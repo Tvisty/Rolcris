@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
+import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Inventory from './pages/Inventory';
@@ -22,7 +22,7 @@ const App: React.FC = () => {
       <ThemeProvider>
         <Router>
           <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 font-sans selection:bg-gold-500 selection:text-black transition-colors duration-300">
-            <Navbar />
+            <Navigation />
             <main className="flex-grow">
               <Routes>
                 <Route path="/" element={<Home />} />
