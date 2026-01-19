@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Loader2, Bot, User } from 'lucide-react';
-import { GoogleGenAI, Tool } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { useCars } from '../context/CarContext';
 
 // Define the interface for the message structure
@@ -76,28 +76,28 @@ const ChatBot: React.FC = () => {
 
   // --- Gemini Setup ---
   
-  const createLeadTool: Tool = {
+  const createLeadTool = {
     functionDeclarations: [
       {
         name: "createLead",
         description: "Use this function ONLY when the user explicitly confirms they want to book a test drive, service, or get a financing offer AND provides their Name and Phone Number.",
         parameters: {
-          type: "OBJECT",
+          type: Type.OBJECT,
           properties: {
             customerName: {
-              type: "STRING",
+              type: Type.STRING,
               description: "The full name of the customer."
             },
             customerPhone: {
-              type: "STRING",
+              type: Type.STRING,
               description: "The phone number of the customer."
             },
             carOfInterest: {
-              type: "STRING",
+              type: Type.STRING,
               description: "The make and model of the car they are interested in. If it is a general service, detailing, or finance request without a specific car, set this to 'N/A'."
             },
             intent: {
-              type: "STRING",
+              type: Type.STRING,
               description: "The specific intent of the user. Choose STRICTLY from: 'test_drive', 'finance', 'service', 'detailing', 'question'."
             }
           },
@@ -118,9 +118,10 @@ const ChatBot: React.FC = () => {
     try {
       const apiKey = process.env.API_KEY;
       
-      if (!apiKey) {
-        console.error("CRITICAL ERROR: API Key is missing. Please add 'API_KEY' to your Vercel Environment Variables.");
-        setMessages(prev => [...prev, { role: 'model', text: 'Sistemul de chat este momentan indisponibil (Eroare Configurare: Cheie API lipsă).' }]);
+      // Strict check for API Key placeholder
+      if (!apiKey || apiKey.includes('PASTE_YOUR')) {
+        console.error("CRITICAL ERROR: API Key is invalid or missing. Check your .env file.");
+        setMessages(prev => [...prev, { role: 'model', text: 'Eroare Configurare: Cheia API lipsește. Te rog verifică fișierul .env.' }]);
         setIsTyping(false);
         return;
       }
@@ -174,7 +175,6 @@ const ChatBot: React.FC = () => {
         - Keep responses concise.
       `;
 
-      // Increased history context to 30 messages to "remember" long conversations
       const historyMessages = messages.slice(-30);
       const history = historyMessages.map(m => ({
         role: m.role,
@@ -186,8 +186,9 @@ const ChatBot: React.FC = () => {
         parts: [{ text: userMessage }]
       };
 
+      // Using the stable Gemini 3 Flash Preview model
       const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash-exp',
+        model: 'gemini-3-flash-preview',
         contents: [...history, currentContent],
         config: {
           systemInstruction: systemInstruction,
@@ -196,11 +197,7 @@ const ChatBot: React.FC = () => {
         }
       });
 
-      const firstCandidate = response.candidates?.[0];
-      const contentParts = firstCandidate?.content?.parts || [];
-      const textPart = contentParts.find(p => p.text);
-      let botResponseText = textPart ? textPart.text : "";
-      
+      const botResponseText = response.text || "";
       const functionCalls = response.functionCalls;
 
       if (functionCalls && functionCalls.length > 0) {
@@ -209,18 +206,14 @@ const ChatBot: React.FC = () => {
             const { customerName, customerPhone, carOfInterest, intent } = call.args as any;
             
             // --- MEMORIZE CUSTOMER ---
-            // Save details to state so we don't ask again in this session
             if (!customerInfo) {
                setCustomerInfo({ name: customerName, phone: customerPhone });
             }
 
             // --- DUPLICATE CHECK ---
-            // If we have already booked this specific intent in this session, skip.
             if (bookedIntents.has(intent)) {
                console.log(`Skipping duplicate booking for intent: ${intent}`);
-               if (!botResponseText) {
-                 botResponseText = "Am înregistrat deja cererea ta. Te mai pot ajuta cu alte informații?";
-               }
+               // Don't add a message if we are skipping, just show the text response if any
                continue; 
             }
 
@@ -237,7 +230,6 @@ const ChatBot: React.FC = () => {
               ? 'Nespecificat' 
               : carOfInterest;
 
-            // Determine image based on type
             let image = 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=2070&auto=format&fit=crop';
             if (intent === 'service') image = 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=2070&auto=format&fit=crop';
             if (intent === 'detailing') image = 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?q=80&w=2070&auto=format&fit=crop';
@@ -253,15 +245,10 @@ const ChatBot: React.FC = () => {
               date: new Date().toISOString(),
               status: 'pending',
               createdAt: Date.now(),
-              type: mapIntent // Explicit Type for Admin Panel
+              type: mapIntent
             });
             
-            // Mark this intent as booked for this session
             setBookedIntents(prev => new Set(prev).add(intent));
-
-            if (!botResponseText) {
-              botResponseText = `Am înregistrat cu succes cererea ta pentru ${mapIntent}, ${customerName}! Un coleg te va contacta la ${customerPhone} în cel mai scurt timp pentru confirmare.`;
-            }
           }
         }
       }
@@ -271,6 +258,14 @@ const ChatBot: React.FC = () => {
     } catch (error: any) {
       console.error("AI Error:", error);
       let errorMessage = "Îmi pare rău, întâmpin o eroare tehnică momentan. Te rog să ne suni la 0740 513 713.";
+      
+      // More descriptive error if possible
+      if (error.message && error.message.includes('400')) {
+          errorMessage += " (Eroare 400: Cerere invalidă)";
+      } else if (error.message && error.message.includes('403')) {
+          errorMessage += " (Eroare 403: Cheie API invalidă)";
+      }
+
       setMessages(prev => [...prev, { role: 'model', text: errorMessage }]);
     } finally {
       setIsTyping(false);

@@ -45,37 +45,60 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   const prevMessagesCount = useRef<number>(0);
   const isInitialLoad = useRef<boolean>(true);
 
-  // VAPID Key from Firebase Console -> Project Settings -> Cloud Messaging
-  // Since we don't have a real one from the user, we use a placeholder.
-  // User needs to generate this in Firebase Console.
-  const VAPID_KEY = "BH_..._REPLACE_WITH_YOUR_REAL_VAPID_KEY_FROM_FIREBASE_CONSOLE"; 
-
   const requestNotificationPermission = async () => {
-    if (!messaging) return null;
+    if (!messaging) {
+      console.error("Firebase Messaging not initialized (Check network/HTTPS)");
+      return null;
+    }
+
     try {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
-        // Register Service Worker first
-        if ('serviceWorker' in navigator) {
-            const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            console.log('Service Worker Registered');
-            
-            // Get Token
-            const token = await getToken(messaging, { 
-               vapidKey: VAPID_KEY,
-               serviceWorkerRegistration: registration 
-            });
-            
-            if (token) {
-              console.log('FCM Token:', token);
-              setFcmToken(token);
-              // Here you would typically send this token to your backend to associate it with the user
-              return token;
-            }
+        // VAPID Key from environment variables
+        const vapidKey = process.env.VAPID_KEY;
+
+        if (!vapidKey || vapidKey.includes('PASTE_YOUR')) {
+           console.error("❌ VAPID KEY MISSING: Please add VAPID_KEY to .env or Vercel Settings.");
+           alert("Eroare Configurare: Lipsește Cheia VAPID pentru notificări.");
+           return null;
         }
+
+        // Register Service Worker explicitly to ensure scope is correct
+        let registration;
+        try {
+           // Ensure firebase-messaging-sw.js is in your PUBLIC folder
+           registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+           console.log('✅ Service Worker Registered with scope:', registration.scope);
+        } catch (swError) {
+           console.error("❌ Service Worker Registration Failed:", swError);
+           alert("Eroare: Service Worker nu a putut fi înregistrat. Verifică dacă fișierul firebase-messaging-sw.js este în folderul 'public'.");
+           return null;
+        }
+            
+        // Get Token
+        try {
+          const token = await getToken(messaging, { 
+             vapidKey: vapidKey,
+             serviceWorkerRegistration: registration 
+          });
+          
+          if (token) {
+            console.log('✅ FCM Token:', token);
+            setFcmToken(token);
+            // Optionally save this token to Firestore under a 'users/{uid}/tokens' collection
+            return token;
+          } else {
+            console.warn('No registration token available. Request permission to generate one.');
+          }
+        } catch (tokenError) {
+           console.error("❌ Error retrieving FCM token:", tokenError);
+           alert("Eroare la obținerea token-ului de notificare.");
+        }
+      } else {
+        alert("Permisiunea pentru notificări a fost refuzată.");
       }
     } catch (error) {
-      console.error('An error occurred while retrieving token. ', error);
+      console.error('An error occurred while retrieving token.', error);
     }
     return null;
   };
@@ -84,26 +107,39 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     // Listener for foreground messages
     if (messaging) {
       onMessage(messaging, (payload) => {
-        console.log('Message received. ', payload);
+        console.log('📩 Message received in foreground:', payload);
         // Show a simple browser notification if the app is in foreground
-        new Notification(payload.notification?.title || 'Notificare Nouă', {
+        const title = payload.notification?.title || 'Notificare Nouă';
+        const options = {
           body: payload.notification?.body,
           icon: 'https://i.imgur.com/e7JOUNo.png'
-        });
+        };
+        
+        // Check if browser supports Notification constructor
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+           new Notification(title, options);
+        } else {
+           // Fallback for when Notification API isn't fully available in context
+           alert(`${title}: ${options.body}`);
+        }
       });
     }
   }, []);
 
   const triggerLocalNotification = (title: string, body: string) => {
-    if (Notification.permission === 'granted') {
-       new Notification(title, {
-         body: body,
-         icon: 'https://i.imgur.com/e7JOUNo.png'
-       });
-       // Also play a subtle sound
-       const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-       audio.volume = 0.5;
-       audio.play().catch(() => {});
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+       try {
+         new Notification(title, {
+           body: body,
+           icon: 'https://i.imgur.com/e7JOUNo.png'
+         });
+         // Also play a subtle sound
+         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+         audio.volume = 0.5;
+         audio.play().catch(() => {});
+       } catch (e) {
+         console.log("Notification API error:", e);
+       }
     }
   };
 

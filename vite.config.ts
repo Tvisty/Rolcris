@@ -8,8 +8,9 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
-      // Explicitly define process.env.API_KEY to ensure it gets replaced by the string value at build time
+      // Explicitly define env vars to ensure they get replaced by the string value at build time
       'process.env.API_KEY': JSON.stringify(env.API_KEY),
+      'process.env.VAPID_KEY': JSON.stringify(env.VAPID_KEY),
     },
     build: {
       outDir: 'dist',
