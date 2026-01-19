@@ -80,11 +80,12 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
         // 4. Register Service Worker
         let registration;
         try {
+           // Explicitly try to register the SW located in public/firebase-messaging-sw.js
            registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
            console.log('✅ Service Worker Registered:', registration);
-        } catch (swError) {
+        } catch (swError: any) {
            console.error("❌ Service Worker Error:", swError);
-           alert("Eroare Service Worker: Asigură-te că fișierul 'firebase-messaging-sw.js' există în folderul 'public'.");
+           alert(`Eroare Service Worker: ${swError.message || "Fișierul nu a fost găsit"}. Asigură-te că 'firebase-messaging-sw.js' este în folderul 'public'.`);
            return null;
         }
             

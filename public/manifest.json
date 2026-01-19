@@ -1,0 +1,24 @@
+
+{
+  "short_name": "RolCris Admin",
+  "name": "Autoparc RolCris Dealer Portal",
+  "icons": [
+    {
+      "src": "https://i.imgur.com/e7JOUNo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://i.imgur.com/e7JOUNo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/?source=pwa",
+  "background_color": "#0a0a0a",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#C5A059",
+  "description": "Dealer management portal for Autoparc RolCris",
+  "gcm_sender_id": "103953800507"
+}
