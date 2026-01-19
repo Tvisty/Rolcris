@@ -8,7 +8,7 @@ import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { 
   Plus, Edit, Trash2, Save, X, Image as ImageIcon, 
   LogIn, LogOut, Search, DollarSign, 
-  Calendar, Gauge, Zap, LayoutDashboard, Fuel, Settings, Upload, FileText, AlertTriangle, Wifi, WifiOff, HelpCircle, Copy, Check, Star, Loader2, Phone, User as UserIcon, Clock, Mail, Gavel, Timer, Bell, BellOff
+  Calendar, Gauge, Zap, LayoutDashboard, Fuel, Settings, Upload, FileText, AlertTriangle, Wifi, WifiOff, HelpCircle, Copy, Check, Star, Loader2, Phone, User as UserIcon, Clock, Mail, Gavel, Timer, Bell, BellOff, Info
 } from 'lucide-react';
 import { BRANDS, BODY_TYPES, FUELS } from '../constants';
 import { Link } from 'react-router-dom';
@@ -163,6 +163,7 @@ const Admin: React.FC = () => {
   const [showSetup, setShowSetup] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [permissionStatus, setPermissionStatus] = useState<string>('default');
   
   const [currentCar, setCurrentCar] = useState<Partial<Car>>({});
   const [featureInput, setFeatureInput] = useState('');
@@ -203,6 +204,12 @@ const Admin: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if ('Notification' in window) {
+      setPermissionStatus(Notification.permission);
+    }
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (auth) {
@@ -233,8 +240,10 @@ const Admin: React.FC = () => {
     const token = await requestNotificationPermission();
     if (token) {
       alert("Notificări activate cu succes!");
+      setPermissionStatus('granted');
     } else {
-      alert("Nu s-au putut activa notificările. Verifică setările browserului.");
+      // Alert handled in context
+      if ('Notification' in window) setPermissionStatus(Notification.permission);
     }
   };
 
@@ -564,16 +573,31 @@ const Admin: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
           <div>
             <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-3"><LayoutDashboard className="text-gold-500" /> Dashboard Dealer</h1>
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex flex-wrap items-center gap-2 mt-2">
                {isConnected ? (
                  <span className="bg-green-500/10 text-green-500 text-xs px-2 py-1 rounded border border-green-500/20 font-bold">ONLINE</span>
                ) : (
                  <span className="bg-red-500/10 text-red-500 text-xs px-2 py-1 rounded border border-red-500/20 font-bold">OFFLINE</span>
                )}
+               
+               {/* Notification Status Button */}
                {fcmToken ? (
-                 <span className="bg-blue-500/10 text-blue-500 text-xs px-2 py-1 rounded border border-blue-500/20 font-bold flex items-center gap-1"><Bell size={10} /> NOTIFICĂRI ACTIVE</span>
+                 <span className="bg-blue-500/10 text-blue-500 text-xs px-2 py-1 rounded border border-blue-500/20 font-bold flex items-center gap-1">
+                   <Bell size={10} /> NOTIFICĂRI ACTIVE
+                 </span>
                ) : (
-                 <button onClick={handleEnableNotifications} className="bg-gray-100 dark:bg-white/10 text-gray-500 text-xs px-2 py-1 rounded border border-gray-300 dark:border-white/10 font-bold flex items-center gap-1 hover:bg-gold-500 hover:text-black transition-colors"><BellOff size={10} /> ACTIVEAZĂ NOTIFICĂRI</button>
+                 <button 
+                   onClick={handleEnableNotifications} 
+                   className={`text-xs px-2 py-1 rounded border font-bold flex items-center gap-1 transition-colors ${
+                     permissionStatus === 'denied' 
+                       ? 'bg-red-500/10 text-red-500 border-red-500/20' 
+                       : 'bg-gray-100 dark:bg-white/10 text-gray-500 border-gray-300 dark:border-white/10 hover:bg-gold-500 hover:text-black'
+                   }`}
+                   title={permissionStatus === 'denied' ? 'Permisiune blocată. Resetează din browser.' : 'Click pentru activare'}
+                 >
+                   {permissionStatus === 'denied' ? <BellOff size={10} /> : <Bell size={10} />}
+                   {permissionStatus === 'denied' ? 'NOTIFICĂRI BLOCATE' : 'ACTIVEAZĂ NOTIFICĂRI'}
+                 </button>
                )}
             </div>
           </div>
@@ -588,7 +612,7 @@ const Admin: React.FC = () => {
             <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Valoare Stoc</p>
             <h3 className="text-3xl font-display font-bold text-gray-900 dark:text-white">{totalValue.toLocaleString()} €</h3>
           </div>
-          <div className="glass-panel p-6 rounded-2xl bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10" onClick={() => setActiveTab('calendar')}>
+          <div className="glass-panel p-6 rounded-2xl bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 cursor-pointer hover:border-gold-500/50 transition-colors" onClick={() => setActiveTab('calendar')}>
             <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Programări (Noi)</p>
             <h3 className="text-3xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-2">
               {pendingBookings}
@@ -609,6 +633,8 @@ const Admin: React.FC = () => {
           </div>
         </div>
 
+        {/* ... Rest of the component unchanged ... */}
+        
         <div className="flex gap-6 border-b border-gray-200 dark:border-white/10 mb-8 overflow-x-auto">
            <button 
              onClick={() => setActiveTab('inventory')}
@@ -688,7 +714,8 @@ const Admin: React.FC = () => {
             </div>
           </div>
         )}
-
+        
+        {/* Only updating inventory tab content as per instructions to save space, but keeping structure intact */}
         {activeTab === 'auctions' && (
           <div className="animate-fade-in space-y-8">
              <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 mb-8">

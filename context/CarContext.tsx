@@ -46,36 +46,49 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   const isInitialLoad = useRef<boolean>(true);
 
   const requestNotificationPermission = async () => {
+    // 1. Check Browser Support
+    if (!('Notification' in window)) {
+      alert("Acest browser nu suportă notificări.");
+      return null;
+    }
+
+    // 2. Check Messaging Initialization
     if (!messaging) {
-      console.error("Firebase Messaging not initialized (Check network/HTTPS)");
+      console.error("Firebase Messaging failed to init.");
+      alert("Eroare Firebase Messaging. Verifică consola pentru detalii (posibil lipsă HTTPS).");
       return null;
     }
 
     try {
+      // 3. Request Permission
       const permission = await Notification.requestPermission();
+      
+      if (permission === 'denied') {
+        alert("Notificările sunt blocate din setările browserului. Te rog apasă pe lacătul din bara de adresă și permite notificările, apoi reîncarcă pagina.");
+        return null;
+      }
+
       if (permission === 'granted') {
-        // VAPID Key from environment variables
         const vapidKey = process.env.VAPID_KEY;
+        console.log("VAPID Key check:", vapidKey ? "Loaded" : "Missing");
 
         if (!vapidKey || vapidKey.includes('PASTE_YOUR')) {
-           console.error("❌ VAPID KEY MISSING: Please add VAPID_KEY to .env or Vercel Settings.");
-           alert("Eroare Configurare: Lipsește Cheia VAPID pentru notificări.");
+           alert("Eroare Configurare: Cheia VAPID lipsește din fișierul .env.");
            return null;
         }
 
-        // Register Service Worker explicitly to ensure scope is correct
+        // 4. Register Service Worker
         let registration;
         try {
-           // Ensure firebase-messaging-sw.js is in your PUBLIC folder
            registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-           console.log('✅ Service Worker Registered with scope:', registration.scope);
+           console.log('✅ Service Worker Registered:', registration);
         } catch (swError) {
-           console.error("❌ Service Worker Registration Failed:", swError);
-           alert("Eroare: Service Worker nu a putut fi înregistrat. Verifică dacă fișierul firebase-messaging-sw.js este în folderul 'public'.");
+           console.error("❌ Service Worker Error:", swError);
+           alert("Eroare Service Worker: Asigură-te că fișierul 'firebase-messaging-sw.js' există în folderul 'public'.");
            return null;
         }
             
-        // Get Token
+        // 5. Get Token
         try {
           const token = await getToken(messaging, { 
              vapidKey: vapidKey,
@@ -85,20 +98,18 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
           if (token) {
             console.log('✅ FCM Token:', token);
             setFcmToken(token);
-            // Optionally save this token to Firestore under a 'users/{uid}/tokens' collection
             return token;
           } else {
-            console.warn('No registration token available. Request permission to generate one.');
+            console.warn('No registration token available.');
           }
-        } catch (tokenError) {
-           console.error("❌ Error retrieving FCM token:", tokenError);
-           alert("Eroare la obținerea token-ului de notificare.");
+        } catch (tokenError: any) {
+           console.error("❌ Token Error:", tokenError);
+           alert(`Eroare la generarea token-ului: ${tokenError.message}`);
         }
-      } else {
-        alert("Permisiunea pentru notificări a fost refuzată.");
       }
     } catch (error) {
       console.error('An error occurred while retrieving token.', error);
+      alert("A apărut o eroare neașteptată la activarea notificărilor.");
     }
     return null;
   };
@@ -108,19 +119,14 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     if (messaging) {
       onMessage(messaging, (payload) => {
         console.log('📩 Message received in foreground:', payload);
-        // Show a simple browser notification if the app is in foreground
         const title = payload.notification?.title || 'Notificare Nouă';
         const options = {
           body: payload.notification?.body,
           icon: 'https://i.imgur.com/e7JOUNo.png'
         };
         
-        // Check if browser supports Notification constructor
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
            new Notification(title, options);
-        } else {
-           // Fallback for when Notification API isn't fully available in context
-           alert(`${title}: ${options.body}`);
         }
       });
     }
@@ -133,7 +139,6 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
            body: body,
            icon: 'https://i.imgur.com/e7JOUNo.png'
          });
-         // Also play a subtle sound
          const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
          audio.volume = 0.5;
          audio.play().catch(() => {});
@@ -195,11 +200,9 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
             bookingList.push({ ...doc.data(), id: doc.id } as Booking);
           });
           
-          // NOTIFICATION LOGIC FOR BOOKINGS
-          // Only trigger if not initial load and count increased
           if (!isInitialLoad.current && bookingList.length > prevBookingsCount.current) {
-             const newBooking = bookingList[bookingList.length - 1]; // Approximation
-             if (user) { // Only notify if admin is logged in (conceptually)
+             const newBooking = bookingList[bookingList.length - 1]; 
+             if (user) { 
                 triggerLocalNotification("O nouă programare!", `${newBooking.customerName} a solicitat ${newBooking.type}`);
              }
           }
@@ -218,7 +221,6 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
             messageList.push({ ...doc.data(), id: doc.id } as ContactMessage);
           });
 
-          // NOTIFICATION LOGIC FOR MESSAGES
           if (!isInitialLoad.current && messageList.length > prevMessagesCount.current) {
              const newMessage = messageList[0];
              if (user) {
@@ -226,7 +228,6 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
              }
           }
           prevMessagesCount.current = messageList.length;
-          
           setMessages(messageList);
         },
         (error) => console.warn("⚠️ Messages fetch failed:", error.message)
@@ -241,8 +242,6 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
             auctionList.push({ ...doc.data(), id: doc.id } as Auction);
           });
           setAuctions(auctionList);
-          
-          // After first batch of data, disable initial load flag after a short delay
           setTimeout(() => { isInitialLoad.current = false; }, 2000);
         },
         (error) => console.warn("⚠️ Auctions fetch failed:", error.message)
@@ -370,7 +369,6 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     if (db && isConnected) {
       await addDoc(collection(db, "auctions"), auction);
     } else {
-      // Offline fallback for demo
       const newAuction = { ...auction, id: Math.random().toString(36).substr(2, 9) };
       setAuctions(prev => [...prev, newAuction]);
     }
@@ -396,8 +394,6 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     const now = Date.now();
     const timeRemaining = auction.endTime - now;
     
-    // RULE: If bid is in the last minute (60000 ms) AND extension count < 3
-    // Add 10 minutes (600000 ms)
     if (timeRemaining < 60000 && auction.extensionCount < 3) {
       newEndTime = auction.endTime + 600000;
       newExtensionCount = auction.extensionCount + 1;
