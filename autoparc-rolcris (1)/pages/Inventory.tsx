@@ -1,0 +1,367 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Filter, X, ChevronDown, ChevronUp, Search, Loader2 } from 'lucide-react';
+import CarCard from '../components/CarCard';
+import { BRANDS, BODY_TYPES, FUELS } from '../constants';
+import { SortOption } from '../types';
+import { useCars } from '../context/CarContext';
+
+const FilterSection: React.FC<React.PropsWithChildren<{ title: string; defaultOpen?: boolean }>> = ({ title, children, defaultOpen = true }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  return (
+    <div className="border-b border-gray-200 dark:border-white/10 py-5">
+      <button className="flex justify-between items-center w-full mb-4" onClick={() => setIsOpen(!isOpen)}>
+        <h3 className="text-gray-900 dark:text-white font-bold font-display tracking-wide">{title}</h3>
+        {isOpen ? <ChevronUp size={16} className="text-gold-500" /> : <ChevronDown size={16} className="text-gray-500" />}
+      </button>
+      {isOpen && <div className="space-y-3 animate-fade-in">{children}</div>}
+    </div>
+  );
+};
+
+const Inventory: React.FC = () => {
+  const { cars, isLoading } = useCars();
+  const [searchParams] = useSearchParams();
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  
+  // Initialize state with URL params if present, otherwise defaults
+  // Extended default ranges to prevent accidentally hiding valid cars
+  const [filters, setFilters] = useState({
+    priceRange: [0, Number(searchParams.get('maxPrice')) || 1000000],
+    selectedBrand: searchParams.get('make') || '',
+    selectedModel: '',
+    selectedBody: '',
+    selectedFuel: '',
+    selectedTransmission: '',
+    // CHANGED: Default min year to 0 to catch cars with unspecified years
+    yearRange: [Number(searchParams.get('minYear')) || 0, new Date().getFullYear() + 1], 
+    maxMileage: '',
+    selectedSeats: ''
+  });
+  
+  const [sortOption, setSortOption] = useState<SortOption>('newest');
+
+  // Update filters if URL params change
+  useEffect(() => {
+    const make = searchParams.get('make');
+    const minYear = searchParams.get('minYear');
+    const maxPrice = searchParams.get('maxPrice');
+
+    if (make || minYear || maxPrice) {
+      setFilters(prev => ({
+        ...prev,
+        selectedBrand: make || prev.selectedBrand,
+        yearRange: [minYear ? Number(minYear) : prev.yearRange[0], prev.yearRange[1]],
+        priceRange: [prev.priceRange[0], maxPrice ? Number(maxPrice) : prev.priceRange[1]]
+      }));
+    }
+  }, [searchParams]);
+
+  // Filter Logic
+  const filteredCars = useMemo(() => {
+    if (!cars) return [];
+    
+    let result = cars.filter(car => {
+      // Type safety checks: Ensure car properties exist before comparison
+      const carPrice = Number(car.price) || 0;
+      const carYear = Number(car.year) || 0;
+
+      // Brand
+      if (filters.selectedBrand && car.make !== filters.selectedBrand) return false;
+      // Model (Partial text match)
+      if (filters.selectedModel && !car.model.toLowerCase().includes(filters.selectedModel.toLowerCase())) return false;
+      // Body Type
+      if (filters.selectedBody && car.bodyType !== filters.selectedBody) return false;
+      // Fuel
+      if (filters.selectedFuel && car.fuel !== filters.selectedFuel) return false;
+      // Transmission
+      if (filters.selectedTransmission && car.transmission !== filters.selectedTransmission) return false;
+      // Year Range
+      if (carYear < filters.yearRange[0] || carYear > filters.yearRange[1]) return false;
+      // Price Range
+      if (carPrice < filters.priceRange[0] || carPrice > filters.priceRange[1]) return false;
+      // Max Mileage
+      if (filters.maxMileage && car.mileage > Number(filters.maxMileage)) return false;
+      // Seats
+      if (filters.selectedSeats && car.seats !== Number(filters.selectedSeats)) return false;
+
+      return true;
+    });
+
+    // Sorting
+    if (sortOption === 'price_asc') result.sort((a, b) => a.price - b.price);
+    if (sortOption === 'price_desc') result.sort((a, b) => b.price - a.price);
+    if (sortOption === 'newest') result.sort((a, b) => b.year - a.year);
+
+    return result;
+  }, [filters, sortOption, cars]);
+
+  const resetFilters = () => {
+    setFilters({
+      priceRange: [0, 1000000],
+      selectedBrand: '',
+      selectedModel: '',
+      selectedBody: '',
+      selectedFuel: '',
+      selectedTransmission: '',
+      yearRange: [0, new Date().getFullYear() + 1],
+      maxMileage: '',
+      selectedSeats: ''
+    });
+    setIsMobileFilterOpen(false);
+  };
+
+  return (
+    <div className="min-h-screen pt-24 pb-12 px-4 max-w-7xl mx-auto">
+      
+      {/* Header & Mobile Filter Toggle */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+           <h1 className="text-4xl font-display font-bold text-gray-900 dark:text-white mb-2">Stoc Disponibil</h1>
+           <p className="text-gray-500 dark:text-gray-400 text-sm">
+             {isLoading ? 'Se încarcă...' : `${filteredCars.length} autoturisme găsite`}
+           </p>
+        </div>
+        
+        <div className="flex gap-4 w-full md:w-auto">
+           <button 
+             onClick={() => setIsMobileFilterOpen(true)}
+             className="md:hidden flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 font-semibold"
+           >
+             <Filter size={18} /> Filtre
+           </button>
+
+           <div className="relative flex-1 md:w-48">
+              <select 
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value as SortOption)}
+                className="w-full bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white px-4 py-3 rounded-lg appearance-none cursor-pointer focus:border-gold-500 outline-none"
+              >
+                <option value="newest">Cele mai noi</option>
+                <option value="price_asc">Preț: Crescător</option>
+                <option value="price_desc">Preț: Descrescător</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
+           </div>
+        </div>
+      </div>
+
+      <div className="flex gap-8">
+        {/* Sidebar Filters */}
+        <aside className={`
+          fixed inset-0 z-50 bg-white dark:bg-[#0a0a0a] p-6 overflow-y-auto transition-transform duration-300 md:relative md:translate-x-0 md:bg-transparent md:p-0 md:w-72 md:block md:z-0
+          ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}>
+          <div className="flex justify-between items-center md:hidden mb-6">
+            <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-white">Filtre</h2>
+            <button onClick={() => setIsMobileFilterOpen(false)} className="text-gray-500 dark:text-gray-400">
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="glass-panel rounded-xl p-6 md:sticky md:top-24 bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10">
+            
+            {/* PRICE */}
+            <FilterSection title="Preț (€)">
+              <div className="flex gap-2 items-center">
+                 <input 
+                   type="number" 
+                   placeholder="Min"
+                   value={filters.priceRange[0]} 
+                   className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-3 py-2 text-gray-900 dark:text-white text-sm focus:border-gold-500 outline-none"
+                   onChange={(e) => setFilters({...filters, priceRange: [Number(e.target.value), filters.priceRange[1]]})}
+                 />
+                 <span className="text-gray-500">-</span>
+                 <input 
+                   type="number" 
+                   placeholder="Max"
+                   value={filters.priceRange[1]} 
+                   className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-3 py-2 text-gray-900 dark:text-white text-sm focus:border-gold-500 outline-none"
+                   onChange={(e) => setFilters({...filters, priceRange: [filters.priceRange[0], Number(e.target.value)]})}
+                 />
+              </div>
+            </FilterSection>
+
+            {/* MARCA */}
+            <FilterSection title="Marca">
+              <select 
+                value={filters.selectedBrand}
+                onChange={(e) => setFilters({...filters, selectedBrand: e.target.value})}
+                className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded p-3 focus:border-gold-500 outline-none cursor-pointer"
+              >
+                <option value="" className="bg-white dark:bg-[#121212]">Toate</option>
+                {BRANDS.map(b => <option key={b} value={b} className="bg-white dark:bg-[#121212]">{b}</option>)}
+              </select>
+            </FilterSection>
+
+            {/* MODEL (New) */}
+            <FilterSection title="Model">
+              <div className="relative">
+                 <input 
+                   type="text" 
+                   placeholder="Caută model..." 
+                   value={filters.selectedModel}
+                   onChange={(e) => setFilters({...filters, selectedModel: e.target.value})}
+                   className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 pl-10 text-gray-900 dark:text-white focus:border-gold-500 outline-none text-sm placeholder-gray-500"
+                 />
+                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              </div>
+            </FilterSection>
+
+            {/* AN (New) */}
+            <FilterSection title="An Fabricație">
+              <div className="flex gap-2 items-center">
+                 <input 
+                   type="number" 
+                   placeholder="Min"
+                   value={filters.yearRange[0]} 
+                   onChange={(e) => setFilters({...filters, yearRange: [Number(e.target.value), filters.yearRange[1]]})}
+                   className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-3 py-2 text-gray-900 dark:text-white text-sm focus:border-gold-500 outline-none"
+                 />
+                 <span className="text-gray-500">-</span>
+                 <input 
+                   type="number" 
+                   placeholder="Max"
+                   value={filters.yearRange[1]} 
+                   onChange={(e) => setFilters({...filters, yearRange: [filters.yearRange[0], Number(e.target.value)]})}
+                   className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded px-3 py-2 text-gray-900 dark:text-white text-sm focus:border-gold-500 outline-none"
+                 />
+              </div>
+            </FilterSection>
+
+            {/* KILOMETRAJ (New) */}
+            <FilterSection title="Kilometraj Max">
+              <div className="relative">
+                 <input 
+                   type="number" 
+                   placeholder="Ex: 100000"
+                   value={filters.maxMileage} 
+                   onChange={(e) => setFilters({...filters, maxMileage: e.target.value})}
+                   className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 pr-8 text-gray-900 dark:text-white focus:border-gold-500 outline-none text-sm placeholder-gray-500"
+                 />
+                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs">km</span>
+              </div>
+            </FilterSection>
+
+            {/* CUTIE DE VITEZE (New) */}
+            <FilterSection title="Cutie de Viteze">
+              <div className="flex flex-wrap gap-2">
+                {['Manuală', 'Automată'].map(trans => (
+                  <button
+                    key={trans}
+                    onClick={() => setFilters({...filters, selectedTransmission: filters.selectedTransmission === trans ? '' : trans})}
+                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                      filters.selectedTransmission === trans 
+                        ? 'bg-gold-500 border-gold-500 text-black font-bold' 
+                        : 'border-gray-300 dark:border-white/20 text-gray-600 dark:text-gray-400 hover:border-gold-500 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {trans}
+                  </button>
+                ))}
+              </div>
+            </FilterSection>
+
+            {/* CAROSERIE */}
+            <FilterSection title="Caroserie">
+              <div className="space-y-2">
+                {BODY_TYPES.map(type => (
+                  <label key={type} className="flex items-center gap-2 cursor-pointer group">
+                    <div className={`w-4 h-4 rounded-sm border ${filters.selectedBody === type ? 'bg-gold-500 border-gold-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-gold-500'} transition-colors flex items-center justify-center`}>
+                      {filters.selectedBody === type && <div className="w-2 h-2 bg-black rounded-[1px]" />}
+                    </div>
+                    <input 
+                      type="radio" 
+                      name="bodyType" 
+                      className="hidden"
+                      checked={filters.selectedBody === type}
+                      onChange={() => setFilters({...filters, selectedBody: filters.selectedBody === type ? '' : type})}
+                    />
+                    <span className={`text-sm ${filters.selectedBody === type ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'}`}>{type}</span>
+                  </label>
+                ))}
+              </div>
+            </FilterSection>
+
+            {/* COMBUSTIBIL */}
+            <FilterSection title="Combustibil">
+              <div className="flex flex-wrap gap-2">
+                {FUELS.map(fuel => (
+                  <button
+                    key={fuel}
+                    onClick={() => setFilters({...filters, selectedFuel: filters.selectedFuel === fuel ? '' : fuel})}
+                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                      filters.selectedFuel === fuel 
+                        ? 'bg-gold-500 border-gold-500 text-black font-bold' 
+                        : 'border-gray-300 dark:border-white/20 text-gray-600 dark:text-gray-400 hover:border-gold-500 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {fuel}
+                  </button>
+                ))}
+              </div>
+            </FilterSection>
+
+            {/* LOCURI (New) */}
+            <FilterSection title="Locuri">
+              <div className="flex flex-wrap gap-2">
+                {[2, 4, 5, 7].map(seats => (
+                  <button
+                    key={seats}
+                    onClick={() => setFilters({...filters, selectedSeats: filters.selectedSeats === String(seats) ? '' : String(seats)})}
+                    className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-all ${
+                      filters.selectedSeats === String(seats)
+                        ? 'bg-gold-500 border-gold-500 text-black font-bold' 
+                        : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-gold-500 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {seats}
+                  </button>
+                ))}
+              </div>
+            </FilterSection>
+
+            <button 
+              onClick={resetFilters}
+              className="w-full mt-6 py-3 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-dashed border-gray-400 dark:border-gray-600 hover:border-gray-900 dark:hover:border-white rounded-lg transition-colors"
+            >
+              Resetează Filtrele
+            </button>
+
+          </div>
+        </aside>
+
+        {/* Car Grid */}
+        <div className="flex-1">
+           {isLoading ? (
+             <div className="flex flex-col items-center justify-center py-20 min-h-[400px]">
+               <Loader2 className="w-10 h-10 text-gold-500 animate-spin mb-4" />
+               <p className="text-gray-500 dark:text-gray-400">Se încarcă oferta...</p>
+             </div>
+           ) : filteredCars.length > 0 ? (
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+               {filteredCars.map(car => <CarCard key={car.id} car={car} />)}
+             </div>
+           ) : (
+             <div className="flex flex-col items-center justify-center py-20 text-center glass-panel rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#121212]">
+                <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-4">
+                  <Filter size={32} className="text-gray-500" />
+                </div>
+                <h3 className="text-xl text-gray-900 dark:text-white font-bold mb-2">Niciun rezultat găsit</h3>
+                <p className="text-gray-500 dark:text-gray-400">Încearcă să ajustezi filtrele pentru a găsi mașina dorită.</p>
+                <button 
+                  onClick={resetFilters}
+                  className="mt-4 text-gold-500 hover:text-gray-900 dark:hover:text-white underline font-medium"
+                >
+                  Resetează toate filtrele
+                </button>
+             </div>
+           )}
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default Inventory;
