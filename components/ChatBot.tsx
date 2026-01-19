@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Loader2, Bot, User } from 'lucide-react';
 import { GoogleGenAI, Tool } from "@google/genai";
@@ -115,7 +116,16 @@ const ChatBot: React.FC = () => {
     setIsTyping(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const apiKey = process.env.API_KEY;
+      
+      if (!apiKey) {
+        console.error("CRITICAL ERROR: API Key is missing. Please add 'API_KEY' to your Vercel Environment Variables.");
+        setMessages(prev => [...prev, { role: 'model', text: 'Sistemul de chat este momentan indisponibil (Eroare Configurare: Cheie API lipsă).' }]);
+        setIsTyping(false);
+        return;
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
       
       const inventoryContext = cars.length > 0 
         ? cars.map(c => 
