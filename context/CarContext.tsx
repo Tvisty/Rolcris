@@ -70,12 +70,16 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
 
       if (permission === 'granted') {
         const vapidKey = process.env.VAPID_KEY;
-        console.log("VAPID Key check:", vapidKey ? "Loaded" : "Missing");
-
-        if (!vapidKey || vapidKey.includes('PASTE_YOUR')) {
-           alert("Eroare Configurare: Cheia VAPID lipsește din fișierul .env.");
+        
+        // --- VALIDATION START ---
+        if (!vapidKey || vapidKey.includes('PASTE_YOUR') || vapidKey.length < 10) {
+           alert("Eroare Configurare: Cheia VAPID este invalidă sau lipsește din fișierul .env.\n\nMergi în Firebase Console -> Project Settings -> Cloud Messaging -> Web Push Certificates, generează o cheie nouă și copiază 'Key pair'-ul în .env.");
            return null;
         }
+        
+        // Remove whitespace just in case
+        const cleanVapidKey = vapidKey.trim();
+        // --- VALIDATION END ---
 
         // 4. Register Service Worker
         let registration;
@@ -92,7 +96,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
         // 5. Get Token
         try {
           const token = await getToken(messaging, { 
-             vapidKey: vapidKey,
+             vapidKey: cleanVapidKey,
              serviceWorkerRegistration: registration 
           });
           
@@ -105,7 +109,12 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
           }
         } catch (tokenError: any) {
            console.error("❌ Token Error:", tokenError);
-           alert(`Eroare la generarea token-ului: ${tokenError.message}`);
+           
+           if (tokenError.message && tokenError.message.includes("applicationServerKey")) {
+             alert("Eroare Critică Cheie VAPID: Cheia din .env nu este validă. Asigură-te că ai copiat 'Key pair' (cheia publică) din Firebase Console și nu altceva.");
+           } else {
+             alert(`Eroare la generarea token-ului: ${tokenError.message}`);
+           }
         }
       }
     } catch (error) {
