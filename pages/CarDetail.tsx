@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle } from 'lucide-react';
@@ -87,6 +88,7 @@ const CarDetail: React.FC = () => {
             <img 
               src={car.images[activeImage]} 
               alt={car.model} 
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover animate-fade-in"
             />
             {car.isHotDeal && (
@@ -103,7 +105,7 @@ const CarDetail: React.FC = () => {
                 onClick={() => setActiveImage(idx)}
                 className={`aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-gold-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
               >
-                <img src={img} alt="thumbnail" className="w-full h-full object-cover" />
+                <img src={img} alt="thumbnail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               </button>
             ))}
           </div>
@@ -174,7 +176,7 @@ const CarDetail: React.FC = () => {
             {/* Features Table */}
             <div className="glass-panel p-6 rounded-2xl bg-white dark:bg-[#121212]/50 border border-gray-200 dark:border-white/10">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Dotări Principale</h3>
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
                 {car.features.map((feature, idx) => (
                   <div key={idx} className="flex items-start gap-3 text-gray-600 dark:text-gray-300">
                     <div className="mt-1 w-4 h-4 rounded-full bg-gold-500/20 flex items-center justify-center shrink-0">
