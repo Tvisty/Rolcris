@@ -50,7 +50,7 @@ const WEBSITE_KNOWLEDGE_BASE = `
 const ChatBot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'model', text: 'Salut! Sunt Cris, asistentul virtual Autoparc RolCris. Te pot ajuta cu detalii despre mașini, finanțare sau programări la service. Cu ce începem?' }
+    { role: 'model', text: 'Salut! Sunt Cris, asistentul virtual Autoparc RolCris. Cu ce te pot ajuta astăzi?' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -130,52 +130,35 @@ const ChatBot: React.FC = () => {
       
       const inventoryContext = cars.length > 0 
         ? cars.map(c => 
-            `- ${c.make} ${c.model} (${c.year}): ${c.price} EUR. ${c.mileage}km, ${c.fuel}, ${c.transmission}, ${c.power}CP. ${c.isHotDeal ? '[HOT DEAL]' : ''} ID: ${c.id}`
+            `- ${c.make} ${c.model} (${c.year}): ${c.price} EUR. ${c.isHotDeal ? '[HOT DEAL]' : ''}`
           ).join('\n')
         : "Momentan nu am acces la lista de mașini în timp real, dar te pot ajuta cu informații generale.";
 
       const systemInstruction = `
         You are Cris, the expert AI sales assistant for "Autoparc RolCris".
         
-        YOUR KNOWLEDGE BASE (Use this to answer questions):
+        YOUR KNOWLEDGE BASE:
         ${WEBSITE_KNOWLEDGE_BASE}
 
-        CURRENT CAR INVENTORY (Real-time data):
+        CURRENT CAR INVENTORY (Use ONLY if specific cars are requested):
         ${inventoryContext}
 
         KNOWN CUSTOMER CONTEXT:
         ${customerInfo ? `Name: ${customerInfo.name}, Phone: ${customerInfo.phone} (ALREADY PROVIDED - DO NOT ASK AGAIN)` : "Customer details not yet known."}
 
-        YOUR GOALS:
-        1. Answer questions accurately based on the KNOWLEDGE BASE and INVENTORY above.
-        2. Be polite, professional, and slightly persuasive (sales-oriented).
-        3. CUSTOMER DATA HANDLING:
-           - **CHECK CONVERSATION HISTORY FIRST.** If the user provided Name/Phone earlier, USE IT.
-           - If "KNOWN CUSTOMER CONTEXT" above is filled, USE IT. **DO NOT** ask for Name/Phone again.
-           - Only ask for details if they are completely missing.
-        4. CATEGORIZE the user's need accurately (Service, Detailing, Finance, Test Drive).
-        
+        CRITICAL RULES FOR RESPONSES:
+        1. **BE CONCISE:** Keep answers short (max 2-3 sentences). Do NOT write paragraphs.
+        2. **NO DUMPING:** Do **NOT** list the entire inventory. If asked for "test drive" or "what cars do you have", ASK for their preferences (Brand, Budget, SUV/Sedan) instead of listing everything.
+        3. **CLARITY:** If the user wants a test drive generally, ask: "Pentru care mașină doriți test drive?"
+        4. **CONFIRMATION:** When you have the Car + Name + Phone, ask for a simple confirmation ("Da"). If they say "Da", trigger the 'createLead' tool immediately.
+        5. **LANGUAGE:** Respond in Romanian.
+
         TOOL USAGE RULES:
-        - Call the 'createLead' tool ONLY after you have Name + Phone Number (either from current input, history, or context).
-        - **CLARITY IN CONFIRMATION:**
-           - BEFORE calling the tool to register a lead, you MUST explicitly ask for confirmation if the user hasn't clearly said "Yes, book it".
-           - **IMPORTANT:** When asking for confirmation, REPEAT the details to be clear.
-           - BAD EXAMPLE: "Doriți să continui?" (Too vague)
-           - GOOD EXAMPLE: "Am înțeles. Doriți să înregistrez o cerere pentru [Mașina/Serviciul] pe numele [Nume] la telefonul [Telefon]?"
-        - If the user just says "Thank you" after a booking, reply politely, DO NOT call the tool again.
-
-        LANGUAGE RULES:
-        - DETECT the language of the user's last message.
-        - RESPOND in the SAME language as the user.
-        - Supported: Romanian (Primary), English, Hungarian.
-        - If uncertain, default to Romanian.
-
-        TONE:
-        - Friendly, helpful, transparent.
-        - Keep responses concise.
+        - Call 'createLead' ONLY after you have Name + Phone + Intent confirmed.
+        - After calling the tool, the system will handle the confirmation message.
       `;
 
-      const historyMessages = messages.slice(-30);
+      const historyMessages = messages.slice(-20); // Keep context slightly shorter for performance
       const history = historyMessages.map(m => ({
         role: m.role,
         parts: [{ text: m.text }]
@@ -186,19 +169,19 @@ const ChatBot: React.FC = () => {
         parts: [{ text: userMessage }]
       };
 
-      // Using the stable Gemini 3 Flash Preview model
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: [...history, currentContent],
         config: {
           systemInstruction: systemInstruction,
           tools: [createLeadTool],
-          temperature: 0.7,
+          temperature: 0.6, // Lower temperature for more focused answers
         }
       });
 
-      const botResponseText = response.text || "";
+      let botResponseText = response.text;
       const functionCalls = response.functionCalls;
+      let functionExecuted = false;
 
       if (functionCalls && functionCalls.length > 0) {
         for (const call of functionCalls) {
@@ -212,8 +195,8 @@ const ChatBot: React.FC = () => {
 
             // --- DUPLICATE CHECK ---
             if (bookedIntents.has(intent)) {
-               console.log(`Skipping duplicate booking for intent: ${intent}`);
-               // Don't add a message if we are skipping, just show the text response if any
+               // If already booked, just reply with text
+               if (!botResponseText) botResponseText = "Am notat deja această cerere. Te mai pot ajuta cu altceva?";
                continue; 
             }
 
@@ -249,24 +232,23 @@ const ChatBot: React.FC = () => {
             });
             
             setBookedIntents(prev => new Set(prev).add(intent));
+            functionExecuted = true;
           }
         }
       }
 
-      setMessages(prev => [...prev, { role: 'model', text: botResponseText || "Nu am înțeles, poți repeta?" }]);
+      // Logic to handle empty text response when function calls are made
+      if (functionExecuted) {
+         // If a function was executed, override any potential confusion with a clear success message
+         setMessages(prev => [...prev, { role: 'model', text: "Perfect! Am înregistrat cererea ta. Un coleg te va contacta în curând pentru confirmare." }]);
+      } else {
+         // Standard text response
+         setMessages(prev => [...prev, { role: 'model', text: botResponseText || "Nu am înțeles, poți reformula?" }]);
+      }
 
     } catch (error: any) {
       console.error("AI Error:", error);
-      let errorMessage = "Îmi pare rău, întâmpin o eroare tehnică momentan. Te rog să ne suni la 0740 513 713.";
-      
-      // More descriptive error if possible
-      if (error.message && error.message.includes('400')) {
-          errorMessage += " (Eroare 400: Cerere invalidă)";
-      } else if (error.message && error.message.includes('403')) {
-          errorMessage += " (Eroare 403: Cheie API invalidă)";
-      }
-
-      setMessages(prev => [...prev, { role: 'model', text: errorMessage }]);
+      setMessages(prev => [...prev, { role: 'model', text: "Îmi pare rău, am întâmpinat o eroare de conexiune. Te rog să încerci din nou." }]);
     } finally {
       setIsTyping(false);
     }
