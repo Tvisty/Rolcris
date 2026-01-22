@@ -11,7 +11,7 @@ import {
   LogIn, Search, 
   Calendar, Gauge, LayoutDashboard, Fuel, Settings, Upload, AlertTriangle, Wifi, WifiOff, Check, Star, Loader2, Phone, User as UserIcon, Clock, Mail, Gavel, Timer, Bell, BellOff, Info, Link as LinkIcon, Clipboard, CloudUpload, ChevronLeft, ChevronRight, Heart, Gift
 } from 'lucide-react';
-import { BRANDS, BODY_TYPES, FUELS } from '../constants';
+import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES } from '../constants';
 import { Link } from 'react-router-dom';
 
 // --- ULTRA-ROBUST COMPRESSOR V2 ---
@@ -203,7 +203,7 @@ const Admin: React.FC = () => {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const auctionFileInputRef = useRef<HTMLInputElement>(null);
-  const [isAuctionUploading, setIsAuctionUploading] = useState(false); // New state for auction upload
+  const [isAuctionUploading, setIsAuctionUploading] = useState(false); 
 
   const [auctionForm, setAuctionForm] = useState({
     make: 'BMW',
@@ -417,21 +417,29 @@ const Admin: React.FC = () => {
     });
   };
 
-  const addFeature = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && featureInput.trim()) {
-      e.preventDefault();
-      setCurrentCar({
-        ...currentCar,
-        features: [...(currentCar.features || []), featureInput.trim()]
-      });
+  const addFeature = (e: React.KeyboardEvent | any) => {
+    const key = (e as React.KeyboardEvent).key || 'Enter';
+    if (key === 'Enter' && featureInput.trim()) {
+      if(e.preventDefault) e.preventDefault();
+      const newFeature = featureInput.trim();
+      const currentFeatures = currentCar.features || [];
+      if (!currentFeatures.includes(newFeature)) {
+          setCurrentCar({
+            ...currentCar,
+            features: [...currentFeatures, newFeature]
+          });
+      }
       setFeatureInput('');
     }
   };
 
-  const removeFeature = (index: number) => {
-    const newFeatures = [...(currentCar.features || [])];
-    newFeatures.splice(index, 1);
-    setCurrentCar({ ...currentCar, features: newFeatures });
+  const toggleFeature = (feature: string) => {
+    const currentFeatures = currentCar.features || [];
+    if (currentFeatures.includes(feature)) {
+        setCurrentCar({ ...currentCar, features: currentFeatures.filter(f => f !== feature) });
+    } else {
+        setCurrentCar({ ...currentCar, features: [...currentFeatures, feature] });
+    }
   };
 
   const addImage = () => {
@@ -1212,12 +1220,37 @@ const Admin: React.FC = () => {
                         <label htmlFor="isHotDeal" className="cursor-pointer flex-1 font-bold text-gray-900 dark:text-white">Marchează ca Oferta Specială (HOT DEAL)</label>
                      </div>
                      <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Dotări (Adaugă și apasă Enter)</label>
-                        <div className="flex flex-wrap gap-2 p-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus-within:border-gold-500 transition-all">
-                           {currentCar.features?.map((f, i) => (
-                             <span key={i} className="bg-gold-500 text-black px-2 py-1 rounded text-xs font-bold flex items-center gap-1">{f}<button onClick={() => removeFeature(i)}><X size={12}/></button></span>
-                           ))}
-                           <input type="text" value={featureInput} onChange={(e) => setFeatureInput(e.target.value)} onKeyDown={addFeature} className="bg-transparent outline-none text-sm text-gray-900 dark:text-white flex-1 min-w-[100px]" placeholder="Tastează dotare..." />
+                        <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Dotări</label>
+                        <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 max-h-60 overflow-y-auto custom-scrollbar mb-3">
+                            <div className="flex flex-wrap gap-2">
+                                {CAR_FEATURES.map(feature => (
+                                    <button
+                                        key={feature}
+                                        type="button"
+                                        onClick={() => toggleFeature(feature)}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                                            currentCar.features?.includes(feature)
+                                            ? 'bg-gold-500 text-black border-gold-500'
+                                            : 'bg-white dark:bg-white/5 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-white/10 hover:border-gold-500 hover:text-black dark:hover:text-white'
+                                        }`}
+                                    >
+                                        {feature}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                           <input 
+                             type="text" 
+                             value={featureInput} 
+                             onChange={(e) => setFeatureInput(e.target.value)} 
+                             onKeyDown={addFeature} 
+                             className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white outline-none focus:border-gold-500" 
+                             placeholder="Adaugă altă dotare (opțional)..." 
+                           />
+                           <button onClick={(e) => addFeature({ key: 'Enter', preventDefault: () => {} } as any)} className="bg-gold-500 text-black px-3 py-1 rounded-lg text-xs font-bold flex items-center justify-center">
+                             <Plus size={16} />
+                           </button>
                         </div>
                      </div>
                   </div>

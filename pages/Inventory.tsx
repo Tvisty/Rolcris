@@ -1,8 +1,9 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Filter, X, ChevronDown, ChevronUp, Search, Loader2 } from 'lucide-react';
+import { Filter, X, ChevronDown, ChevronUp, Search, Loader2, Check } from 'lucide-react';
 import CarCard from '../components/CarCard';
-import { BRANDS, BODY_TYPES, FUELS } from '../constants';
+import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES } from '../constants';
 import { SortOption } from '../types';
 import { useCars } from '../context/CarContext';
 
@@ -36,7 +37,8 @@ const Inventory: React.FC = () => {
     // CHANGED: Default min year to 0 to catch cars with unspecified years
     yearRange: [Number(searchParams.get('minYear')) || 0, new Date().getFullYear() + 1], 
     maxMileage: '',
-    selectedSeats: ''
+    selectedSeats: '',
+    selectedFeatures: [] as string[]
   });
   
   const [sortOption, setSortOption] = useState<SortOption>('newest');
@@ -84,6 +86,13 @@ const Inventory: React.FC = () => {
       if (filters.maxMileage && car.mileage > Number(filters.maxMileage)) return false;
       // Seats
       if (filters.selectedSeats && car.seats !== Number(filters.selectedSeats)) return false;
+      // Features (Must have all selected)
+      if (filters.selectedFeatures.length > 0) {
+        const hasAllSelectedFeatures = filters.selectedFeatures.every(feature => 
+            car.features && car.features.includes(feature)
+        );
+        if (!hasAllSelectedFeatures) return false;
+      }
 
       return true;
     });
@@ -106,9 +115,21 @@ const Inventory: React.FC = () => {
       selectedTransmission: '',
       yearRange: [0, new Date().getFullYear() + 1],
       maxMileage: '',
-      selectedSeats: ''
+      selectedSeats: '',
+      selectedFeatures: []
     });
     setIsMobileFilterOpen(false);
+  };
+
+  const toggleFeatureFilter = (feature: string) => {
+    setFilters(prev => {
+        const current = prev.selectedFeatures;
+        if (current.includes(feature)) {
+            return { ...prev, selectedFeatures: current.filter(f => f !== feature) };
+        } else {
+            return { ...prev, selectedFeatures: [...current, feature] };
+        }
+    });
   };
 
   return (
@@ -194,7 +215,7 @@ const Inventory: React.FC = () => {
               </select>
             </FilterSection>
 
-            {/* MODEL (New) */}
+            {/* MODEL */}
             <FilterSection title="Model">
               <div className="relative">
                  <input 
@@ -208,7 +229,7 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            {/* AN (New) */}
+            {/* AN */}
             <FilterSection title="An Fabricație">
               <div className="flex gap-2 items-center">
                  <input 
@@ -229,7 +250,7 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            {/* KILOMETRAJ (New) */}
+            {/* KILOMETRAJ */}
             <FilterSection title="Kilometraj Max">
               <div className="relative">
                  <input 
@@ -243,7 +264,7 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            {/* CUTIE DE VITEZE (New) */}
+            {/* CUTIE DE VITEZE */}
             <FilterSection title="Cutie de Viteze">
               <div className="flex flex-wrap gap-2">
                 {['Manuală', 'Automată'].map(trans => (
@@ -302,23 +323,45 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            {/* LOCURI (New) */}
+            {/* LOCURI (Updated) */}
             <FilterSection title="Locuri">
               <div className="flex flex-wrap gap-2">
-                {[2, 4, 5, 7].map(seats => (
+                {[4, 5, 7, 9].map(seats => (
                   <button
                     key={seats}
                     onClick={() => setFilters({...filters, selectedSeats: filters.selectedSeats === String(seats) ? '' : String(seats)})}
-                    className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-all ${
+                    className={`px-3 py-2 rounded-lg border text-sm font-bold transition-all ${
                       filters.selectedSeats === String(seats)
-                        ? 'bg-gold-500 border-gold-500 text-black font-bold' 
+                        ? 'bg-gold-500 border-gold-500 text-black' 
                         : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-gold-500 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
-                    {seats}
+                    {seats === 9 ? '8+1' : seats}
                   </button>
                 ))}
               </div>
+            </FilterSection>
+
+            {/* FEATURES (New) */}
+            <FilterSection title="Dotări">
+                <div className="max-h-60 overflow-y-auto custom-scrollbar pr-2 space-y-2">
+                    {CAR_FEATURES.map(feature => (
+                        <label key={feature} className="flex items-center gap-2 cursor-pointer group">
+                            <div className={`w-4 h-4 rounded-sm border ${filters.selectedFeatures.includes(feature) ? 'bg-gold-500 border-gold-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-gold-500'} transition-colors flex items-center justify-center shrink-0`}>
+                                {filters.selectedFeatures.includes(feature) && <Check size={12} className="text-black" />}
+                            </div>
+                            <span className={`text-sm ${filters.selectedFeatures.includes(feature) ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
+                                {feature}
+                            </span>
+                            <input 
+                                type="checkbox" 
+                                className="hidden"
+                                checked={filters.selectedFeatures.includes(feature)}
+                                onChange={() => toggleFeatureFilter(feature)}
+                            />
+                        </label>
+                    ))}
+                </div>
             </FilterSection>
 
             <button 

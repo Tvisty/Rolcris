@@ -84,43 +84,56 @@ const SeasonalEffects: React.FC = () => {
 
       {/* PRIZE POPUP MODAL */}
       {showPrizeModal && holidayPrize && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
-           <div className="relative bg-white dark:bg-[#121212] w-full max-w-md rounded-3xl border-2 border-pink-500/30 p-8 shadow-2xl flex flex-col items-center text-center overflow-hidden">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-pink-900/30 backdrop-blur-md animate-fade-in">
+           <div className="relative bg-white w-full max-w-md rounded-3xl border-4 border-pink-100 p-6 shadow-[0_0_50px_rgba(236,72,153,0.3)] flex flex-col items-center text-center overflow-hidden animate-fade-in-up">
+              
+              {/* Background Glow - White/Pink Theme */}
+              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-pink-50 to-white pointer-events-none" />
               
               <button 
                 onClick={() => setShowPrizeModal(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-pink-500 transition-colors z-20"
+                className="absolute top-4 right-4 bg-pink-100 p-2 rounded-full text-pink-500 hover:bg-pink-200 transition-all z-30"
               >
-                <X size={28} />
+                <X size={20} />
               </button>
 
-              <div className="w-48 h-48 rounded-2xl overflow-hidden mb-6 shadow-xl border border-pink-100 dark:border-white/10 relative z-10 bg-gray-50">
-                 <img 
-                   src={holidayPrize.image || "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=1000&auto=format&fit=crop"} 
-                   alt="Prize" 
-                   className="w-full h-full object-cover"
-                 />
+              {/* Main Image - Auto Size / No Black */}
+              <div className="relative z-20 w-full mb-6">
+                 <div className="relative rounded-2xl overflow-hidden shadow-lg border-2 border-pink-100 bg-white">
+                    <img 
+                      src={holidayPrize.image || "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=1000&auto=format&fit=crop"} 
+                      alt="Prize" 
+                      referrerPolicy="no-referrer"
+                      className="w-full h-auto object-contain block"
+                    />
+                 </div>
+                 
+                 {/* Decorative Badge */}
+                 <div className="absolute -top-3 -right-3 animate-pulse z-30 drop-shadow-md">
+                    <Sparkles className="text-yellow-400" size={36} fill="currentColor" />
+                 </div>
               </div>
 
-              <div className="space-y-4 relative z-10">
-                 <div className="inline-flex items-center gap-2 bg-pink-500/10 text-pink-500 px-4 py-1.5 rounded-full font-bold text-xs uppercase tracking-widest border border-pink-500/20">
+              <div className="space-y-4 relative z-20 w-full">
+                 <div className="inline-flex items-center gap-2 bg-pink-100 text-pink-600 px-4 py-1.5 rounded-full font-bold text-xs uppercase tracking-widest border border-pink-200 shadow-sm">
                     <Gift size={14} /> Surpriză de Valentine's
                  </div>
                  
-                 <h2 className="text-3xl font-display font-bold text-gray-900 dark:text-white">
+                 <h2 className="text-3xl font-display font-bold text-gray-900">
                    {holidayPrize.title || "Premiu Special"}
                  </h2>
                  
-                 <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm">
+                 <p className="text-gray-600 leading-relaxed text-base">
                    {holidayPrize.description || "Te așteptăm în showroom pentru a descoperi surpriza pregătită special pentru tine!"}
                  </p>
 
-                 <div className="pt-4">
+                 <div className="pt-4 w-full">
                     <button 
                       onClick={() => setShowPrizeModal(false)}
-                      className="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-pink-500/30 transition-transform hover:scale-105 active:scale-95"
+                      className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-pink-500/30 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
                     >
-                      Super, Mulțumesc!
+                      <Heart size={20} fill="currentColor" />
+                      <span className="text-lg">Vreau Premiul!</span>
                     </button>
                  </div>
               </div>
