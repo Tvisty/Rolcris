@@ -77,6 +77,13 @@ export interface Review {
   image: string;
 }
 
+export interface HolidayPrize {
+  isEnabled: boolean;
+  image: string;
+  title: string;
+  description: string;
+}
+
 export type SortOption = 'newest' | 'price_asc' | 'price_desc';
 
 export interface FilterState {
@@ -88,3 +95,5 @@ export interface FilterState {
   fuel: string[];
   bodyType: string[];
 }
+
+export type SeasonalTheme = 'default' | 'valentine' | 'halloween' | 'martisor' | 'romania' | 'easter' | 'christmas' | 'blackfriday';

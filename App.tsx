@@ -13,6 +13,7 @@ import Contact from './pages/Contact';
 import Admin from './pages/Admin';
 import Auctions from './pages/Auctions';
 import ChatBot from './components/ChatBot';
+import SeasonalEffects from './components/SeasonalEffects';
 import { CarProvider } from './context/CarContext';
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -21,9 +22,10 @@ const App: React.FC = () => {
     <CarProvider>
       <ThemeProvider>
         <Router>
-          <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 font-sans selection:bg-gold-500 selection:text-black transition-colors duration-300">
+          <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 font-sans selection:bg-gold-500 selection:text-black transition-colors duration-300 relative">
+            <SeasonalEffects />
             <Navigation />
-            <main className="flex-grow">
+            <main className="flex-grow z-10">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/inventory" element={<Inventory />} />

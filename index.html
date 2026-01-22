@@ -40,6 +40,9 @@
               'fade-in-left': 'fadeInLeft 0.8s ease-out forwards',
               'fade-in-right': 'fadeInRight 0.8s ease-out forwards',
               'subtle-zoom': 'subtleZoom 20s infinite alternate',
+              'float-up': 'floatUp 15s linear infinite',
+              'fall-down': 'fallDown 10s linear infinite',
+              'sway': 'sway 3s ease-in-out infinite alternate',
             },
             keyframes: {
               fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
@@ -47,6 +50,19 @@
               fadeInLeft: { '0%': { opacity: '0', transform: 'translateX(-30px)' }, '100%': { opacity: '1', transform: 'translateX(0)' } },
               fadeInRight: { '0%': { opacity: '0', transform: 'translateX(30px)' }, '100%': { opacity: '1', transform: 'translateX(0)' } },
               subtleZoom: { '0%': { transform: 'scale(1)' }, '100%': { transform: 'scale(1.1)' } },
+              floatUp: { 
+                '0%': { transform: 'translateY(100vh) rotate(0deg)', opacity: '0' }, 
+                '10%': { opacity: '0.8' },
+                '100%': { transform: 'translateY(-20vh) rotate(360deg)', opacity: '0' } 
+              },
+              fallDown: { 
+                '0%': { transform: 'translateY(-20vh) rotate(0deg)', opacity: '0.8' }, 
+                '100%': { transform: 'translateY(100vh) rotate(360deg)', opacity: '0.2' } 
+              },
+              sway: {
+                '0%': { transform: 'rotate(-5deg)' },
+                '100%': { transform: 'rotate(5deg)' }
+              }
             }
           }
         }
@@ -102,7 +118,7 @@
 </script>
 <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 transition-colors duration-300">
+  <body class="bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 transition-colors duration-300 overflow-x-hidden">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

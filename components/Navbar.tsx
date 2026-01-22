@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Phone, Car, Sun, Moon } from 'lucide-react';
+import { Menu, X, Phone, Car, Sun, Moon, Heart } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const Navbar: React.FC = () => {
@@ -9,7 +9,7 @@ const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoError, setLogoError] = useState(false);
   const location = useLocation();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, seasonalTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,10 +40,18 @@ const Navbar: React.FC = () => {
         
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group relative">
+          
+          {/* Seasonal Decoration: Valentine */}
+          {seasonalTheme === 'valentine' && (
+            <div className="absolute -top-3 -right-3 z-10 animate-pulse">
+               <Heart className="text-pink-500 fill-pink-500/50" size={24} />
+            </div>
+          )}
+
           {!logoError ? (
             <>
               {/* Subtle Glow Effect behind logo */}
-              <div className="absolute inset-0 bg-gold-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
+              <div className={`absolute inset-0 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full ${seasonalTheme === 'valentine' ? 'bg-pink-500/30' : 'bg-gold-500/20'}`} />
               <img 
                 src="https://i.imgur.com/e7JOUNo.png" 
                 alt="RolCris Autoparc" 
@@ -57,12 +65,12 @@ const Navbar: React.FC = () => {
             </>
           ) : (
             <>
-              <div className="w-10 h-10 bg-gold-500 rounded-lg flex items-center justify-center transform rotate-45 group-hover:rotate-0 transition-all duration-500 shadow-[0_0_15px_rgba(197,160,89,0.5)]">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center transform rotate-45 group-hover:rotate-0 transition-all duration-500 shadow-[0_0_15px_rgba(197,160,89,0.5)] ${seasonalTheme === 'valentine' ? 'bg-pink-500 shadow-pink-500/50' : 'bg-gold-500'}`}>
                 <Car className="text-black -rotate-45 group-hover:rotate-0 transition-transform duration-500" size={24} />
               </div>
               <div className="flex flex-col">
                 <span className={`text-xl font-display font-bold tracking-wide leading-none ${isScrolled ? 'text-gray-900 dark:text-white' : 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'}`}>ROLCRIS</span>
-                <span className="text-xs text-gold-500 font-semibold tracking-[0.2em] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">AUTOPARC</span>
+                <span className={`text-xs font-semibold tracking-[0.2em] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] ${seasonalTheme === 'valentine' ? 'text-pink-400' : 'text-gold-500'}`}>AUTOPARC</span>
               </div>
             </>
           )}
@@ -76,7 +84,7 @@ const Navbar: React.FC = () => {
               to={link.path}
               className={`text-base font-black tracking-wide transition-all duration-300 relative group/link 
                 ${isActive(link.path)
-                  ? 'text-gold-500' 
+                  ? (seasonalTheme === 'valentine' ? 'text-pink-500' : 'text-gold-500')
                   : (isScrolled ? 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white' : 'text-white hover:text-gold-400')
                 }`}
               style={{
@@ -84,7 +92,7 @@ const Navbar: React.FC = () => {
               }}
             >
               {link.name}
-              <span className={`absolute -bottom-1 left-0 h-0.5 bg-gold-500 transition-all duration-300 shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${isActive(link.path) ? 'w-full' : 'w-0 group-hover/link:w-full'}`} />
+              <span className={`absolute -bottom-1 left-0 h-0.5 transition-all duration-300 shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${seasonalTheme === 'valentine' ? 'bg-pink-500' : 'bg-gold-500'} ${isActive(link.path) ? 'w-full' : 'w-0 group-hover/link:w-full'}`} />
             </Link>
           ))}
         </div>
@@ -135,14 +143,14 @@ const Navbar: React.FC = () => {
               key={link.name} 
               to={link.path}
               onClick={() => setIsMobileMenuOpen(false)}
-              className={`text-lg font-bold p-3 rounded-lg border-b border-gray-100 dark:border-white/5 last:border-0 transition-colors ${isActive(link.path) ? 'text-gold-500 bg-gold-500/5' : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/5'}`}
+              className={`text-lg font-bold p-3 rounded-lg border-b border-gray-100 dark:border-white/5 last:border-0 transition-colors ${isActive(link.path) ? (seasonalTheme === 'valentine' ? 'text-pink-500 bg-pink-500/5' : 'text-gold-500 bg-gold-500/5') : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/5'}`}
             >
               <div className="flex items-center gap-2">
                 {link.name}
               </div>
             </Link>
           ))}
-          <a href="tel:+40740513713" className="flex items-center justify-center gap-2 bg-gold-500 text-black py-3 rounded-lg font-bold mt-2 shadow-[0_0_20px_rgba(197,160,89,0.3)]">
+          <a href="tel:+40740513713" className={`flex items-center justify-center gap-2 text-black py-3 rounded-lg font-bold mt-2 shadow-[0_0_20px_rgba(197,160,89,0.3)] ${seasonalTheme === 'valentine' ? 'bg-pink-500' : 'bg-gold-500'}`}>
             <Phone size={20} />
             Sună Dealerul
           </a>

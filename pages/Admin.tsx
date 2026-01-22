@@ -1,22 +1,27 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useCars } from '../context/CarContext';
-import { Car, Booking, ContactMessage, Auction } from '../types';
+import { useTheme } from '../context/ThemeContext';
+import { Car, Booking, ContactMessage, Auction, HolidayPrize } from '../types';
 import { auth, db, storage } from '../firebase';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { 
   Plus, Edit, Trash2, Save, X, Image as ImageIcon, 
-  LogIn, LogOut, Search, DollarSign, 
-  Calendar, Gauge, Zap, LayoutDashboard, Fuel, Settings, Upload, FileText, AlertTriangle, Wifi, WifiOff, HelpCircle, Copy, Check, Star, Loader2, Phone, User as UserIcon, Clock, Mail, Gavel, Timer, Bell, BellOff, Info, Link as LinkIcon, Clipboard, CloudUpload, ChevronLeft, ChevronRight
+  LogIn, Search, 
+  Calendar, Gauge, LayoutDashboard, Fuel, Settings, Upload, AlertTriangle, Wifi, WifiOff, Check, Star, Loader2, Phone, User as UserIcon, Clock, Mail, Gavel, Timer, Bell, BellOff, Info, Link as LinkIcon, Clipboard, CloudUpload, ChevronLeft, ChevronRight, Heart, Gift
 } from 'lucide-react';
 import { BRANDS, BODY_TYPES, FUELS } from '../constants';
 import { Link } from 'react-router-dom';
 
-// --- ULTRA-FAST COMPRESSOR ---
-// Prioritizes speed and small size. Always resolves.
+// --- ULTRA-ROBUST COMPRESSOR V2 ---
 const compressImage = (file: File): Promise<string> => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    // 5-second timeout to prevent infinite hanging
+    const timeoutId = setTimeout(() => {
+      reject(new Error("Procesarea imaginii a durat prea mult. Încercați o imagine mai mică."));
+    }, 5000);
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
     
@@ -25,10 +30,11 @@ const compressImage = (file: File): Promise<string> => {
       img.src = event.target?.result as string;
       
       img.onload = () => {
+        clearTimeout(timeoutId);
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
-        // Reduced to 600px for instant processing
+        // Aggressive resizing to ensure Base64 compatibility (< 1MB)
         const MAX_WIDTH = 600;
         let width = img.width;
         let height = img.height;
@@ -46,17 +52,26 @@ const compressImage = (file: File): Promise<string> => {
             return;
         }
 
+        // Draw and compress
+        ctx.fillStyle = '#FFFFFF'; // Ensure white background for transparent PNGs
+        ctx.fillRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
         
-        // JPEG is faster to encode than WebP on many devices
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.5); 
+        // 0.6 quality is a good balance for web
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.6); 
         resolve(dataUrl);
       };
       
-      // Safety fallbacks
-      img.onerror = () => resolve(""); 
+      img.onerror = () => {
+        clearTimeout(timeoutId);
+        reject(new Error("Imaginea este coruptă sau formatul nu este suportat."));
+      };
     };
-    reader.onerror = () => resolve("");
+    
+    reader.onerror = () => {
+        clearTimeout(timeoutId);
+        reject(new Error("Nu s-a putut citi fișierul."));
+    };
   });
 };
 
@@ -154,8 +169,9 @@ const MessageCard: React.FC<{ message: ContactMessage, onDelete: (id: string) =>
 
 const Admin: React.FC = () => {
   const { cars, bookings, messages, auctions, addCar, updateCar, deleteCar, updateBookingStatus, deleteBooking, deleteMessage, createAuction, cancelAuction, isConnected, requestNotificationPermission, fcmToken } = useCars();
-  
-  const [activeTab, setActiveTab] = useState<'inventory' | 'calendar' | 'messages' | 'auctions'>('inventory');
+  const { seasonalTheme, setSeasonalTheme, holidayPrize, saveHolidayPrize } = useTheme();
+
+  const [activeTab, setActiveTab] = useState<'inventory' | 'calendar' | 'messages' | 'auctions' | 'settings'>('inventory');
   
   const [user, setUser] = useState<User | null>(null);
   const [isDemoAuth, setIsDemoAuth] = useState(false);
@@ -170,13 +186,24 @@ const Admin: React.FC = () => {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [permissionStatus, setPermissionStatus] = useState<string>('default');
   
+  // Prize Management
+  const [prizeForm, setPrizeForm] = useState<HolidayPrize>({
+    isEnabled: false,
+    image: '',
+    title: '',
+    description: ''
+  });
+  const [isPrizeUploading, setIsPrizeUploading] = useState(false);
+  const prizeFileInputRef = useRef<HTMLInputElement>(null);
+  
   const [currentCar, setCurrentCar] = useState<Partial<Car>>({});
   const [featureInput, setFeatureInput] = useState('');
   const [imageInput, setImageInput] = useState('');
-  const [uploadingCount, setUploadingCount] = useState(0); // Track active uploads
+  const [uploadingCount, setUploadingCount] = useState(0); 
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const auctionFileInputRef = useRef<HTMLInputElement>(null);
+  const [isAuctionUploading, setIsAuctionUploading] = useState(false); // New state for auction upload
 
   const [auctionForm, setAuctionForm] = useState({
     make: 'BMW',
@@ -207,6 +234,12 @@ const Admin: React.FC = () => {
       setAuthLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (holidayPrize) {
+      setPrizeForm(holidayPrize);
+    }
+  }, [holidayPrize]);
 
   useEffect(() => {
     if ('Notification' in window) {
@@ -316,10 +349,7 @@ const Admin: React.FC = () => {
       return;
     }
 
-    // Filter out any blobs that might have failed to upload and stick to strings
     const validImages = (currentCar.images || []).filter(img => !img.startsWith('blob:'));
-    
-    // Fallback image if empty
     const finalImages = validImages.length > 0 ? validImages : ["https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop"];
 
     const cleanedCar = {
@@ -453,14 +483,12 @@ const Admin: React.FC = () => {
     }
   };
 
-  // --- ROBUST SEQUENTIAL UPLOAD HANDLER ---
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const fileArray = Array.from(files) as File[];
     
-    // 1. Instant Visual Feedback with Blobs
     const newImages = fileArray.map(f => ({
       tempId: Math.random().toString(), 
       blob: URL.createObjectURL(f),
@@ -474,47 +502,36 @@ const Admin: React.FC = () => {
 
     setUploadingCount(prev => prev + fileArray.length);
 
-    // 2. Process Sequentially to prevent blocking
     for (const item of newImages) {
         let finalUrl = "";
         
         try {
-            // A. Compress (Fast)
             const compressedBase64 = await compressImage(item.file);
-            
-            if (!compressedBase64) throw new Error("Compression failed");
-
             finalUrl = compressedBase64;
 
-            // B. Try Upload (with aggressive timeout)
-            // If storage upload takes more than 2.5 seconds, we give up and use Base64 to keep things moving.
             if (storage && compressedBase64.length < 1500000) { 
                 try {
                     const storageRef = ref(storage, `car-images/${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`);
-                    
                     const uploadTask = uploadString(storageRef, compressedBase64, 'data_url');
-                    
-                    // The Promise.race ensures we don't wait forever
+                    // Add timeout for storage upload as well
                     await Promise.race([
                         uploadTask,
-                        new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 2500))
+                        new Promise((_, reject) => setTimeout(() => reject(new Error("Storage upload timeout")), 8000))
                     ]);
-                    
                     finalUrl = await getDownloadURL(storageRef);
                 } catch (err) {
-                    console.warn("Fast upload failed/timed out, using Base64 fallback for speed.");
+                    console.warn("Storage upload failed, falling back to base64.");
                 }
             }
 
         } catch (error) {
-            console.error("Processing failed for image", error);
-            // If completely failed, remove the placeholder
+            console.error("Processing failed", error);
+            // Remove image that failed
             setCurrentCar(prev => ({
                 ...prev,
                 images: (prev.images || []).filter(img => img !== item.blob)
             }));
         } finally {
-            // C. Replace Blob with Final URL (if successful)
             if (finalUrl) {
                 setCurrentCar(prev => {
                     const currentImages = [...(prev.images || [])];
@@ -525,8 +542,6 @@ const Admin: React.FC = () => {
                     return { ...prev, images: currentImages };
                 });
             }
-            
-            // Clean up
             URL.revokeObjectURL(item.blob);
             setUploadingCount(prev => Math.max(0, prev - 1));
         }
@@ -539,32 +554,98 @@ const Admin: React.FC = () => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    setIsAuctionUploading(true);
     const file = files[0];
-    const prevText = e.target.previousSibling as HTMLInputElement;
-    if(prevText) prevText.value = "Se încarcă...";
-
     try {
         const compressedDataUrl = await compressImage(file);
+        if (!compressedDataUrl) throw new Error("Compresia imaginii a eșuat");
+
         let finalUrl = compressedDataUrl;
 
         if (storage) {
              const fileName = `auction-images/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`;
              const storageRef = ref(storage, fileName);
              try {
-                await uploadString(storageRef, compressedDataUrl, 'data_url');
+                // Time-bounded upload
+                const uploadTask = uploadString(storageRef, compressedDataUrl, 'data_url');
+                await Promise.race([
+                    uploadTask,
+                    new Promise((_, reject) => setTimeout(() => reject(new Error("Upload Timeout")), 8000))
+                ]);
                 finalUrl = await getDownloadURL(storageRef);
-             } catch(err) {
-                console.warn("Auction upload fallback");
+             } catch(err: any) {
+                console.warn("Auction upload fallback to Base64", err.message);
              }
         }
         
         setAuctionForm(prev => ({ ...prev, image: finalUrl }));
 
     } catch (error: any) {
-      console.error("Image processing error:", error);
-      alert("Eroare la încărcarea imaginii.");
+      console.error("Auction Image Error:", error);
+      alert(`Eroare la încărcarea imaginii: ${error.message}`);
     } finally {
+      setIsAuctionUploading(false);
       if (auctionFileInputRef.current) auctionFileInputRef.current.value = '';
+    }
+  };
+
+  const handlePrizeFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsPrizeUploading(true);
+    const file = files[0];
+    try {
+        const compressedDataUrl = await compressImage(file);
+        let finalUrl = compressedDataUrl;
+
+        // Try Upload to Firebase Storage
+        if (storage) {
+             const fileName = `prize-images/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`;
+             const storageRef = ref(storage, fileName);
+             try {
+                // Use a race to timeout the upload if it hangs (e.g. CORS or network issue)
+                const uploadTask = uploadString(storageRef, compressedDataUrl, 'data_url');
+                await Promise.race([
+                    uploadTask,
+                    new Promise((_, reject) => setTimeout(() => reject(new Error("Upload Timeout")), 8000))
+                ]);
+                finalUrl = await getDownloadURL(storageRef);
+                console.log("Uploaded prize image to storage:", finalUrl);
+             } catch(err: any) {
+                console.warn("Storage upload failed, falling back to base64.", err.message);
+             }
+        } else {
+            console.warn("Storage not initialized, using base64 fallback.");
+        }
+        
+        // Final fallback check: if using Base64, warn if it's still too big (unlikely with new compressor)
+        if (finalUrl.startsWith('data:') && finalUrl.length > 900000) {
+             alert("Atenție: Imaginea este prea mare chiar și comprimată. S-ar putea să nu se salveze corect. Încercați o imagine mai simplă.");
+        }
+
+        setPrizeForm(prev => ({ ...prev, image: finalUrl }));
+
+    } catch (error: any) {
+      console.error("Image processing error:", error);
+      alert(`Eroare la procesarea imaginii: ${error.message}. Încercați altă imagine.`);
+    } finally {
+      setIsPrizeUploading(false);
+      if (prizeFileInputRef.current) prizeFileInputRef.current.value = '';
+    }
+  };
+
+  const handleSavePrize = async () => {
+    if (!prizeForm.title || !prizeForm.description) {
+        alert("Titlul și descrierea sunt obligatorii.");
+        return;
+    }
+    try {
+      await saveHolidayPrize(prizeForm);
+      alert("Premiul a fost salvat cu succes!");
+    } catch (e: any) {
+      console.error("Save failed:", e);
+      alert(`Eroare la salvare: ${e.message}`);
     }
   };
 
@@ -586,17 +667,13 @@ const Admin: React.FC = () => {
   const moveImage = (index: number, direction: 'left' | 'right') => {
     if (!currentCar.images) return;
     const newImages = [...currentCar.images];
-    
     if (direction === 'left') {
       if (index === 0) return;
-      // Swap with left neighbor
       [newImages[index - 1], newImages[index]] = [newImages[index], newImages[index - 1]];
     } else {
       if (index === newImages.length - 1) return;
-      // Swap with right neighbor
       [newImages[index], newImages[index + 1]] = [newImages[index + 1], newImages[index]];
     }
-    
     setCurrentCar({ ...currentCar, images: newImages });
   };
 
@@ -661,7 +738,6 @@ const Admin: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] pt-24 pb-12">
-      {/* (Rest of the JSX remains the same as in previous version, mostly unchanged structure) */}
       {showSetup && <SetupGuide />}
       
       {pendingDeleteId && (
@@ -715,7 +791,7 @@ const Admin: React.FC = () => {
         </div>
 
         {/* Dashboard Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <div className="glass-panel p-6 rounded-2xl bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10">
             <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Valoare Stoc</p>
             <h3 className="text-3xl font-display font-bold text-gray-900 dark:text-white">{totalValue.toLocaleString()} €</h3>
@@ -731,28 +807,150 @@ const Admin: React.FC = () => {
             <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Mesaje Contact</p>
             <h3 className="text-3xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-2">{totalMessages}</h3>
           </div>
-          <div className="glass-panel p-6 rounded-2xl bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 cursor-pointer hover:border-gold-500/50 transition-colors" onClick={() => setActiveTab('auctions')}>
-            <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Licitații Active</p>
-            <h3 className="text-3xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-2">{activeAuctionsCount}</h3>
-          </div>
         </div>
 
         {/* Tabs */}
         <div className="flex gap-6 border-b border-gray-200 dark:border-white/10 mb-8 overflow-x-auto">
-           {['inventory', 'auctions', 'calendar', 'messages'].map((tab) => (
+           {['inventory', 'auctions', 'calendar', 'messages', 'settings'].map((tab) => (
              <button 
                key={tab}
                onClick={() => setActiveTab(tab as any)}
-               className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all border-b-2 whitespace-nowrap ${activeTab === tab ? 'border-gold-500 text-gold-500' : 'border-transparent text-gray-500 hover:text-white'}`}
+               className={`pb-4 text-sm font-bold uppercase tracking-wider transition-all border-b-2 whitespace-nowrap flex items-center gap-2 ${activeTab === tab ? 'border-gold-500 text-gold-500' : 'border-transparent text-gray-500 hover:text-white'}`}
              >
-               {tab === 'inventory' ? 'Gestiune Stoc' : tab === 'auctions' ? 'Licitații' : tab === 'calendar' ? 'Calendar Programări' : 'Mesaje'}
+               {tab === 'inventory' ? 'Gestiune Stoc' : tab === 'auctions' ? 'Licitații' : tab === 'calendar' ? 'Calendar' : tab === 'messages' ? 'Mesaje' : <> <Settings size={14} /> Setări Site </>}
              </button>
            ))}
         </div>
 
+        {/* --- SETTINGS TAB --- */}
+        {activeTab === 'settings' && (
+           <div className="animate-fade-in space-y-8">
+              <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
+                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                    <Heart className={seasonalTheme === 'valentine' ? "text-red-500 fill-current" : "text-gray-400"} /> 
+                    Teme Sezoniere
+                 </h3>
+                 
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button 
+                       onClick={() => setSeasonalTheme('default')}
+                       className={`p-4 rounded-xl border flex flex-col items-center gap-3 transition-all ${seasonalTheme === 'default' ? 'border-gold-500 bg-gold-500/10' : 'border-gray-200 dark:border-white/10 hover:border-gold-500/50'}`}
+                    >
+                       <div className="w-full h-24 bg-gray-900 rounded-lg flex items-center justify-center border border-white/10">
+                          <span className="text-gold-500 font-bold">ORIGINAL</span>
+                       </div>
+                       <span className={`font-bold ${seasonalTheme === 'default' ? 'text-gold-500' : 'text-gray-500'}`}>Theme Default</span>
+                    </button>
+
+                    <button 
+                       onClick={() => setSeasonalTheme('valentine')}
+                       className={`p-4 rounded-xl border flex flex-col items-center gap-3 transition-all ${seasonalTheme === 'valentine' ? 'border-pink-500 bg-pink-500/10' : 'border-gray-200 dark:border-white/10 hover:border-pink-500/50'}`}
+                    >
+                       <div className="w-full h-24 bg-pink-900/30 rounded-lg flex items-center justify-center border border-pink-500/30 relative overflow-hidden">
+                          <Heart className="text-pink-500 absolute top-2 right-2 opacity-50" size={16} />
+                          <Heart className="text-pink-500 absolute bottom-2 left-2 opacity-50" size={24} />
+                          <span className="text-pink-500 font-bold z-10">VALENTINE</span>
+                       </div>
+                       <span className={`font-bold ${seasonalTheme === 'valentine' ? 'text-pink-500' : 'text-gray-500'}`}>Valentine's Day</span>
+                    </button>
+                 </div>
+                 <p className="text-sm text-gray-500 mt-4">
+                    * Selectarea unei teme va actualiza automat site-ul pentru toți vizitatorii.
+                 </p>
+              </div>
+
+              {/* HOLIDAY PRIZE SECTION */}
+              <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
+                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                    <Gift className="text-gold-500" /> 
+                    Premiu & Pop-up Sezonier (Inimioară)
+                 </h3>
+                 
+                 <div className="space-y-4 max-w-2xl">
+                    <div className="flex items-center gap-3 mb-4 p-4 bg-gray-50 dark:bg-white/5 rounded-xl">
+                        <input 
+                          type="checkbox" 
+                          id="prizeEnabled" 
+                          checked={prizeForm.isEnabled} 
+                          onChange={(e) => setPrizeForm({...prizeForm, isEnabled: e.target.checked})} 
+                          className="w-5 h-5 accent-gold-500 cursor-pointer" 
+                        />
+                        <label htmlFor="prizeEnabled" className="cursor-pointer font-bold text-gray-900 dark:text-white">Activează Pop-up cu Premiu (pe inimioara din stânga jos)</label>
+                    </div>
+
+                    <div>
+                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Imagine Premiu</label>
+                       <div className="flex gap-2">
+                          <input 
+                            type="text" 
+                            value={prizeForm.image} 
+                            onChange={(e) => setPrizeForm({...prizeForm, image: e.target.value})} 
+                            className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" 
+                            placeholder="Link imagine sau Upload..." 
+                          />
+                          <input type="file" ref={prizeFileInputRef} onChange={handlePrizeFileUpload} accept="image/png, image/jpeg, image/webp" className="hidden" />
+                          <button 
+                            type="button" 
+                            onClick={() => prizeFileInputRef.current?.click()} 
+                            disabled={isPrizeUploading}
+                            className="bg-gold-500 text-black px-4 rounded-lg hover:bg-gold-600 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed min-w-[60px]"
+                          >
+                            {isPrizeUploading ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
+                          </button>
+                       </div>
+                       
+                       {prizeForm.image && (
+                         <div className="mt-4 relative inline-block group">
+                           <div className="w-32 h-32 rounded-lg overflow-hidden border border-gray-200 dark:border-white/10">
+                             <img src={prizeForm.image} alt="Preview" className="w-full h-full object-cover" />
+                           </div>
+                           <button 
+                             onClick={() => setPrizeForm({...prizeForm, image: ''})}
+                             className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:scale-110 transition-transform"
+                           >
+                             <X size={14} />
+                           </button>
+                         </div>
+                       )}
+                    </div>
+
+                    <div>
+                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Titlu Premiu</label>
+                       <input 
+                         type="text" 
+                         value={prizeForm.title} 
+                         onChange={(e) => setPrizeForm({...prizeForm, title: e.target.value})} 
+                         className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" 
+                         placeholder="Ex: Cină Romantică" 
+                       />
+                    </div>
+
+                    <div>
+                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Descriere Detaliată</label>
+                       <textarea 
+                         rows={4} 
+                         value={prizeForm.description} 
+                         onChange={(e) => setPrizeForm({...prizeForm, description: e.target.value})} 
+                         className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" 
+                         placeholder="Detalii despre premiu..." 
+                       />
+                    </div>
+
+                    <button 
+                      onClick={handleSavePrize} 
+                      className="px-6 py-3 bg-gold-500 text-black font-bold rounded-lg hover:bg-gold-600 transition-colors shadow-lg flex items-center gap-2"
+                    >
+                      <Save size={18} /> Salvează Premiul
+                    </button>
+                 </div>
+              </div>
+           </div>
+        )}
+
         {/* --- INVENTORY TAB --- */}
         {activeTab === 'inventory' && (
           <div className="animate-fade-in">
+            {/* Inventory UI same as before */}
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 bg-white dark:bg-[#121212] p-4 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
               <div className="relative w-full md:w-96">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -802,13 +1000,14 @@ const Admin: React.FC = () => {
           </div>
         )}
 
-        {/* --- AUCTIONS TAB --- */}
+        {/* ... (Auctions, Calendar, Messages logic - same as existing) ... */}
         {activeTab === 'auctions' && (
           <div className="animate-fade-in space-y-8">
+             {/* ... Same as existing file ... */}
              <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 mb-8">
                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2"><Plus className="text-gold-500" /> Start Licitație Nouă</h3>
                <form onSubmit={handleStartAuction} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
-                  {/* ... Fields for Auction Form (make, model, year, etc.) ... */}
+                  {/* ... same inputs ... */}
                   <div>
                     <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Marca</label>
                     <select value={auctionForm.make} onChange={(e) => setAuctionForm({...auctionForm, make: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500">
@@ -819,14 +1018,18 @@ const Admin: React.FC = () => {
                     <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Model</label>
                     <input type="text" value={auctionForm.model} onChange={(e) => setAuctionForm({...auctionForm, model: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" placeholder="Ex: Seria 5" />
                   </div>
-                  {/* ... Additional fields ... */}
                    <div>
                      <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Imagine</label>
                      <div className="flex gap-2">
                         <input type="text" value={auctionForm.image} onChange={(e) => setAuctionForm({...auctionForm, image: e.target.value})} className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" placeholder="https://..." />
                         <input type="file" ref={auctionFileInputRef} onChange={handleAuctionFileUpload} accept="image/*" className="hidden" />
-                        <button type="button" onClick={() => auctionFileInputRef.current?.click()} className="bg-gold-500 text-black px-4 rounded-lg hover:bg-gold-600 transition-all flex items-center justify-center">
-                          <Upload size={20} />
+                        <button 
+                          type="button" 
+                          onClick={() => auctionFileInputRef.current?.click()} 
+                          disabled={isAuctionUploading}
+                          className="bg-gold-500 text-black px-4 rounded-lg hover:bg-gold-600 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed min-w-[60px]"
+                        >
+                          {isAuctionUploading ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
                         </button>
                      </div>
                   </div>
@@ -878,7 +1081,7 @@ const Admin: React.FC = () => {
           </div>
         )}
 
-        {/* --- CALENDAR TAB --- */}
+        {/* ... (Calendar and Messages tabs same as existing) ... */}
         {activeTab === 'calendar' && (
           <div className="animate-fade-in space-y-8">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Programări Test Drive</h3>
@@ -912,7 +1115,6 @@ const Admin: React.FC = () => {
           </div>
         )}
 
-        {/* --- MESSAGES TAB --- */}
         {activeTab === 'messages' && (
           <div className="animate-fade-in space-y-8">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Mesaje Contact</h3>
@@ -932,10 +1134,11 @@ const Admin: React.FC = () => {
         )}
       </div>
 
-      {/* --- EDIT MODAL --- */}
+      {/* --- EDIT MODAL (Kept same) --- */}
       {isEditing && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
           <div className="bg-white dark:bg-[#121212] w-full max-w-6xl h-[90vh] rounded-2xl border border-gray-200 dark:border-white/10 flex flex-col shadow-2xl overflow-hidden">
+            {/* ... Modal content same as existing ... */}
             <div className="p-6 border-b border-gray-200 dark:border-white/10 flex justify-between items-center bg-gray-50 dark:bg-[#121212]">
               <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 {currentCar.id ? <Edit className="text-gold-500"/> : <Plus className="text-gold-500"/>}
