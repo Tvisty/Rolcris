@@ -6,7 +6,7 @@ export interface Car {
   year: number;
   price: number;
   mileage: number;
-  fuel: 'Diesel' | 'Benzină' | 'Hibrid' | 'Electric';
+  fuel: 'Diesel' | 'Benzină' | 'Benzină/Gaz' | 'Hibrid' | 'Electric';
   transmission: 'Automată' | 'Manuală';
   bodyType: 'SUV' | 'Sedan' | 'Coupe' | 'Cabrio' | 'Break' | 'Hatchback';
   power: number; // HP

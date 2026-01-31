@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
@@ -16,6 +17,7 @@ const BrandLogo = ({ brand }: { brand: string }) => {
     const map: Record<string, string> = {
       'Mercedes-Benz': 'mercedes',
       'Land Rover': 'landrover',
+      'Range Rover': 'landrover',
       'Jaguar': 'jaguar',
       'Volkswagen': 'volkswagen',
       'BMW': 'bmw',
@@ -27,7 +29,14 @@ const BrandLogo = ({ brand }: { brand: string }) => {
       'Dacia': 'dacia',
       'Toyota': 'toyota',
       'Ford': 'ford',
-      'Renault': 'renault'
+      'Mustang': 'ford',
+      'Renault': 'renault',
+      'Citroën': 'citroen',
+      'Alfa Romeo': 'alfaromeo',
+      'Maserati': 'maserati',
+      'Aston Martin': 'astonmartin',
+      'Rolls-Royce': 'rollsroyce',
+      'McLaren': 'mclaren'
     };
     return map[b] || b.toLowerCase().replace(/[^a-z0-9]/g, '');
   };
@@ -79,6 +88,10 @@ const Home: React.FC = () => {
   const hotDeals = cars.filter(c => c.isHotDeal).slice(0, 4);
   const [heroImage, setHeroImage] = useState("https://i.imgur.com/00Ys6FS.png");
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // Filter out specific brands from the homepage logo display
+  const brandsToExclude = ['BYD', 'Cupra', 'Lexus', 'Dodge'];
+  const displayBrands = BRANDS.filter(brand => !brandsToExclude.includes(brand));
 
   return (
     <div className="w-full">
@@ -185,16 +198,16 @@ const Home: React.FC = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6">
-              {BRANDS.map(brand => (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+              {displayBrands.map(brand => (
                 <Link 
                   key={brand}
                   to={`/inventory?make=${brand}`}
-                  className="group glass-panel p-6 rounded-2xl flex flex-col items-center justify-center gap-4 bg-white dark:bg-[#121212]/50 border border-gray-200 dark:border-white/10 hover:border-gold-500 hover:shadow-[0_0_30px_rgba(197,160,89,0.15)] transition-all duration-300 hover:-translate-y-1"
+                  className="group glass-panel p-4 rounded-xl flex flex-col items-center justify-center gap-4 bg-white dark:bg-[#121212]/50 border border-gray-200 dark:border-white/10 hover:border-gold-500 hover:shadow-[0_0_30px_rgba(197,160,89,0.15)] transition-all duration-300 hover:-translate-y-1 h-32"
                 >
                   <BrandLogo brand={brand} />
                   
-                  <span className="font-bold text-gray-900 dark:text-white text-sm text-center group-hover:text-gold-500 transition-colors">
+                  <span className="font-bold text-gray-900 dark:text-white text-xs text-center group-hover:text-gold-500 transition-colors">
                     {brand}
                   </span>
                 </Link>

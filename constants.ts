@@ -23,16 +23,57 @@ export const MOCK_REVIEWS: Review[] = [
   {
     id: '3',
     name: 'Mihai Radu',
-    carPurchased: 'Mercedes E-Class',
+    carPurchased: 'Mercedes-Benz E-Class',
     rating: 5,
     comment: 'O experiență de 5 stele. Echipa a fost foarte răbdătoare și m-a ajutat să aleg configurația perfectă pentru mine.',
     image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop'
   }
 ];
 
-export const BRANDS = ['BMW', 'Mercedes-Benz', 'Porsche', 'Audi', 'Tesla', 'Land Rover', 'Jaguar', 'Volvo', 'Skoda', 'Dacia', 'Volkswagen', 'Toyota', 'Ford', 'Renault'];
+export const BRANDS = [
+  'Alfa Romeo',
+  'Audi',
+  'BMW',
+  'BYD',
+  'Chevrolet',
+  'Citroën',
+  'Cupra',
+  'Dacia',
+  'Dodge',
+  'Fiat',
+  'Ford',
+  'Honda',
+  'Hyundai',
+  'Jaguar',
+  'Jeep',
+  'Kia',
+  'Land Rover',
+  'Lexus',
+  'Maserati',
+  'Mazda',
+  'Mercedes-Benz',
+  'MG',
+  'Mitsubishi',
+  'Mustang',
+  'Nissan',
+  'Opel',
+  'Peugeot',
+  'Porsche',
+  'Range Rover',
+  'Renault',
+  'SEAT',
+  'Skoda',
+  'Smart',
+  'Subaru',
+  'Suzuki',
+  'Tesla',
+  'Toyota',
+  'Volkswagen',
+  'Volvo'
+];
+
 export const BODY_TYPES = ['SUV', 'Sedan', 'Coupe', 'Cabrio', 'Break', 'Hatchback'];
-export const FUELS = ['Diesel', 'Benzină', 'Hibrid', 'Electric'];
+export const FUELS = ['Diesel', 'Benzină', 'Benzină/Gaz', 'Hibrid', 'Electric'];
 
 export const CAR_FEATURES = [
   "7 Locuri",
