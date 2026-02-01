@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, MessageSquare, CheckCircle, ExternalLink } from 'lucide-react';
 import { useCars } from '../context/CarContext';
@@ -185,13 +186,13 @@ const Contact: React.FC = () => {
                 </div>
               </a>
 
-              <a href="mailto:contact@autoparcrolcris.ro" className="flex items-center gap-4 group">
+              <a href="mailto:autoparcrolcris@gmail.com" className="flex items-center gap-4 group">
                 <div className="w-12 h-12 rounded-full bg-gold-500/10 flex items-center justify-center text-gold-500 group-hover:bg-gold-500 group-hover:text-black transition-all">
                   <Mail size={20} />
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 uppercase font-bold">Email</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">contact@autoparcrolcris.ro</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">autoparcrolcris@gmail.com</p>
                 </div>
               </a>
 

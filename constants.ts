@@ -74,6 +74,7 @@ export const BRANDS = [
 
 export const BODY_TYPES = ['SUV', 'Sedan', 'Coupe', 'Cabrio', 'Break', 'Hatchback'];
 export const FUELS = ['Diesel', 'Benzină', 'Benzină/Gaz', 'Hibrid', 'Electric'];
+export const LOCATIONS = ['Satu Mare', 'Seini', 'Tășnad'];
 
 export const CAR_FEATURES = [
   "7 Locuri",

@@ -9,9 +9,9 @@ import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { 
   Plus, Edit, Trash2, Save, X, Image as ImageIcon, 
   LogIn, Search, 
-  Calendar, Gauge, LayoutDashboard, Fuel, Settings, Upload, AlertTriangle, Wifi, WifiOff, Check, Star, Loader2, Phone, User as UserIcon, Clock, Mail, Gavel, Timer, Bell, BellOff, Info, Link as LinkIcon, Clipboard, CloudUpload, ChevronLeft, ChevronRight, Heart, Gift
+  Calendar, Gauge, LayoutDashboard, Fuel, Settings, Upload, AlertTriangle, Wifi, WifiOff, Check, Star, Loader2, Phone, User as UserIcon, Clock, Mail, Gavel, Timer, Bell, BellOff, Info, Link as LinkIcon, Clipboard, CloudUpload, ChevronLeft, ChevronRight, Heart, Gift, Tag
 } from 'lucide-react';
-import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES } from '../constants';
+import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS } from '../constants';
 import { Link } from 'react-router-dom';
 
 // --- ULTRA-ROBUST COMPRESSOR V2 ---
@@ -299,10 +299,22 @@ const Admin: React.FC = () => {
       engineSize: '',
       vin: '',
       images: [],
-      description: '',
+      description: `Oferim factură și garanție de 12 luni pe motor și cutia de viteze.
+Kilometrajul autoturismului garantat și verificabil.
+Achiziție autoturism în rate fixe cu 0% avans și fără garanții, doar cu buletinul.
+Posibilitate credit pentru persoane fizice (salariați, pensionari) cu vârsta cuprinsă între 18-75 ani, cu o perioadă de creditare de la 12 până la 60 luni.
+Condiții minim 3 luni vechime la actualul angajator.
+Se acceptă persoane cu contract de muncă în străinătate
+Credit online pentru persoane cu istoric negativ.
+Finanțare leasing auto pentru persoane juridice.
+Buy-Back/Mașina ta poate fi avansul necesar pentru autoturismul dorit.
+Birou Intermedieri/Oferim servicii complete de înmatriculări și acte auto/Programarea și efectuarea omologării autoturismului la RAR/Autorizație provizorie(numere roşii)/Înmatriculare vehicul.
+Pentru detalii finanțare și alte informații vă rugăm să ne contactați la numărul de telefon:0741281517`,
       features: [],
       seats: 5,
-      isHotDeal: false
+      isHotDeal: false,
+      isSold: false,
+      location: 'Satu Mare'
     });
     setFeatureInput('');
     setImageInput('');
@@ -355,7 +367,8 @@ const Admin: React.FC = () => {
     const cleanedCar = {
       ...currentCar,
       images: finalImages,
-      features: currentCar.features || []
+      features: currentCar.features || [],
+      location: currentCar.location || 'Satu Mare'
     } as Car;
 
     const jsonSize = new Blob([JSON.stringify(cleanedCar)]).size;
@@ -833,6 +846,7 @@ const Admin: React.FC = () => {
         {/* --- SETTINGS TAB --- */}
         {activeTab === 'settings' && (
            <div className="animate-fade-in space-y-8">
+              {/* ... (Settings content unchanged) ... */}
               <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                     <Heart className={seasonalTheme === 'valentine' ? "text-red-500 fill-current" : "text-gray-400"} /> 
@@ -862,13 +876,11 @@ const Admin: React.FC = () => {
                        <span className={`font-bold ${seasonalTheme === 'valentine' ? 'text-pink-500' : 'text-gray-500'}`}>Valentine's Day</span>
                     </button>
                  </div>
-                 <p className="text-sm text-gray-500 mt-4">
-                    * Selectarea unei teme va actualiza automat site-ul pentru toți vizitatorii.
-                 </p>
               </div>
 
               {/* HOLIDAY PRIZE SECTION */}
               <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
+                 {/* ... (Prize content unchanged) ... */}
                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                     <Gift className="text-gold-500" /> 
                     Premiu & Pop-up Sezonier (Inimioară)
@@ -971,7 +983,7 @@ const Admin: React.FC = () => {
 
             <div className="grid grid-cols-1 gap-4">
               {filteredInventory.map(car => (
-                <div key={car.id} className="group glass-panel p-4 rounded-xl flex flex-col md:flex-row items-center gap-6 border border-gray-200 dark:border-white/5 bg-white dark:bg-[#121212] hover:border-gold-500/50 transition-all shadow-sm">
+                <div key={car.id} className={`group glass-panel p-4 rounded-xl flex flex-col md:flex-row items-center gap-6 border border-gray-200 dark:border-white/5 bg-white dark:bg-[#121212] hover:border-gold-500/50 transition-all shadow-sm ${car.isSold ? 'opacity-80 grayscale' : ''}`}>
                   <div className="relative w-full md:w-48 h-32 rounded-lg overflow-hidden shrink-0">
                     <img 
                       src={car.images[0]} 
@@ -980,7 +992,11 @@ const Admin: React.FC = () => {
                       referrerPolicy="no-referrer"
                       onError={(e) => { e.currentTarget.src = "https://placehold.co/600x400/121212/C5A059?text=Link+Invalid"; }}
                     />
-                    {car.isHotDeal && <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase">HOT</div>}
+                    {/* Status Badges */}
+                    <div className="absolute top-2 left-2 flex gap-1 flex-col items-start">
+                       {car.isSold && <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase">VÂNDUT</span>}
+                       {!car.isSold && car.isHotDeal && <span className="bg-orange-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase">HOT</span>}
+                    </div>
                   </div>
                   <div className="flex-1 text-center md:text-left w-full">
                     <div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
@@ -1207,18 +1223,41 @@ const Admin: React.FC = () => {
                           <select value={currentCar.bodyType} onChange={(e) => setCurrentCar({...currentCar, bodyType: e.target.value as any})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500">{BODY_TYPES.map(b => <option key={b} value={b} className="bg-white dark:bg-[#121212]">{b}</option>)}</select>
                         </div>
                         <div>
+                          <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Locație Parc</label>
+                          <select value={currentCar.location || 'Satu Mare'} onChange={(e) => setCurrentCar({...currentCar, location: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500">
+                             {LOCATIONS.map(loc => (
+                                <option key={loc} value={loc} className="bg-white dark:bg-[#121212]">{loc}</option>
+                             ))}
+                          </select>
+                        </div>
+                     </div>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div>
                           <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Motor</label>
                           <input type="text" value={currentCar.engineSize} onChange={(e) => setCurrentCar({...currentCar, engineSize: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" placeholder="Ex: 2.0 TDI" />
                         </div>
+                        <div>
+                           <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Serie Șasiu (VIN)</label>
+                           <input type="text" value={currentCar.vin} onChange={(e) => setCurrentCar({...currentCar, vin: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500 font-mono uppercase" placeholder="VF1..." />
+                        </div>
                      </div>
-                     <div>
-                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Serie Șasiu (VIN)</label>
-                       <input type="text" value={currentCar.vin} onChange={(e) => setCurrentCar({...currentCar, vin: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500 font-mono uppercase" placeholder="VF1..." />
+                     
+                     <div className="flex flex-col gap-4">
+                        <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10">
+                            <input type="checkbox" id="isHotDeal" checked={currentCar.isHotDeal} onChange={(e) => setCurrentCar({...currentCar, isHotDeal: e.target.checked})} className="w-5 h-5 accent-gold-500 cursor-pointer" />
+                            <label htmlFor="isHotDeal" className="cursor-pointer flex-1 font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <Star size={16} className="text-orange-500" fill="currentColor" /> Marchează ca Oferta Specială (HOT)
+                            </label>
+                        </div>
+                        
+                        <div className="flex items-center gap-3 p-4 bg-red-500/10 dark:bg-red-900/10 rounded-xl border border-red-500/20">
+                            <input type="checkbox" id="isSold" checked={currentCar.isSold} onChange={(e) => setCurrentCar({...currentCar, isSold: e.target.checked})} className="w-5 h-5 accent-red-500 cursor-pointer" />
+                            <label htmlFor="isSold" className="cursor-pointer flex-1 font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
+                                <Tag size={16} fill="currentColor" /> Marchează ca VÂNDUT
+                            </label>
+                        </div>
                      </div>
-                     <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10">
-                        <input type="checkbox" id="isHotDeal" checked={currentCar.isHotDeal} onChange={(e) => setCurrentCar({...currentCar, isHotDeal: e.target.checked})} className="w-5 h-5 accent-gold-500 cursor-pointer" />
-                        <label htmlFor="isHotDeal" className="cursor-pointer flex-1 font-bold text-gray-900 dark:text-white">Marchează ca Oferta Specială (HOT DEAL)</label>
-                     </div>
+
                      <div>
                         <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Dotări</label>
                         <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 max-h-60 overflow-y-auto custom-scrollbar mb-3">

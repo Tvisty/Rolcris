@@ -170,7 +170,7 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             { title: 'Garanție Extinsă', desc: 'Garanție 12 luni pentru orice autoturism.' },
-            { title: 'Verificare Tehnică', desc: 'Inspecție în 360 de puncte realizată de experți.' },
+            { title: 'Verificare Tehnică', desc: 'Inspecție tehnică amănunțită realizată de experți.' },
             { title: 'Finanțare Rapidă', desc: 'Aprobare pe loc doar cu buletinul.' }
           ].map((feature, i) => (
             <div key={i} className="flex gap-4 items-start">

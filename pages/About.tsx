@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Award, Users, Car, ShieldCheck, Clock, CheckCircle2, MapPin, Phone, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -159,7 +160,7 @@ const About: React.FC = () => {
                 'Peste 20 de ani de reputație impecabilă',
                 'Colaborare cu parteneri financiari de top',
                 'Sistem de rate flexibil și aprobare rapidă',
-                'Fiecare vehicul trece prin 360 puncte de verificare'
+                'Inspecție tehnică detaliată înainte de vânzare'
               ].map((item, i) => (
                 <li key={i} className="flex items-center gap-3 text-gray-900 dark:text-gray-200 font-medium">
                   <div className="w-6 h-6 rounded-full bg-gold-500 flex items-center justify-center text-black">

@@ -14,9 +14,11 @@ export interface Car {
   vin?: string;
   images: string[];
   isHotDeal?: boolean;
+  isSold?: boolean; // New field for Sold status
   description: string;
   features: string[];
   seats: number;
+  location?: string; // New field for location filtering
 }
 
 export interface Booking {
@@ -47,6 +49,7 @@ export interface Bid {
   bidderPhone: string;
   amount: number;
   timestamp: number;
+  timestampStr?: string;
 }
 
 export interface Auction {
@@ -94,6 +97,7 @@ export interface FilterState {
   maxYear: number;
   fuel: string[];
   bodyType: string[];
+  location?: string;
 }
 
 export type SeasonalTheme = 'default' | 'valentine' | 'halloween' | 'martisor' | 'romania' | 'easter' | 'christmas' | 'blackfriday';

@@ -23,7 +23,7 @@ const WEBSITE_KNOWLEDGE_BASE = `
 2. Seini: Piața Unirii 2, Jud. Maramureș.
 3. Tășnad: Str. N. Bălcescu 19, Jud. Satu Mare.
 - Telefon General: 0740 513 713 (Răspundem și pe WhatsApp).
-- Email: contact@autoparcrolcris.ro
+- Email: autoparcrolcris@gmail.com
 - Program: Luni - Vineri (09:00 - 18:00), Sâmbătă (09:00 - 14:00), Duminică (Închis).
 
 --- SERVICII OFERITE ---
@@ -32,7 +32,7 @@ const WEBSITE_KNOWLEDGE_BASE = `
 3. Vulcanizare & Roți: Schimb anvelope, echilibrare, geometrie 3D, Hotel de anvelope.
 4. Acte Auto: Înmatriculări, numere roșii (provizorii) pe loc, contracte vânzare-cumpărare, asigurări RCA/CASCO.
 5. Garanție: Oferim 12 luni garanție pentru autoturisme.
-6. Verificare: Mașinile trec printr-o inspecție tehnică în 360 de puncte.
+6. Verificare: Mașinile trec printr-o inspecție tehnică amănunțită.
 
 --- FINANȚARE (LEASING & CREDIT) ---
 - Parteneri: BT Leasing, Unicredit, BCR Leasing, Porsche Bank, Impuls.

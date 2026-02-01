@@ -109,7 +109,7 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
                 <Mail className={seasonalTheme === 'valentine' ? "text-pink-500 shrink-0" : "text-gold-500 shrink-0"} size={18} />
-                <span className="text-sm">contact@autoparcrolcris.ro</span>
+                <span className="text-sm">autoparcrolcris@gmail.com</span>
               </li>
             </ul>
           </div>

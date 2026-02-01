@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronLeft, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle } from 'lucide-react';
+import { ChevronLeft, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useCars } from '../context/CarContext';
 
 const CarDetail: React.FC = () => {
@@ -89,9 +89,15 @@ const CarDetail: React.FC = () => {
               src={car.images[activeImage]} 
               alt={car.model} 
               referrerPolicy="no-referrer"
-              className="w-full h-full object-cover animate-fade-in"
+              className={`w-full h-full object-cover animate-fade-in ${car.isSold ? 'grayscale-[50%]' : ''}`}
             />
-            {car.isHotDeal && (
+            {car.isSold ? (
+               <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+                  <div className="border-4 border-red-600 text-red-600 px-8 py-3 text-4xl font-black uppercase tracking-widest -rotate-12 bg-white/10 backdrop-blur-sm shadow-2xl">
+                    VÂNDUT
+                  </div>
+               </div>
+            ) : car.isHotDeal && (
               <div className="absolute top-6 left-6 bg-red-600 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
                 <Zap size={16} fill="currentColor" /> HOT DEAL
               </div>
@@ -125,41 +131,61 @@ const CarDetail: React.FC = () => {
               <h1 className="text-4xl md:text-5xl font-display font-bold text-gray-900 dark:text-white mb-6">{car.make} {car.model}</h1>
               
               <div className="text-5xl font-display font-bold text-gray-900 dark:text-white mb-2">
-                {car.price.toLocaleString()} <span className="text-gold-500">€</span>
+                {car.isSold ? (
+                  <span className="text-red-500">VÂNDUT</span>
+                ) : (
+                  <>
+                    {car.price.toLocaleString()} <span className="text-gold-500">€</span>
+                  </>
+                )}
               </div>
-              <p className="text-sm text-gray-500">Finanțare disponibilă</p>
+              {!car.isSold && <p className="text-sm text-gray-500">Finanțare disponibilă</p>}
             </div>
 
             {/* CTA Box */}
             <div className="glass-panel p-6 rounded-2xl border-gold-500/20 shadow-[0_0_40px_rgba(197,160,89,0.05)] bg-white dark:bg-[#121212]/80">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <a 
-                    href={whatsappLink} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white py-4 rounded-xl font-bold transition-transform hover:scale-[1.02]"
-                  >
-                    <MessageCircle size={20} />
-                    WhatsApp
-                  </a>
-                  <a 
-                    href="tel:+40740513713" 
-                    className="flex items-center justify-center gap-2 bg-transparent border-2 border-gray-900 dark:border-white hover:bg-gray-900 dark:hover:bg-white hover:text-white dark:hover:text-black text-gray-900 dark:text-white py-4 rounded-xl font-bold transition-all"
-                  >
-                    <Phone size={20} />
-                    Sună Acum
-                  </a>
-               </div>
-               
-               <button 
-                  onClick={() => setIsBookingOpen(true)}
-                  className="w-full bg-gold-500 hover:bg-gold-600 text-black font-bold py-4 rounded-xl transition-transform hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg shadow-gold-500/20"
-               >
-                 <Calendar size={20} />
-                 Programează Test Drive
-               </button>
+               {car.isSold ? (
+                 <div className="text-center py-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <p className="text-red-500 font-bold flex items-center justify-center gap-2">
+                       <AlertTriangle size={20} />
+                       Acest autoturism nu mai este disponibil.
+                    </p>
+                    <Link to="/inventory" className="text-sm text-gray-500 underline mt-2 block hover:text-gray-900 dark:hover:text-white">
+                       Vezi alte oferte similare
+                    </Link>
+                 </div>
+               ) : (
+                 <>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <a 
+                        href={whatsappLink} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white py-4 rounded-xl font-bold transition-transform hover:scale-[1.02]"
+                      >
+                        <MessageCircle size={20} />
+                        WhatsApp
+                      </a>
+                      <a 
+                        href="tel:+40740513713" 
+                        className="flex items-center justify-center gap-2 bg-transparent border-2 border-gray-900 dark:border-white hover:bg-gray-900 dark:hover:bg-white hover:text-white dark:hover:text-black text-gray-900 dark:text-white py-4 rounded-xl font-bold transition-all"
+                      >
+                        <Phone size={20} />
+                        Sună Acum
+                      </a>
+                   </div>
+                   
+                   <button 
+                      onClick={() => setIsBookingOpen(true)}
+                      className="w-full bg-gold-500 hover:bg-gold-600 text-black font-bold py-4 rounded-xl transition-transform hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg shadow-gold-500/20"
+                   >
+                     <Calendar size={20} />
+                     Programează Test Drive
+                   </button>
 
-               <p className="text-center text-xs text-gray-500 mt-4">Răspundem de obicei în &lt; 15 minute</p>
+                   <p className="text-center text-xs text-gray-500 mt-4">Răspundem de obicei în &lt; 15 minute</p>
+                 </>
+               )}
             </div>
 
             {/* Quick Specs */}

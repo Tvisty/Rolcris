@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Filter, X, ChevronDown, ChevronUp, Search, Loader2, Check } from 'lucide-react';
 import CarCard from '../components/CarCard';
-import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES } from '../constants';
+import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS } from '../constants';
 import { SortOption } from '../types';
 import { useCars } from '../context/CarContext';
 
@@ -34,6 +34,7 @@ const Inventory: React.FC = () => {
     selectedBody: '',
     selectedFuel: '',
     selectedTransmission: '',
+    selectedLocation: '',
     // CHANGED: Default min year to 0 to catch cars with unspecified years
     yearRange: [Number(searchParams.get('minYear')) || 0, new Date().getFullYear() + 1], 
     maxMileage: '',
@@ -78,6 +79,8 @@ const Inventory: React.FC = () => {
       if (filters.selectedFuel && car.fuel !== filters.selectedFuel) return false;
       // Transmission
       if (filters.selectedTransmission && car.transmission !== filters.selectedTransmission) return false;
+      // Location
+      if (filters.selectedLocation && car.location !== filters.selectedLocation) return false;
       // Year Range
       if (carYear < filters.yearRange[0] || carYear > filters.yearRange[1]) return false;
       // Price Range
@@ -113,6 +116,7 @@ const Inventory: React.FC = () => {
       selectedBody: '',
       selectedFuel: '',
       selectedTransmission: '',
+      selectedLocation: '',
       yearRange: [0, new Date().getFullYear() + 1],
       maxMileage: '',
       selectedSeats: '',
@@ -182,6 +186,29 @@ const Inventory: React.FC = () => {
 
           <div className="glass-panel rounded-xl p-6 md:sticky md:top-24 bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10">
             
+            {/* LOCATIE - Moved to top for visibility */}
+            <FilterSection title="Locație">
+                <div className="space-y-2">
+                    {LOCATIONS.map(loc => (
+                        <label key={loc} className="flex items-center gap-2 cursor-pointer group">
+                            <div className={`w-4 h-4 rounded-full border ${filters.selectedLocation === loc ? 'bg-gold-500 border-gold-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-gold-500'} transition-colors flex items-center justify-center`}>
+                                {filters.selectedLocation === loc && <div className="w-2 h-2 bg-black rounded-full" />}
+                            </div>
+                            <input 
+                                type="radio" 
+                                name="location" 
+                                className="hidden"
+                                checked={filters.selectedLocation === loc}
+                                onChange={() => setFilters({...filters, selectedLocation: filters.selectedLocation === loc ? '' : loc})}
+                            />
+                            <span className={`text-sm ${filters.selectedLocation === loc ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
+                                {loc}
+                            </span>
+                        </label>
+                    ))}
+                </div>
+            </FilterSection>
+
             {/* PRICE */}
             <FilterSection title="Preț (€)">
               <div className="flex gap-2 items-center">
