@@ -198,6 +198,7 @@ const Admin: React.FC = () => {
   
   const [currentCar, setCurrentCar] = useState<Partial<Car>>({});
   const [featureInput, setFeatureInput] = useState('');
+  const [featureSearch, setFeatureSearch] = useState(''); // New state for feature search
   const [imageInput, setImageInput] = useState('');
   const [uploadingCount, setUploadingCount] = useState(0); 
   
@@ -317,6 +318,7 @@ Pentru detalii finanțare și alte informații vă rugăm să ne contactați la 
       location: 'Satu Mare'
     });
     setFeatureInput('');
+    setFeatureSearch('');
     setImageInput('');
     setUploadingCount(0);
     setIsEditing(true);
@@ -325,6 +327,7 @@ Pentru detalii finanțare și alte informații vă rugăm să ne contactați la 
   const handleEdit = (car: Car) => {
     setCurrentCar({ ...car });
     setFeatureInput('');
+    setFeatureSearch('');
     setImageInput('');
     setUploadingCount(0);
     setIsEditing(true);
@@ -1260,9 +1263,25 @@ Pentru detalii finanțare și alte informații vă rugăm să ne contactați la 
 
                      <div>
                         <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Dotări</label>
+                        
+                        {/* Search for features */}
+                        <div className="relative mb-2">
+                           <input 
+                             type="text" 
+                             placeholder="Caută în lista de dotări..." 
+                             value={featureSearch} 
+                             onChange={(e) => setFeatureSearch(e.target.value)} 
+                             className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-900 dark:text-white outline-none focus:border-gold-500"
+                           />
+                           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        </div>
+
                         <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-4 max-h-60 overflow-y-auto custom-scrollbar mb-3">
                             <div className="flex flex-wrap gap-2">
-                                {CAR_FEATURES.map(feature => (
+                                {[...CAR_FEATURES]
+                                  .sort((a, b) => a.localeCompare(b, 'ro')) // Alphabetical sort
+                                  .filter(f => f.toLowerCase().includes(featureSearch.toLowerCase())) // Search filter
+                                  .map(feature => (
                                     <button
                                         key={feature}
                                         type="button"
@@ -1285,7 +1304,7 @@ Pentru detalii finanțare și alte informații vă rugăm să ne contactați la 
                              onChange={(e) => setFeatureInput(e.target.value)} 
                              onKeyDown={addFeature} 
                              className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white outline-none focus:border-gold-500" 
-                             placeholder="Adaugă altă dotare (opțional)..." 
+                             placeholder="Adaugă manual altă dotare..." 
                            />
                            <button onClick={(e) => addFeature({ key: 'Enter', preventDefault: () => {} } as any)} className="bg-gold-500 text-black px-3 py-1 rounded-lg text-xs font-bold flex items-center justify-center">
                              <Plus size={16} />

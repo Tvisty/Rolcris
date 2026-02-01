@@ -1,13 +1,15 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Calculator, CheckCircle, FileText, Building2, User, ArrowRight, Wallet, Percent, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Finance: React.FC = () => {
-  // Calculator State
-  const [vehiclePrice, setVehiclePrice] = useState(15000);
-  const [downPaymentPercent, setDownPaymentPercent] = useState(20);
-  const [periodMonths, setPeriodMonths] = useState(48);
-  const [interestRate] = useState(7.5); // Average of 6.5% - 8.5%
+  // Calculator State - Defaults updated to match your example (10990 / 0% / 60 months)
+  const [vehiclePrice, setVehiclePrice] = useState(10990);
+  const [downPaymentPercent, setDownPaymentPercent] = useState(0);
+  const [periodMonths, setPeriodMonths] = useState(60);
+  // Adjusted interest rate to approx 13.4% to yield ~252 Euro for the 10990/60m/0% scenario
+  const [interestRate] = useState(13.4); 
 
   // Calculation Logic
   const calculation = useMemo(() => {
@@ -58,7 +60,7 @@ const Finance: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-display">Calculator Rate</h2>
-                <p className="text-xs text-gray-500">Estimare orientativă (Dobânzi între 6.5% - 8.5%)</p>
+                <p className="text-xs text-gray-500">Estimare orientativă (Dobânzi între 10% - 14%)</p>
               </div>
             </div>
 
@@ -67,17 +69,25 @@ const Finance: React.FC = () => {
               
               {/* Vehicle Price */}
               <div>
-                <div className="flex justify-between mb-2">
+                <div className="flex justify-between mb-2 items-center">
                   <label className="text-gray-500 dark:text-gray-400 text-sm flex items-center gap-2">
                     <Wallet size={16} /> Preț Autoturism (EUR)
                   </label>
-                  <span className="text-gray-900 dark:text-white font-bold">{vehiclePrice.toLocaleString()} €</span>
+                  <div className="flex items-center gap-1 bg-gray-100 dark:bg-white/5 rounded-lg px-3 py-1 border border-transparent focus-within:border-gold-500 transition-colors">
+                    <input 
+                      type="number"
+                      value={vehiclePrice}
+                      onChange={(e) => setVehiclePrice(Number(e.target.value))}
+                      className="bg-transparent text-gray-900 dark:text-white font-bold text-right outline-none w-24 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <span className="text-gray-500 font-bold">€</span>
+                  </div>
                 </div>
                 <input 
                   type="range" 
                   min="1000" 
                   max="50000" 
-                  step="500" 
+                  step="50" // Changed step from 500 to 50
                   value={vehiclePrice}
                   onChange={(e) => setVehiclePrice(Number(e.target.value))}
                   className="w-full h-2 bg-gray-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-gold-500 hover:accent-gold-400 transition-all"
