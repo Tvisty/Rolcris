@@ -6,9 +6,9 @@ export interface Car {
   year: number;
   price: number;
   mileage: number;
-  fuel: 'Diesel' | 'Benzină' | 'Benzină/Gaz' | 'Hibrid' | 'Electric';
+  fuel: 'Diesel' | 'Benzină' | 'Benzină/Gaz' | 'Hibrid' | 'Electric' | 'Diesel/Electric';
   transmission: 'Automată' | 'Manuală';
-  bodyType: 'SUV' | 'Sedan' | 'Coupe' | 'Cabrio' | 'Break' | 'Hatchback';
+  bodyType: 'SUV' | 'Sedan' | 'Coupe' | 'Cabrio' | 'Break' | 'Hatchback' | 'Dube' | 'Monovolum';
   power: number; // HP
   engineSize: string; // e.g. 3.0L
   vin?: string;
@@ -19,6 +19,9 @@ export interface Car {
   features: string[];
   seats: number;
   location?: string; // New field for location filtering
+  pollutionStandard?: string; // e.g. Euro 6
+  traction?: string; // e.g. 4x4
+  color?: string; // e.g. Negru
 }
 
 export interface Booking {

@@ -11,7 +11,7 @@ import {
   LogIn, Search, 
   Calendar, Gauge, LayoutDashboard, Fuel, Settings, Upload, AlertTriangle, Wifi, WifiOff, Check, Star, Loader2, Phone, User as UserIcon, Clock, Mail, Gavel, Timer, Bell, BellOff, Info, Link as LinkIcon, Clipboard, CloudUpload, ChevronLeft, ChevronRight, Heart, Gift, Tag
 } from 'lucide-react';
-import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS } from '../constants';
+import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS, COLORS } from '../constants';
 import { Link } from 'react-router-dom';
 
 // --- ULTRA-ROBUST COMPRESSOR V2 ---
@@ -315,7 +315,10 @@ Pentru detalii finanțare și alte informații vă rugăm să ne contactați la 
       seats: 5,
       isHotDeal: false,
       isSold: false,
-      location: 'Satu Mare'
+      location: 'Satu Mare',
+      pollutionStandard: 'Euro 6',
+      traction: 'Fata',
+      color: 'Negru'
     });
     setFeatureInput('');
     setFeatureSearch('');
@@ -1226,6 +1229,34 @@ Pentru detalii finanțare și alte informații vă rugăm să ne contactați la 
                           <select value={currentCar.bodyType} onChange={(e) => setCurrentCar({...currentCar, bodyType: e.target.value as any})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500">{BODY_TYPES.map(b => <option key={b} value={b} className="bg-white dark:bg-[#121212]">{b}</option>)}</select>
                         </div>
                         <div>
+                          <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Tractiune</label>
+                          <select value={currentCar.traction || 'Fata'} onChange={(e) => setCurrentCar({...currentCar, traction: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500">
+                             {TRACTIONS.map(tr => <option key={tr} value={tr} className="bg-white dark:bg-[#121212]">{tr}</option>)}
+                          </select>
+                        </div>
+                     </div>
+                     
+                     <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Norma Poluare</label>
+                          <select value={currentCar.pollutionStandard || 'Euro 6'} onChange={(e) => setCurrentCar({...currentCar, pollutionStandard: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500">
+                             {POLLUTION_STANDARDS.map(ps => <option key={ps} value={ps} className="bg-white dark:bg-[#121212]">{ps}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Locuri</label>
+                          <input type="number" value={currentCar.seats} onChange={(e) => setCurrentCar({...currentCar, seats: Number(e.target.value)})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" />
+                        </div>
+                     </div>
+
+                     <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Culoare</label>
+                          <select value={currentCar.color || 'Negru'} onChange={(e) => setCurrentCar({...currentCar, color: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500">
+                             {COLORS.map(c => <option key={c} value={c} className="bg-white dark:bg-[#121212]">{c}</option>)}
+                          </select>
+                        </div>
+                        <div>
                           <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Locație Parc</label>
                           <select value={currentCar.location || 'Satu Mare'} onChange={(e) => setCurrentCar({...currentCar, location: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500">
                              {LOCATIONS.map(loc => (
@@ -1234,6 +1265,7 @@ Pentru detalii finanțare și alte informații vă rugăm să ne contactați la 
                           </select>
                         </div>
                      </div>
+
                      <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Motor</label>
