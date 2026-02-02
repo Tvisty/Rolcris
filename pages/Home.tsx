@@ -90,7 +90,7 @@ const Home: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Filter out specific brands from the homepage logo display
-  const brandsToExclude = ['BYD', 'Cupra', 'Lexus', 'Dodge'];
+  const brandsToExclude = ['BYD', 'Cupra', 'Lexus', 'Dodge', 'SsangYong'];
   const displayBrands = BRANDS.filter(brand => !brandsToExclude.includes(brand));
 
   return (

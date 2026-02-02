@@ -196,6 +196,7 @@ const CarDetail: React.FC = () => {
               <SpecItem icon={Settings} label="Cutie Viteze" value={car.transmission} />
               <SpecItem icon={CarFront} label="Caroserie" value={car.bodyType} />
               <SpecItem icon={Zap} label="Motorizare" value={`${car.engineSize} • ${car.power} CP`} />
+              <SpecItem icon={Layout} label="Portiere" value={car.doors || '4/5'} />
               <SpecItem icon={Fingerprint} label="VIN" value={car.vin || 'Nespecificat'} />
             </div>
 
@@ -276,7 +277,7 @@ const CarDetail: React.FC = () => {
                           min={new Date().toISOString().split('T')[0]}
                           value={bookingDate}
                           onChange={(e) => setBookingDate(e.target.value)}
-                          className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 text-gray-900 dark:text-white outline-none focus:border-gold-500 transition-all cursor-pointer"
+                          className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 text-gray-900 dark:text-white outline-none focus:border-gold-500 transition-all"
                         />
                       </div>
                       <div>
@@ -285,7 +286,7 @@ const CarDetail: React.FC = () => {
                           required
                           value={bookingTime}
                           onChange={(e) => setBookingTime(e.target.value)}
-                          className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 text-gray-900 dark:text-white outline-none focus:border-gold-500 transition-all cursor-pointer"
+                          className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 text-gray-900 dark:text-white outline-none focus:border-gold-500 transition-all"
                         >
                           <option value="">Alege...</option>
                           <option value="09:00">09:00</option>
@@ -301,14 +302,11 @@ const CarDetail: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="bg-gold-500/10 p-3 rounded-lg border border-gold-500/20 mt-4">
-                      <p className="text-xs text-gold-500 flex items-center gap-2">
-                        <CheckCircle size={14} /> Mașina: <span className="font-bold">{car.make} {car.model}</span>
-                      </p>
-                    </div>
-
-                    <button type="submit" className="w-full bg-gold-500 hover:bg-gold-600 text-black font-bold py-3 rounded-xl mt-4 transition-all flex items-center justify-center gap-2">
-                      Trimite Cererea
+                    <button 
+                      type="submit" 
+                      className="w-full bg-gold-500 hover:bg-gold-600 text-black font-bold py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 mt-2"
+                    >
+                      Confirmă Programarea
                     </button>
                  </form>
                )}

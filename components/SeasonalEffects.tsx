@@ -137,7 +137,12 @@ const SeasonalEffects: React.FC = () => {
 
                  <div className="pt-2 w-full">
                     <button 
-                      onClick={() => setShowPrizeModal(false)}
+                      onClick={() => {
+                        if (holidayPrize.buttonLink) {
+                            window.open(holidayPrize.buttonLink, '_blank');
+                        }
+                        setShowPrizeModal(false);
+                      }}
                       className="w-full bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-pink-500/30 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3"
                     >
                       <Heart size={24} fill="currentColor" />

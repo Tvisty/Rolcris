@@ -50,7 +50,7 @@ const WEBSITE_KNOWLEDGE_BASE = `
 const ChatBot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'model', text: 'Salut! Sunt Cris, asistentul virtual Autoparc RolCris. Cu ce te pot ajuta astăzi?' }
+    { role: 'model', text: 'Salut! Sunt RolCris, asistentul virtual Autoparc RolCris. Cu ce te pot ajuta astăzi?' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -135,7 +135,7 @@ const ChatBot: React.FC = () => {
         : "Momentan nu am acces la lista de mașini în timp real, dar te pot ajuta cu informații generale.";
 
       const systemInstruction = `
-        You are Cris, the expert AI sales assistant for "Autoparc RolCris".
+        You are RolCris, the expert AI sales assistant for "Autoparc RolCris".
         
         YOUR KNOWLEDGE BASE:
         ${WEBSITE_KNOWLEDGE_BASE}
@@ -176,6 +176,7 @@ const ChatBot: React.FC = () => {
           systemInstruction: systemInstruction,
           tools: [createLeadTool],
           temperature: 0.6, // Lower temperature for more focused answers
+          thinkingConfig: { thinkingBudget: 0 } // Disable thinking for maximum speed
         }
       });
 
@@ -279,7 +280,7 @@ const ChatBot: React.FC = () => {
           )}
           
           <span className={`max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-in-out whitespace-nowrap text-sm font-bold ${isOpen ? '' : 'ml-0 group-hover:ml-3'}`}>
-            {isOpen ? '' : 'Chat cu Cris'}
+            {isOpen ? '' : 'Chat cu RolCris'}
           </span>
         </button>
       </div>
@@ -294,7 +295,7 @@ const ChatBot: React.FC = () => {
             <Bot size={24} className="text-black" />
           </div>
           <div>
-            <h3 className="text-white font-bold font-display">Cris - Asistent Virtual</h3>
+            <h3 className="text-white font-bold font-display">RolCris - Asistent Virtual</h3>
             <p className="text-gold-500 text-xs flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               Online
@@ -357,7 +358,7 @@ const ChatBot: React.FC = () => {
             </button>
           </div>
           <p className="text-[10px] text-gray-400 text-center mt-2">
-            Cris poate face greșeli. Verifică informațiile importante.
+            RolCris poate face greșeli. Verifică informațiile importante.
           </p>
         </div>
       </div>

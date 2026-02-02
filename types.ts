@@ -18,6 +18,7 @@ export interface Car {
   description: string;
   features: string[];
   seats: number;
+  doors?: number; // New field for Number of doors
   location?: string; // New field for location filtering
   pollutionStandard?: string; // e.g. Euro 6
   traction?: string; // e.g. 4x4
@@ -88,6 +89,7 @@ export interface HolidayPrize {
   image: string;
   title: string;
   description: string;
+  buttonLink?: string;
 }
 
 export type SortOption = 'newest' | 'price_asc' | 'price_desc';

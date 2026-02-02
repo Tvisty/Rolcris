@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useCars } from '../context/CarContext';
 import { useTheme } from '../context/ThemeContext';
@@ -191,7 +190,8 @@ const Admin: React.FC = () => {
     isEnabled: false,
     image: '',
     title: '',
-    description: ''
+    description: '',
+    buttonLink: ''
   });
   const [isPrizeUploading, setIsPrizeUploading] = useState(false);
   const prizeFileInputRef = useRef<HTMLInputElement>(null);
@@ -313,6 +313,7 @@ Birou Intermedieri/Oferim servicii complete de înmatriculări și acte auto/Pro
 Pentru detalii finanțare și alte informații vă rugăm să ne contactați la numărul de telefon:0741281517`,
       features: [],
       seats: 5,
+      doors: 5,
       isHotDeal: false,
       isSold: false,
       location: 'Satu Mare',
@@ -362,7 +363,7 @@ Pentru detalii finanțare și alte informații vă rugăm să ne contactați la 
       return;
     }
 
-    if (!currentCar.make || !currentCar.model || !currentCar.price) {
+    if (!currentCar.make || !currentCar.model || currentCar.price === undefined) {
       alert('Te rog completează câmpurile obligatorii: Marca, Model, Preț.');
       return;
     }
@@ -962,6 +963,17 @@ Pentru detalii finanțare și alte informații vă rugăm să ne contactați la 
                        />
                     </div>
 
+                    <div>
+                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Link Buton (Opțional)</label>
+                       <input 
+                         type="text" 
+                         value={prizeForm.buttonLink || ''} 
+                         onChange={(e) => setPrizeForm({...prizeForm, buttonLink: e.target.value})} 
+                         className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" 
+                         placeholder="Ex: https://wa.me/..." 
+                       />
+                    </div>
+
                     <button 
                       onClick={handleSavePrize} 
                       className="px-6 py-3 bg-gold-500 text-black font-bold rounded-lg hover:bg-gold-600 transition-colors shadow-lg flex items-center gap-2"
@@ -1244,18 +1256,31 @@ Pentru detalii finanțare și alte informații vă rugăm să ne contactați la 
                           </select>
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Locuri</label>
-                          <input type="number" value={currentCar.seats} onChange={(e) => setCurrentCar({...currentCar, seats: Number(e.target.value)})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" />
+                           <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Număr Portiere</label>
+                           <select 
+                              value={currentCar.doors || 5} 
+                              onChange={(e) => setCurrentCar({...currentCar, doors: Number(e.target.value)})} 
+                              className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500"
+                           >
+                              {[2, 3, 4, 5].map(n => <option key={n} value={n} className="bg-white dark:bg-[#121212]">{n}</option>)}
+                           </select>
                         </div>
                      </div>
 
                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Locuri</label>
+                          <input type="number" value={currentCar.seats} onChange={(e) => setCurrentCar({...currentCar, seats: Number(e.target.value)})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" />
+                        </div>
                         <div>
                           <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Culoare</label>
                           <select value={currentCar.color || 'Negru'} onChange={(e) => setCurrentCar({...currentCar, color: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500">
                              {COLORS.map(c => <option key={c} value={c} className="bg-white dark:bg-[#121212]">{c}</option>)}
                           </select>
                         </div>
+                     </div>
+
+                     <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Locație Parc</label>
                           <select value={currentCar.location || 'Satu Mare'} onChange={(e) => setCurrentCar({...currentCar, location: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500">
@@ -1264,13 +1289,13 @@ Pentru detalii finanțare și alte informații vă rugăm să ne contactați la 
                              ))}
                           </select>
                         </div>
-                     </div>
-
-                     <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Motor</label>
                           <input type="text" value={currentCar.engineSize} onChange={(e) => setCurrentCar({...currentCar, engineSize: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" placeholder="Ex: 2.0 TDI" />
                         </div>
+                     </div>
+
+                     <div className="grid grid-cols-1 gap-4">
                         <div>
                            <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Serie Șasiu (VIN)</label>
                            <input type="text" value={currentCar.vin} onChange={(e) => setCurrentCar({...currentCar, vin: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500 font-mono uppercase" placeholder="VF1..." />
