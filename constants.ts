@@ -53,6 +53,7 @@ export const BRANDS = [
   'Mazda',
   'Mercedes-Benz',
   'MG',
+  'Mini',
   'Mitsubishi',
   'Mustang',
   'Nissan',
