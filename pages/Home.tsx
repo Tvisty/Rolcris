@@ -96,7 +96,7 @@ const Home: React.FC = () => {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden bg-black">
+      <section className="relative min-h-screen md:h-screen flex items-center justify-center overflow-hidden bg-black pb-20 md:pb-0">
         {/* Background */}
         <div className={`absolute inset-0 z-0 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent z-10" />
@@ -114,7 +114,7 @@ const Home: React.FC = () => {
           />
         </div>
 
-        <div className="relative z-20 text-center max-w-4xl px-4 pt-28 md:pt-0 md:mt-[-60px]">
+        <div className="relative z-20 text-center max-w-4xl px-4 pt-32 pb-12 md:pt-0 md:mt-[-60px]">
           <h2 
             className="text-gold-500 font-black tracking-[0.2em] uppercase text-3xl md:text-5xl mb-6 animate-fade-in-up"
             style={{ textShadow: '0 4px 8px rgba(0,0,0,0.9), 0 0 30px rgba(197,160,89,0.4)' }}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Search, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +16,7 @@ const SearchWidget: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 relative z-30 -mt-10 lg:-mt-16">
+    <div className="w-full max-w-5xl mx-auto px-4 relative z-30 mt-12 md:-mt-10 lg:-mt-16">
       <div className="glass-panel p-4 md:p-6 rounded-2xl shadow-2xl bg-white/80 dark:bg-[#0a0a0a]/80 border border-gray-200 dark:border-white/10 backdrop-blur-xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           

@@ -30,6 +30,19 @@ const CarDetail: React.FC = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
+  // Preload adjacent images for instant swiping
+  useEffect(() => {
+    if (!car || car.images.length <= 1) return;
+    const nextIdx = (activeImage + 1) % car.images.length;
+    const prevIdx = (activeImage - 1 + car.images.length) % car.images.length;
+    
+    const imgNext = new Image();
+    imgNext.src = car.images[nextIdx];
+    
+    const imgPrev = new Image();
+    imgPrev.src = car.images[prevIdx];
+  }, [activeImage, car]);
+
   // Lock body scroll when gallery is open
   useEffect(() => {
     if (isGalleryOpen) {
@@ -189,6 +202,11 @@ const CarDetail: React.FC = () => {
           src={car.images[activeImage]} 
           alt={`Gallery ${activeImage + 1}`} 
           className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl transition-none duration-0"
+          style={{ 
+            transition: 'none !important',
+            animation: 'none !important',
+            transform: 'none !important'
+          }}
           referrerPolicy="no-referrer"
         />
         
@@ -251,6 +269,12 @@ const CarDetail: React.FC = () => {
               alt={car.model} 
               referrerPolicy="no-referrer"
               className={`w-full h-full object-cover transition-none duration-0 ${car.isSold ? 'grayscale-[50%]' : ''}`}
+              style={{ 
+                transition: 'none !important', 
+                animation: 'none !important',
+                transform: 'none !important',
+                opacity: 1
+              }}
             />
             
             {car.isSold ? (
