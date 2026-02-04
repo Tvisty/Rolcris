@@ -114,7 +114,7 @@ const Home: React.FC = () => {
           />
         </div>
 
-        <div className="relative z-20 text-center max-w-4xl px-4 mt-[-60px]">
+        <div className="relative z-20 text-center max-w-4xl px-4 pt-28 md:pt-0 md:mt-[-60px]">
           <h2 
             className="text-gold-500 font-black tracking-[0.2em] uppercase text-3xl md:text-5xl mb-6 animate-fade-in-up"
             style={{ textShadow: '0 4px 8px rgba(0,0,0,0.9), 0 0 30px rgba(197,160,89,0.4)' }}

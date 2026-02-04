@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle, AlertTriangle, Maximize2 } from 'lucide-react';
@@ -12,6 +12,11 @@ const CarDetail: React.FC = () => {
   const [activeImage, setActiveImage] = useState(0);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+
+  // Touch Handling Refs
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+  const isSwipingRef = useRef(false);
 
   // Booking Form State
   const [bookingDate, setBookingDate] = useState('');
@@ -63,6 +68,41 @@ const CarDetail: React.FC = () => {
     e?.stopPropagation();
     if (!car) return;
     setActiveImage((prev) => (prev - 1 + car.images.length) % car.images.length);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchEndX.current = 0;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    
+    const distance = touchStartX.current - touchEndX.current;
+    const isSwipe = Math.abs(distance) > 50;
+
+    if (isSwipe) {
+      isSwipingRef.current = true;
+      if (distance > 50) {
+        nextImage();
+      } else {
+        prevImage();
+      }
+      // Reset swipe flag after click event usually fires
+      setTimeout(() => {
+        isSwipingRef.current = false;
+      }, 200);
+    }
+  };
+
+  const handleMainImageClick = () => {
+    if (!isSwipingRef.current) {
+      setIsGalleryOpen(true);
+    }
   };
 
   const handleBookingSubmit = async (e: React.FormEvent) => {
@@ -141,6 +181,9 @@ const CarDetail: React.FC = () => {
       <div 
         className="relative w-full h-full flex flex-col items-center justify-center p-4 md:p-10"
         onClick={(e) => e.stopPropagation()} // Prevent close when clicking image area
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <img 
           src={car.images[activeImage]} 
@@ -197,8 +240,11 @@ const CarDetail: React.FC = () => {
         {/* Left Column: Visuals (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
           <div 
-            className="relative aspect-[16/10] bg-gray-100 dark:bg-[#121212] rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-white/5 cursor-pointer"
-            onClick={() => setIsGalleryOpen(true)}
+            className="relative aspect-[16/10] bg-gray-100 dark:bg-[#121212] rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-white/5 cursor-pointer touch-pan-y"
+            onClick={handleMainImageClick}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
             <img 
               src={car.images[activeImage]} 
