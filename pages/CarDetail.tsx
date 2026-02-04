@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronLeft, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle, AlertTriangle, Maximize2 } from 'lucide-react';
 import { useCars } from '../context/CarContext';
 
 const CarDetail: React.FC = () => {
@@ -10,6 +11,7 @@ const CarDetail: React.FC = () => {
   const car = cars.find(c => c.id === id);
   const [activeImage, setActiveImage] = useState(0);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   // Booking Form State
   const [bookingDate, setBookingDate] = useState('');
@@ -23,7 +25,45 @@ const CarDetail: React.FC = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
+  // Lock body scroll when gallery is open
+  useEffect(() => {
+    if (isGalleryOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isGalleryOpen]);
+
+  // Keyboard navigation for gallery
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isGalleryOpen) return;
+      
+      if (e.key === 'Escape') setIsGalleryOpen(false);
+      if (e.key === 'ArrowRight') nextImage(e as any);
+      if (e.key === 'ArrowLeft') prevImage(e as any);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isGalleryOpen, activeImage]);
+
   if (!car) return <div className="h-screen flex items-center justify-center text-gray-900 dark:text-white">Car not found</div>;
+
+  const nextImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!car) return;
+    setActiveImage((prev) => (prev + 1) % car.images.length);
+  };
+
+  const prevImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!car) return;
+    setActiveImage((prev) => (prev - 1 + car.images.length) % car.images.length);
+  };
 
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +106,78 @@ const CarDetail: React.FC = () => {
   const whatsappMessage = `Salut! Sunt interesat de ${car.make} ${car.model} (${car.year}) - ID: ${car.id}. Vă rog să îmi oferiți mai multe detalii.`;
   const whatsappLink = `https://wa.me/40740513713?text=${encodeURIComponent(whatsappMessage)}`;
 
+  const GalleryModal = () => (
+    <div 
+      className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center animate-fade-in"
+      onClick={() => setIsGalleryOpen(false)}
+    >
+      {/* Close Button */}
+      <button 
+        onClick={() => setIsGalleryOpen(false)}
+        className="absolute top-4 right-4 md:top-8 md:right-8 text-white/50 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all z-50"
+      >
+        <X size={32} />
+      </button>
+
+      {/* Navigation Buttons */}
+      {car.images.length > 1 && (
+        <>
+          <button 
+            onClick={prevImage}
+            className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-black/50 hover:bg-gold-500/80 p-3 md:p-4 rounded-full transition-all z-50"
+          >
+            <ChevronLeft size={24} md:size={32} />
+          </button>
+          <button 
+            onClick={nextImage}
+            className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-black/50 hover:bg-gold-500/80 p-3 md:p-4 rounded-full transition-all z-50"
+          >
+            <ChevronRight size={24} md:size={32} />
+          </button>
+        </>
+      )}
+
+      {/* Main Image */}
+      <div 
+        className="relative w-full h-full flex flex-col items-center justify-center p-4 md:p-10"
+        onClick={(e) => e.stopPropagation()} // Prevent close when clicking image area
+      >
+        <img 
+          src={car.images[activeImage]} 
+          alt={`Gallery ${activeImage + 1}`} 
+          className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl transition-none duration-0"
+          referrerPolicy="no-referrer"
+        />
+        
+        {/* Counter & Caption */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-3">
+           <span className="text-white font-bold font-display tracking-wider">
+             {car.make} {car.model}
+           </span>
+           <div className="w-px h-4 bg-white/30"></div>
+           <span className="text-gold-500 font-mono text-sm">
+             {activeImage + 1} / {car.images.length}
+           </span>
+        </div>
+
+        {/* Thumbnails (Desktop Only) */}
+        {car.images.length > 1 && (
+          <div className="absolute bottom-4 md:bottom-10 right-4 md:right-10 hidden lg:flex gap-2 max-w-md overflow-x-auto p-2 bg-black/40 rounded-xl backdrop-blur-sm border border-white/10 custom-scrollbar">
+             {car.images.map((img, idx) => (
+               <button
+                 key={idx}
+                 onClick={(e) => { e.stopPropagation(); setActiveImage(idx); }}
+                 className={`w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${idx === activeImage ? 'border-gold-500 opacity-100 scale-110' : 'border-transparent opacity-50 hover:opacity-100'}`}
+               >
+                 <img src={img} alt="thumb" className="w-full h-full object-cover" />
+               </button>
+             ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen pt-24 pb-12 px-4 max-w-7xl mx-auto">
       
@@ -84,13 +196,17 @@ const CarDetail: React.FC = () => {
         
         {/* Left Column: Visuals (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="relative aspect-[16/10] bg-gray-100 dark:bg-[#121212] rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-white/5">
+          <div 
+            className="relative aspect-[16/10] bg-gray-100 dark:bg-[#121212] rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-white/5 cursor-pointer"
+            onClick={() => setIsGalleryOpen(true)}
+          >
             <img 
               src={car.images[activeImage]} 
               alt={car.model} 
               referrerPolicy="no-referrer"
-              className={`w-full h-full object-cover animate-fade-in ${car.isSold ? 'grayscale-[50%]' : ''}`}
+              className={`w-full h-full object-cover transition-none duration-0 ${car.isSold ? 'grayscale-[50%]' : ''}`}
             />
+            
             {car.isSold ? (
                <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
                   <div className="border-4 border-red-600 text-red-600 px-8 py-3 text-4xl font-black uppercase tracking-widest -rotate-12 bg-white/10 backdrop-blur-sm shadow-2xl">
@@ -98,7 +214,7 @@ const CarDetail: React.FC = () => {
                   </div>
                </div>
             ) : car.isHotDeal && (
-              <div className="absolute top-6 left-6 bg-red-600 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
+              <div className="absolute top-6 left-6 bg-red-600 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 z-10">
                 <Zap size={16} fill="currentColor" /> HOT DEAL
               </div>
             )}
@@ -111,7 +227,7 @@ const CarDetail: React.FC = () => {
                 onClick={() => setActiveImage(idx)}
                 className={`aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-gold-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
               >
-                <img src={img} alt="thumbnail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                <img src={img} alt="thumbnail" className="w-full h-full object-cover transition-none duration-0" referrerPolicy="no-referrer" />
               </button>
             ))}
           </div>
@@ -314,6 +430,9 @@ const CarDetail: React.FC = () => {
           </div>
         </div>
       )}
+      
+      {/* Gallery Modal */}
+      {isGalleryOpen && createPortal(<GalleryModal />, document.body)}
     </div>
   );
 };

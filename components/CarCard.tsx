@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Fuel, Gauge, Calendar, ArrowRight, Zap, ImageOff, MapPin, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Fuel, Gauge, Calendar, ArrowRight, Zap, MapPin } from 'lucide-react';
 import { Car } from '../types';
 
 interface CarCardProps {
@@ -9,12 +9,21 @@ interface CarCardProps {
 }
 
 const CarCard: React.FC<CarCardProps> = ({ car }) => {
+  const navigate = useNavigate();
+
   const mainImage = car.images && car.images.length > 0 
     ? car.images[0] 
     : "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop";
 
+  const handleCardClick = () => {
+    navigate(`/inventory/${car.id}`);
+  };
+
   return (
-    <div className={`group relative bg-white dark:bg-[#121212] rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 dark:border-white/10 hover:border-gold-500/50 hover:shadow-xl dark:hover:shadow-[0_0_30px_rgba(197,160,89,0.15)] ${car.isSold ? 'opacity-80 grayscale-[30%]' : ''}`}>
+    <div 
+      className={`group relative bg-white dark:bg-[#121212] rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 dark:border-white/10 hover:border-gold-500/50 hover:shadow-xl dark:hover:shadow-[0_0_30px_rgba(197,160,89,0.15)] cursor-pointer ${car.isSold ? 'opacity-80 grayscale-[30%]' : ''}`}
+      onClick={handleCardClick}
+    >
       
       {/* SOLD Overlay */}
       {car.isSold && (
@@ -42,6 +51,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
       {/* Image Container */}
       <div className="relative h-64 overflow-hidden bg-gray-100 dark:bg-white/5">
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 opacity-60" />
+        
         <img
           src={mainImage}
           alt={`${car.make} ${car.model}`}
@@ -51,6 +61,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
             e.currentTarget.src = "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop";
           }}
         />
+
         <div className="absolute bottom-3 left-4 z-20 flex gap-2">
            <span className="text-white font-bold text-lg font-display tracking-wide drop-shadow-md">
              {car.make} {car.model}
@@ -85,13 +96,12 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
             </p>
           </div>
           
-          <Link 
-            to={`/inventory/${car.id}`}
-            className="flex items-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gold-500 hover:text-black text-gray-900 dark:text-white px-4 py-2 rounded-lg transition-all text-sm font-semibold border border-gray-200 dark:border-white/10"
+          <div 
+            className="flex items-center gap-2 bg-gray-100 dark:bg-white/5 group-hover:bg-gold-500 group-hover:text-black text-gray-900 dark:text-white px-4 py-2 rounded-lg transition-all text-sm font-semibold border border-gray-200 dark:border-white/10"
           >
             Vezi Detalii
             <ArrowRight size={16} />
-          </Link>
+          </div>
         </div>
       </div>
     </div>
