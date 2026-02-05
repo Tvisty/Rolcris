@@ -60,6 +60,18 @@ const Inventory: React.FC = () => {
     }
   }, [searchParams]);
 
+  // Handle body scroll locking when mobile filter is open
+  useEffect(() => {
+    if (isMobileFilterOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileFilterOpen]);
+
   // Filter Logic
   const filteredCars = useMemo(() => {
     if (!cars) return [];
@@ -122,7 +134,7 @@ const Inventory: React.FC = () => {
       selectedSeats: '',
       selectedFeatures: []
     });
-    setIsMobileFilterOpen(false);
+    // Don't close immediately to let user see it reset
   };
 
   const toggleFeatureFilter = (feature: string) => {
@@ -151,7 +163,7 @@ const Inventory: React.FC = () => {
         <div className="flex gap-4 w-full md:w-auto">
            <button 
              onClick={() => setIsMobileFilterOpen(true)}
-             className="md:hidden flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 font-semibold"
+             className="md:hidden flex-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 font-semibold shadow-sm"
            >
              <Filter size={18} /> Filtre
            </button>
@@ -160,7 +172,7 @@ const Inventory: React.FC = () => {
               <select 
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value as SortOption)}
-                className="w-full bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white px-4 py-3 rounded-lg appearance-none cursor-pointer focus:border-gold-500 outline-none"
+                className="w-full bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white px-4 py-3 rounded-lg appearance-none cursor-pointer focus:border-gold-500 outline-none shadow-sm"
               >
                 <option value="newest">Cele mai noi</option>
                 <option value="price_asc">Preț: Crescător</option>
@@ -174,17 +186,17 @@ const Inventory: React.FC = () => {
       <div className="flex gap-8">
         {/* Sidebar Filters */}
         <aside className={`
-          fixed inset-0 z-50 bg-white dark:bg-[#0a0a0a] p-6 overflow-y-auto transition-transform duration-300 md:relative md:translate-x-0 md:bg-transparent md:p-0 md:w-72 md:block md:z-0
+          fixed inset-0 z-[100] bg-white dark:bg-[#0a0a0a] p-6 overflow-y-auto transition-transform duration-300 md:relative md:translate-x-0 md:bg-transparent md:p-0 md:w-72 md:block md:z-0
           ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full'}
         `}>
-          <div className="flex justify-between items-center md:hidden mb-6">
+          <div className="flex justify-between items-center md:hidden mb-6 sticky top-0 bg-white dark:bg-[#0a0a0a] z-10 pb-4 border-b border-gray-100 dark:border-white/5">
             <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-white">Filtre</h2>
-            <button onClick={() => setIsMobileFilterOpen(false)} className="text-gray-500 dark:text-gray-400">
+            <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 bg-gray-100 dark:bg-white/10 rounded-full text-gray-900 dark:text-white hover:bg-red-500 hover:text-white transition-colors">
               <X size={24} />
             </button>
           </div>
 
-          <div className="glass-panel rounded-xl p-6 md:sticky md:top-24 bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10">
+          <div className="glass-panel rounded-xl p-6 md:sticky md:top-24 bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 pb-32 md:pb-6">
             
             {/* LOCATIE - Moved to top for visibility */}
             <FilterSection title="Locație">
@@ -397,6 +409,16 @@ const Inventory: React.FC = () => {
             >
               Resetează Filtrele
             </button>
+
+            {/* Mobile Only: See Results Button */}
+            <div className="md:hidden fixed bottom-6 left-6 right-6 z-50">
+               <button 
+                 onClick={() => setIsMobileFilterOpen(false)}
+                 className="w-full bg-gold-500 hover:bg-gold-600 text-black font-bold py-4 rounded-xl shadow-2xl flex items-center justify-center gap-2 transition-all transform active:scale-95"
+               >
+                 Vezi {filteredCars.length} Rezultate
+               </button>
+            </div>
 
           </div>
         </aside>
