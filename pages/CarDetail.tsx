@@ -30,19 +30,6 @@ const CarDetail: React.FC = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  // Preload adjacent images for instant swiping
-  useEffect(() => {
-    if (!car || car.images.length <= 1) return;
-    const nextIdx = (activeImage + 1) % car.images.length;
-    const prevIdx = (activeImage - 1 + car.images.length) % car.images.length;
-    
-    const imgNext = new Image();
-    imgNext.src = car.images[nextIdx];
-    
-    const imgPrev = new Image();
-    imgPrev.src = car.images[prevIdx];
-  }, [activeImage, car]);
-
   // Lock body scroll when gallery is open
   useEffect(() => {
     if (isGalleryOpen) {
@@ -61,8 +48,8 @@ const CarDetail: React.FC = () => {
       if (!isGalleryOpen) return;
       
       if (e.key === 'Escape') setIsGalleryOpen(false);
-      if (e.key === 'ArrowRight') nextImage(e as any);
-      if (e.key === 'ArrowLeft') prevImage(e as any);
+      if (e.key === 'ArrowRight') nextImage();
+      if (e.key === 'ArrowLeft') prevImage();
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -105,7 +92,6 @@ const CarDetail: React.FC = () => {
       } else {
         prevImage();
       }
-      // Reset swipe flag after click event usually fires
       setTimeout(() => {
         isSwipingRef.current = false;
       }, 200);
@@ -132,14 +118,13 @@ const CarDetail: React.FC = () => {
       date: `${bookingDate}T${bookingTime}`,
       status: 'pending',
       createdAt: Date.now(),
-      type: 'Test Drive' // Explicitly set type
+      type: 'Test Drive'
     });
 
     setBookingSuccess(true);
     setTimeout(() => {
       setBookingSuccess(false);
       setIsBookingOpen(false);
-      // Reset form
       setClientName('');
       setClientPhone('');
       setBookingDate('');
@@ -155,10 +140,10 @@ const CarDetail: React.FC = () => {
     </div>
   );
 
-  // Pre-filled WhatsApp Message
   const whatsappMessage = `Salut! Sunt interesat de ${car.make} ${car.model} (${car.year}) - ID: ${car.id}. Vă rog să îmi oferiți mai multe detalii.`;
   const whatsappLink = `https://wa.me/40740513713?text=${encodeURIComponent(whatsappMessage)}`;
 
+  // --- FULL SCREEN GALLERY MODAL ---
   const GalleryModal = () => (
     <div 
       className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center animate-fade-in"
@@ -172,63 +157,69 @@ const CarDetail: React.FC = () => {
         <X size={32} />
       </button>
 
-      {/* Navigation Buttons */}
+      {/* Navigation Buttons (Desktop) */}
       {car.images.length > 1 && (
         <>
           <button 
             onClick={prevImage}
-            className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-black/50 hover:bg-gold-500/80 p-3 md:p-4 rounded-full transition-all z-50"
+            className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-black/50 hover:bg-gold-500/80 p-4 rounded-full transition-all z-50 items-center justify-center"
           >
-            <ChevronLeft size={24} md:size={32} />
+            <ChevronLeft size={32} />
           </button>
           <button 
             onClick={nextImage}
-            className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-black/50 hover:bg-gold-500/80 p-3 md:p-4 rounded-full transition-all z-50"
+            className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-black/50 hover:bg-gold-500/80 p-4 rounded-full transition-all z-50 items-center justify-center"
           >
-            <ChevronRight size={24} md:size={32} />
+            <ChevronRight size={32} />
           </button>
         </>
       )}
 
-      {/* Main Image */}
+      {/* Stacked Images Container */}
       <div 
-        className="relative w-full h-full flex flex-col items-center justify-center p-4 md:p-10"
-        onClick={(e) => e.stopPropagation()} // Prevent close when clicking image area
+        className="relative w-full h-full"
+        onClick={(e) => e.stopPropagation()} 
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <img 
-          src={car.images[activeImage]} 
-          alt={`Gallery ${activeImage + 1}`} 
-          className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl transition-none duration-0"
-          style={{ 
-            transition: 'none !important',
-            animation: 'none !important',
-            transform: 'none !important'
-          }}
-          referrerPolicy="no-referrer"
-        />
+        {car.images.map((img, idx) => (
+            <img 
+              key={idx}
+              src={img} 
+              alt={`Gallery ${idx + 1}`} 
+              loading="eager"
+              className="absolute inset-0 m-auto max-w-[100vw] max-h-[100dvh] object-contain shadow-2xl select-none"
+              style={{ 
+                opacity: activeImage === idx ? 1 : 0,
+                zIndex: activeImage === idx ? 10 : 0,
+                pointerEvents: activeImage === idx ? 'auto' : 'none',
+                transition: 'none' // Force no transition
+              }}
+              draggable={false}
+              referrerPolicy="no-referrer"
+            />
+        ))}
         
-        {/* Counter & Caption */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-3">
-           <span className="text-white font-bold font-display tracking-wider">
+        {/* Counter */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-3 pointer-events-none z-20">
+           <span className="text-white font-bold font-display tracking-wider whitespace-nowrap text-sm md:text-base">
              {car.make} {car.model}
            </span>
            <div className="w-px h-4 bg-white/30"></div>
-           <span className="text-gold-500 font-mono text-sm">
+           <span className="text-gold-500 font-mono text-xs md:text-sm">
              {activeImage + 1} / {car.images.length}
            </span>
         </div>
 
-        {/* Thumbnails (Desktop Only) */}
+        {/* Thumbnails */}
         {car.images.length > 1 && (
-          <div className="absolute bottom-4 md:bottom-10 right-4 md:right-10 hidden lg:flex gap-2 max-w-md overflow-x-auto p-2 bg-black/40 rounded-xl backdrop-blur-sm border border-white/10 custom-scrollbar">
+          <div className="absolute bottom-4 md:bottom-10 right-4 md:right-10 hidden lg:flex gap-2 max-w-md overflow-x-auto p-2 bg-black/40 rounded-xl backdrop-blur-sm border border-white/10 custom-scrollbar z-20">
              {car.images.map((img, idx) => (
                <button
                  key={idx}
                  onClick={(e) => { e.stopPropagation(); setActiveImage(idx); }}
-                 className={`w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${idx === activeImage ? 'border-gold-500 opacity-100 scale-110' : 'border-transparent opacity-50 hover:opacity-100'}`}
+                 className={`w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden border-2 shrink-0 ${idx === activeImage ? 'border-gold-500 opacity-100 scale-110' : 'border-transparent opacity-50 hover:opacity-100'}`}
                >
                  <img src={img} alt="thumb" className="w-full h-full object-cover" />
                </button>
@@ -257,45 +248,78 @@ const CarDetail: React.FC = () => {
         
         {/* Left Column: Visuals (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
+          
+          {/* Main Preview Card with Gallery Features */}
           <div 
-            className="relative aspect-[16/10] bg-gray-100 dark:bg-[#121212] rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-white/5 cursor-pointer touch-pan-y"
+            className="group relative aspect-[16/10] bg-gray-100 dark:bg-[#121212] rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-white/5 cursor-pointer touch-pan-y"
             onClick={handleMainImageClick}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <img 
-              src={car.images[activeImage]} 
-              alt={car.model} 
-              referrerPolicy="no-referrer"
-              className={`w-full h-full object-cover transition-none duration-0 ${car.isSold ? 'grayscale-[50%]' : ''}`}
-              style={{ 
-                transition: 'none !important', 
-                animation: 'none !important',
-                transform: 'none !important',
-                opacity: 1
-              }}
-            />
+            {/* Stacked Images for Zero Flash */}
+            {car.images.map((img, idx) => (
+              <img 
+                key={idx}
+                src={img} 
+                alt={`${car.make} ${car.model} - ${idx + 1}`}
+                referrerPolicy="no-referrer"
+                loading="eager"
+                className={`absolute inset-0 w-full h-full object-cover select-none ${car.isSold ? 'grayscale-[50%]' : ''}`}
+                style={{ 
+                  opacity: activeImage === idx ? 1 : 0,
+                  zIndex: activeImage === idx ? 10 : 1,
+                  transition: 'none', // Critical: No fade transition
+                  pointerEvents: 'none' // Clicks pass to container
+                }}
+                draggable={false}
+              />
+            ))}
             
+            {/* Navigation Arrows on Preview (Appears on Hover) */}
+            {car.images.length > 1 && (
+              <>
+                <button 
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-gold-500 hover:text-black"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button 
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-gold-500 hover:text-black"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </>
+            )}
+
+            {/* Expand Icon */}
+            <div className="absolute top-4 right-4 bg-black/50 p-2 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+               <Maximize2 size={20} />
+            </div>
+
+            {/* Badges */}
             {car.isSold ? (
-               <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+               <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] z-20">
                   <div className="border-4 border-red-600 text-red-600 px-8 py-3 text-4xl font-black uppercase tracking-widest -rotate-12 bg-white/10 backdrop-blur-sm shadow-2xl">
                     VÂNDUT
                   </div>
                </div>
             ) : car.isHotDeal && (
-              <div className="absolute top-6 left-6 bg-red-600 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 z-10">
+              <div className="absolute top-6 left-6 bg-red-600 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 z-20">
                 <Zap size={16} fill="currentColor" /> HOT DEAL
               </div>
             )}
           </div>
           
+          {/* Thumbnails Grid */}
           <div className="grid grid-cols-4 gap-4">
             {car.images.map((img, idx) => (
               <button 
                 key={idx}
                 onClick={() => setActiveImage(idx)}
-                className={`aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-gold-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                className={`aspect-[16/10] rounded-lg overflow-hidden border-2 ${activeImage === idx ? 'border-gold-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
               >
                 <img src={img} alt="thumbnail" className="w-full h-full object-cover transition-none duration-0" referrerPolicy="no-referrer" />
               </button>
