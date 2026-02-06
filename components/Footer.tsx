@@ -20,25 +20,35 @@ const Footer: React.FC = () => {
           
           {/* Brand Info */}
           <div>
-            <div className="mb-6 relative inline-block">
-              {seasonalTheme === 'valentine' && (
-                 <Heart className="absolute -top-3 -right-3 text-pink-500 fill-pink-500/20 animate-pulse" size={20} />
-              )}
-              {!logoError ? (
-                <img 
-                  src="https://i.imgur.com/e7JOUNo.png" 
-                  alt="RolCris Autoparc" 
-                  referrerPolicy="no-referrer"
-                  className="h-20 md:h-24 w-auto object-contain mb-4"
-                  onError={() => setLogoError(true)}
-                />
-              ) : (
-                <div className="flex flex-col mb-6">
-                  <span className="text-2xl font-display font-bold text-gray-900 dark:text-white tracking-wide">ROLCRIS</span>
-                  <span className={`text-sm font-semibold tracking-[0.2em] ${seasonalTheme === 'valentine' ? 'text-pink-500' : 'text-gold-500'}`}>AUTOPARC</span>
+            <div className="mb-6 flex items-center gap-4">
+                <div className="relative">
+                  {seasonalTheme === 'valentine' && (
+                     <Heart className="absolute -top-3 -right-3 text-pink-500 fill-pink-500/20 animate-pulse" size={20} />
+                  )}
+                  {!logoError ? (
+                    <img 
+                      src="https://i.imgur.com/e7JOUNo.png" 
+                      alt="RolCris Autoparc" 
+                      referrerPolicy="no-referrer"
+                      className="h-20 md:h-24 w-auto object-contain mb-4"
+                      onError={() => setLogoError(true)}
+                    />
+                  ) : (
+                    <div className="flex flex-col mb-6">
+                      <span className="text-2xl font-display font-bold text-gray-900 dark:text-white tracking-wide">ROLCRIS</span>
+                      <span className={`text-sm font-semibold tracking-[0.2em] ${seasonalTheme === 'valentine' ? 'text-pink-500' : 'text-gold-500'}`}>AUTOPARC</span>
+                    </div>
+                  )}
                 </div>
-              )}
+                
+                {/* Partner Badge */}
+                <img 
+                  src="https://i.imgur.com/cOPZm14.png" 
+                  alt="Partner Badge" 
+                  className="h-16 w-auto object-contain mb-4"
+                />
             </div>
+
             <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6">
               Lider în vânzări auto premium și de lux. Oferim transparență, garanție și servicii de finanțare personalizate pentru mașina visurilor tale.
             </p>

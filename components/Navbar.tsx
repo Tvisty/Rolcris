@@ -11,6 +11,12 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const { theme, toggleTheme, seasonalTheme } = useTheme();
 
+  // Check if we are on the homepage
+  const isHome = location.pathname === '/';
+  
+  // Navbar should be solid if we are NOT on home, OR if we are scrolled down
+  const showSolidNav = !isHome || isScrolled;
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -35,10 +41,10 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 dark:bg-black/90 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 py-2 shadow-sm' : 'bg-transparent py-4'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${showSolidNav ? 'bg-white/95 dark:bg-black/95 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 py-2 shadow-sm' : 'bg-transparent py-4'}`}>
       <div className="max-w-7xl mx-auto px-4 md:px-8 flex justify-between items-center">
         
-        {/* Logo */}
+        {/* Logo Section */}
         <Link to="/" className="flex items-center gap-2 group relative">
           
           {/* Seasonal Decoration: Valentine */}
@@ -56,7 +62,7 @@ const Navbar: React.FC = () => {
                 src="https://i.imgur.com/e7JOUNo.png" 
                 alt="RolCris Autoparc" 
                 referrerPolicy="no-referrer"
-                className="relative h-16 md:h-24 w-auto object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]"
+                className={`relative h-12 md:h-24 w-auto object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] ${theme === 'light' && showSolidNav ? '' : 'brightness-110'}`}
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                   setLogoError(true);
@@ -69,7 +75,7 @@ const Navbar: React.FC = () => {
                 <Car className="text-black -rotate-45 group-hover:rotate-0 transition-transform duration-500" size={24} />
               </div>
               <div className="flex flex-col">
-                <span className={`text-xl font-display font-bold tracking-wide leading-none ${isScrolled ? 'text-gray-900 dark:text-white' : 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'}`}>ROLCRIS</span>
+                <span className={`text-xl font-display font-bold tracking-wide leading-none ${showSolidNav ? 'text-gray-900 dark:text-white' : 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'}`}>ROLCRIS</span>
                 <span className={`text-xs font-semibold tracking-[0.2em] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] ${seasonalTheme === 'valentine' ? 'text-pink-400' : 'text-gold-500'}`}>AUTOPARC</span>
               </div>
             </>
@@ -85,10 +91,10 @@ const Navbar: React.FC = () => {
               className={`text-base font-black tracking-wide transition-all duration-300 relative group/link 
                 ${isActive(link.path)
                   ? (seasonalTheme === 'valentine' ? 'text-pink-500' : 'text-gold-500')
-                  : (isScrolled ? 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white' : 'text-white hover:text-gold-400')
+                  : (showSolidNav ? 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white' : 'text-white hover:text-gold-400')
                 }`}
               style={{
-                textShadow: isScrolled ? 'none' : '0 2px 4px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)'
+                textShadow: showSolidNav ? 'none' : '0 2px 4px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8)'
               }}
             >
               {link.name}
@@ -102,9 +108,9 @@ const Navbar: React.FC = () => {
            {/* Theme Toggle */}
            <button 
              onClick={toggleTheme}
-             className={`p-2 rounded-full transition-colors ${isScrolled ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10' : 'text-white hover:bg-white/10'}`}
+             className={`p-2 rounded-full transition-colors ${showSolidNav ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10' : 'text-white hover:bg-white/10'}`}
              style={{
-               filter: isScrolled ? 'none' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.9))'
+               filter: showSolidNav ? 'none' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.9))'
              }}
            >
              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
@@ -115,18 +121,18 @@ const Navbar: React.FC = () => {
         <div className="md:hidden flex items-center gap-4">
           <button 
              onClick={toggleTheme}
-             className={`p-2 rounded-full transition-colors ${isScrolled ? 'text-gray-600 dark:text-gray-300' : 'text-white'}`}
+             className={`p-2 rounded-full transition-colors ${showSolidNav ? 'text-gray-600 dark:text-gray-300' : 'text-white'}`}
              style={{
-               filter: isScrolled ? 'none' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.9))'
+               filter: showSolidNav ? 'none' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.9))'
              }}
            >
              {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
            </button>
 
           <button 
-            className={`${isScrolled ? 'text-gray-900 dark:text-white' : 'text-white'} hover:text-gold-500 transition-colors`}
+            className={`${showSolidNav ? 'text-gray-900 dark:text-white' : 'text-white'} hover:text-gold-500 transition-colors`}
             style={{
-               filter: isScrolled ? 'none' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.9))'
+               filter: showSolidNav ? 'none' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.9))'
              }}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >

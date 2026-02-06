@@ -133,6 +133,16 @@ const Home: React.FC = () => {
             </Link>
           </div>
         </div>
+
+        {/* Partner Badge - Top Left Placement (Updated) */}
+        <div className="absolute top-20 left-2 md:top-32 md:left-12 z-20 animate-fade-in-left delay-400">
+           <img 
+             src="https://i.imgur.com/cOPZm14.png" 
+             alt="Official Partner" 
+             className="w-32 md:w-64 h-auto object-contain transform -rotate-12 hover:rotate-0 transition-all duration-500 drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] opacity-90 hover:opacity-100 hover:scale-110"
+           />
+        </div>
+
       </section>
 
       {/* Search Widget Overlay */}
