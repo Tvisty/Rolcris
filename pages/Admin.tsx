@@ -369,7 +369,11 @@ const Admin: React.FC = () => {
                         const fileName = `car-images/restored/${car.id}_${Math.random().toString(36).substr(2, 9)}.webp`;
                         const storageRef = ref(storage, fileName);
                         
-                        await uploadString(storageRef, webpBase64, 'data_url');
+                        // ADDED METADATA FOR CACHING
+                        await uploadString(storageRef, webpBase64, 'data_url', {
+                          cacheControl: 'public, max-age=31536000, immutable',
+                          contentType: 'image/webp'
+                        });
                         const url = await getDownloadURL(storageRef);
                         
                         newImages.push(url);
@@ -609,7 +613,11 @@ Oferim servicii complete prin biroul nostru de intermedieri:
             if (storage) { 
                 try {
                     const storageRef = ref(storage, `car-images/${Date.now()}_${Math.random().toString(36).substring(7)}.webp`);
-                    const uploadTask = uploadString(storageRef, compressedBase64, 'data_url');
+                    // ADDED METADATA FOR CACHING
+                    const uploadTask = uploadString(storageRef, compressedBase64, 'data_url', {
+                      cacheControl: 'public, max-age=31536000, immutable',
+                      contentType: 'image/webp'
+                    });
                     await Promise.race([ uploadTask, new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 15000)) ]);
                     finalUrl = await getDownloadURL(storageRef);
                 } catch (err) { finalUrl = compressedBase64; }
