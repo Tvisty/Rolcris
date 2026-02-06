@@ -415,7 +415,27 @@ const Admin: React.FC = () => {
       engineSize: '',
       vin: '',
       images: [],
-      description: `Oferim factură și garanție de 12 luni pe motor și cutia de viteze.\nKilometrajul autoturismului garantat și verificabil.`,
+      description: `✅ Garanție și Încredere
+🛡️ Garanție 12 luni inclusă pentru motor și cutia de viteze.
+🧾 Factură fiscală pentru fiecare achiziție.
+🛣️ Kilometraj garantat și verificabil (fără surprize neplăcute!).
+
+💳 Finanțare Flexibilă (Rate fixe)
+🆓 0% Avans – Pleci cu mașina doar cu buletinul!
+👥 Persoane Fizice: Salariați sau pensionari (18-75 ani).
+⏱️ Perioadă flexibilă: Creditare între 12 și 60 de luni.
+🌍 Contracte din străinătate: Acceptăm venituri externe.
+📉 Istoric Negativ? Avem soluții de credit online și pentru tine.
+💼 Persoane Juridice: Oferte dedicate de Leasing Auto.
+
+🔄 Servicii Buy-Back
+🚗 Mașina ta poate fi avansul! Evaluăm corect autoturismul tău actual pentru a-l folosi ca plată pentru cel nou.
+
+📋 Birocrație? Ne ocupăm noi!
+Oferim servicii complete prin biroul nostru de intermedieri:
+📑 Dosar complet pentru înmatriculare și acte auto.
+🏎️ Programare și efectuare omologare RAR.
+🔴 Obținere numere roșii (autorizație provizorie).`,
       features: [],
       seats: 5,
       doors: 5,

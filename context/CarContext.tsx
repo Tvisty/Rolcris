@@ -1,8 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Car, Booking, ContactMessage, Auction, Bid } from '../types';
-import { db, auth, messaging, getToken, onMessage } from '../firebase';
+import { db, auth, messaging, getToken, onMessage, storage } from '../firebase';
 import { collection, onSnapshot, addDoc, deleteDoc, updateDoc, doc, query, orderBy, where } from 'firebase/firestore';
+import { ref, deleteObject } from 'firebase/storage';
 import { onAuthStateChanged } from 'firebase/auth';
 
 interface CarContextType {
@@ -318,7 +319,34 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   };
 
   const deleteCar = async (id: string) => {
+    // 1. Find the car to get its images
+    const carToDelete = cars.find(c => c.id === id);
+
+    // 2. Delete images from Storage if they exist and we are connected
+    if (carToDelete && carToDelete.images && storage) {
+      const deletePromises = carToDelete.images.map(async (imgUrl) => {
+        // Only attempt to delete if it looks like a Firebase Storage URL
+        if (imgUrl.includes('firebasestorage.googleapis.com')) {
+          try {
+            // ref() accepts a full URL for the file
+            const imageRef = ref(storage, imgUrl);
+            await deleteObject(imageRef);
+            console.log(`Successfully deleted image: ${imgUrl}`);
+          } catch (error) {
+            console.warn(`Failed to delete image ${imgUrl}:`, error);
+            // Proceed even if image deletion fails
+          }
+        }
+      });
+
+      // Wait for image deletions (or failures) before deleting the doc
+      await Promise.all(deletePromises);
+    }
+
+    // 3. Optimistic UI update
     setCars(prev => prev.filter(c => c.id !== id));
+
+    // 4. Delete Firestore Document
     if (db && isConnected) {
       try {
         await deleteDoc(doc(db, "cars", id));

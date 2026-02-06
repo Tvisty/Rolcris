@@ -30,6 +30,16 @@ const CarDetail: React.FC = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
+  // Explicit Browser Cache Preload
+  useEffect(() => {
+    if (car?.images) {
+      car.images.forEach((src) => {
+        const img = new Image();
+        img.src = src;
+      });
+    }
+  }, [car]);
+
   // Lock body scroll when gallery is open
   useEffect(() => {
     if (isGalleryOpen) {
@@ -189,12 +199,13 @@ const CarDetail: React.FC = () => {
               src={img} 
               alt={`Gallery ${idx + 1}`} 
               loading="eager"
-              className="absolute inset-0 m-auto max-w-[100vw] max-h-[100dvh] object-contain shadow-2xl select-none"
+              className="absolute inset-0 m-auto max-w-[100vw] max-h-[100dvh] object-contain select-none"
               style={{ 
                 opacity: activeImage === idx ? 1 : 0,
-                zIndex: activeImage === idx ? 10 : 0,
+                zIndex: activeImage === idx ? 20 : 10,
                 pointerEvents: activeImage === idx ? 'auto' : 'none',
-                transition: 'none' // Force no transition
+                transition: 'none',
+                willChange: 'opacity'
               }}
               draggable={false}
               referrerPolicy="no-referrer"
@@ -202,7 +213,7 @@ const CarDetail: React.FC = () => {
         ))}
         
         {/* Counter */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-3 pointer-events-none z-20">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-3 pointer-events-none z-30">
            <span className="text-white font-bold font-display tracking-wider whitespace-nowrap text-sm md:text-base">
              {car.make} {car.model}
            </span>
@@ -214,12 +225,12 @@ const CarDetail: React.FC = () => {
 
         {/* Thumbnails */}
         {car.images.length > 1 && (
-          <div className="absolute bottom-4 md:bottom-10 right-4 md:right-10 hidden lg:flex gap-2 max-w-md overflow-x-auto p-2 bg-black/40 rounded-xl backdrop-blur-sm border border-white/10 custom-scrollbar z-20">
+          <div className="absolute bottom-4 md:bottom-10 right-4 md:right-10 hidden lg:flex gap-2 max-w-md overflow-x-auto p-2 bg-black/40 rounded-xl backdrop-blur-sm border border-white/10 custom-scrollbar z-30">
              {car.images.map((img, idx) => (
                <button
                  key={idx}
                  onClick={(e) => { e.stopPropagation(); setActiveImage(idx); }}
-                 className={`w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden border-2 shrink-0 ${idx === activeImage ? 'border-gold-500 opacity-100 scale-110' : 'border-transparent opacity-50 hover:opacity-100'}`}
+                 className={`w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden border-2 shrink-0 transition-all ${idx === activeImage ? 'border-gold-500 brightness-100 scale-110' : 'border-transparent brightness-50 hover:brightness-100'}`}
                >
                  <img src={img} alt="thumb" className="w-full h-full object-cover" />
                </button>
@@ -249,7 +260,7 @@ const CarDetail: React.FC = () => {
         {/* Left Column: Visuals (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
           
-          {/* Main Preview Card with Gallery Features */}
+          {/* Main Preview Card - FULL COVER (No Stripes) */}
           <div 
             className="group relative aspect-[16/10] bg-gray-100 dark:bg-[#121212] rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-white/5 cursor-pointer touch-pan-y"
             onClick={handleMainImageClick}
@@ -265,12 +276,14 @@ const CarDetail: React.FC = () => {
                 alt={`${car.make} ${car.model} - ${idx + 1}`}
                 referrerPolicy="no-referrer"
                 loading="eager"
+                // CHANGED: object-cover to remove black stripes and fill container
                 className={`absolute inset-0 w-full h-full object-cover select-none ${car.isSold ? 'grayscale-[50%]' : ''}`}
                 style={{ 
                   opacity: activeImage === idx ? 1 : 0,
-                  zIndex: activeImage === idx ? 10 : 1,
+                  zIndex: activeImage === idx ? 20 : 10,
                   transition: 'none', // Critical: No fade transition
-                  pointerEvents: 'none' // Clicks pass to container
+                  pointerEvents: 'none', // Clicks pass to container
+                  willChange: 'opacity'
                 }}
                 draggable={false}
               />
@@ -281,13 +294,13 @@ const CarDetail: React.FC = () => {
               <>
                 <button 
                   onClick={prevImage}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-gold-500 hover:text-black"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-30 hover:bg-gold-500 hover:text-black"
                 >
                   <ChevronLeft size={24} />
                 </button>
                 <button 
                   onClick={nextImage}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-gold-500 hover:text-black"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-30 hover:bg-gold-500 hover:text-black"
                 >
                   <ChevronRight size={24} />
                 </button>
@@ -295,19 +308,19 @@ const CarDetail: React.FC = () => {
             )}
 
             {/* Expand Icon */}
-            <div className="absolute top-4 right-4 bg-black/50 p-2 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+            <div className="absolute top-4 right-4 bg-black/50 p-2 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity z-30 pointer-events-none">
                <Maximize2 size={20} />
             </div>
 
             {/* Badges */}
             {car.isSold ? (
-               <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] z-20">
+               <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] z-30">
                   <div className="border-4 border-red-600 text-red-600 px-8 py-3 text-4xl font-black uppercase tracking-widest -rotate-12 bg-white/10 backdrop-blur-sm shadow-2xl">
                     VÂNDUT
                   </div>
                </div>
             ) : car.isHotDeal && (
-              <div className="absolute top-6 left-6 bg-red-600 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 z-20">
+              <div className="absolute top-6 left-6 bg-red-600 text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-2 z-30">
                 <Zap size={16} fill="currentColor" /> HOT DEAL
               </div>
             )}
@@ -319,9 +332,9 @@ const CarDetail: React.FC = () => {
               <button 
                 key={idx}
                 onClick={() => setActiveImage(idx)}
-                className={`aspect-[16/10] rounded-lg overflow-hidden border-2 ${activeImage === idx ? 'border-gold-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                className={`aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-gold-500 brightness-100 ring-2 ring-gold-500/20' : 'border-transparent brightness-50 hover:brightness-100'}`}
               >
-                <img src={img} alt="thumbnail" className="w-full h-full object-cover transition-none duration-0" referrerPolicy="no-referrer" />
+                <img src={img} alt="thumbnail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               </button>
             ))}
           </div>
