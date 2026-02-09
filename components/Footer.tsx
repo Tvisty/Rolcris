@@ -14,7 +14,7 @@ const Footer: React.FC = () => {
   ];
 
   return (
-    <footer className={`bg-white dark:bg-[#050505] border-t pt-16 pb-24 transition-colors duration-300 ${seasonalTheme === 'valentine' ? 'border-pink-500/20' : 'border-gray-200 dark:border-white/5'}`}>
+    <footer className={`bg-white dark:bg-[#050505] border-t pt-16 pb-12 transition-colors duration-300 ${seasonalTheme === 'valentine' ? 'border-pink-500/20' : 'border-gray-200 dark:border-white/5'}`}>
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-12">
           
@@ -126,6 +126,21 @@ const Footer: React.FC = () => {
 
         </div>
         
+        {/* ANPC & ODR Banners */}
+        <div className="flex flex-col items-center gap-4 mb-8 border-t border-gray-200 dark:border-white/5 pt-8">
+           <div className="flex flex-wrap justify-center gap-6">
+              <a href="https://anpc.ro/" target="_blank" rel="noreferrer" className="hover:scale-105 transition-transform duration-300">
+                 <img src="https://i.imgur.com/7OLGTtV.png" alt="ANPC" className="h-10 md:h-12 w-auto object-contain" />
+              </a>
+              <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noreferrer" className="hover:scale-105 transition-transform duration-300">
+                 <img src="https://i.imgur.com/iBPA8jN.png" alt="ANPC SAL" className="h-10 md:h-12 w-auto object-contain" />
+              </a>
+              <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noreferrer" className="hover:scale-105 transition-transform duration-300">
+                 <img src="https://i.imgur.com/h9PQuSA.png" alt="Solutionarea Online a Litigiilor" className="h-10 md:h-12 w-auto object-contain" />
+              </a>
+           </div>
+        </div>
+
         <div className="border-t border-gray-200 dark:border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-500 text-xs">
             <Link to="/admin" className="hover:text-gray-400 transition-colors cursor-default">©</Link> 2024 Autoparc RolCris. Toate drepturile rezervate.

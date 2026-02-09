@@ -25,8 +25,6 @@ const Inventory: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   
-  // Initialize state with URL params if present, otherwise defaults
-  // Extended default ranges to prevent accidentally hiding valid cars
   const [filters, setFilters] = useState({
     priceRange: [0, Number(searchParams.get('maxPrice')) || 1000000],
     selectedBrand: searchParams.get('make') || '',
@@ -35,7 +33,6 @@ const Inventory: React.FC = () => {
     selectedFuel: '',
     selectedTransmission: '',
     selectedLocation: '',
-    // CHANGED: Default min year to 0 to catch cars with unspecified years
     yearRange: [Number(searchParams.get('minYear')) || 0, new Date().getFullYear() + 1], 
     maxMileage: '',
     selectedSeats: '',
@@ -44,7 +41,6 @@ const Inventory: React.FC = () => {
   
   const [sortOption, setSortOption] = useState<SortOption>('newest');
 
-  // Update filters if URL params change
   useEffect(() => {
     const make = searchParams.get('make');
     const minYear = searchParams.get('minYear');
@@ -60,7 +56,6 @@ const Inventory: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Handle body scroll locking when mobile filter is open
   useEffect(() => {
     if (isMobileFilterOpen) {
       document.body.style.overflow = 'hidden';
@@ -72,36 +67,24 @@ const Inventory: React.FC = () => {
     };
   }, [isMobileFilterOpen]);
 
-  // Filter Logic
   const filteredCars = useMemo(() => {
     if (!cars) return [];
     
     let result = cars.filter(car => {
-      // Type safety checks: Ensure car properties exist before comparison
       const carPrice = Number(car.price) || 0;
       const carYear = Number(car.year) || 0;
 
-      // Brand
       if (filters.selectedBrand && car.make !== filters.selectedBrand) return false;
-      // Model (Partial text match)
       if (filters.selectedModel && !car.model.toLowerCase().includes(filters.selectedModel.toLowerCase())) return false;
-      // Body Type
       if (filters.selectedBody && car.bodyType !== filters.selectedBody) return false;
-      // Fuel
       if (filters.selectedFuel && car.fuel !== filters.selectedFuel) return false;
-      // Transmission
       if (filters.selectedTransmission && car.transmission !== filters.selectedTransmission) return false;
-      // Location
       if (filters.selectedLocation && car.location !== filters.selectedLocation) return false;
-      // Year Range
       if (carYear < filters.yearRange[0] || carYear > filters.yearRange[1]) return false;
-      // Price Range
       if (carPrice < filters.priceRange[0] || carPrice > filters.priceRange[1]) return false;
-      // Max Mileage
       if (filters.maxMileage && car.mileage > Number(filters.maxMileage)) return false;
-      // Seats
       if (filters.selectedSeats && car.seats !== Number(filters.selectedSeats)) return false;
-      // Features (Must have all selected)
+      
       if (filters.selectedFeatures.length > 0) {
         const hasAllSelectedFeatures = filters.selectedFeatures.every(feature => 
             car.features && car.features.includes(feature)
@@ -113,9 +96,22 @@ const Inventory: React.FC = () => {
     });
 
     // Sorting
-    if (sortOption === 'price_asc') result.sort((a, b) => a.price - b.price);
-    if (sortOption === 'price_desc') result.sort((a, b) => b.price - a.price);
-    if (sortOption === 'newest') result.sort((a, b) => b.year - a.year);
+    if (sortOption === 'price_asc') result.sort((a, b) => (Number(a.price)||0) - (Number(b.price)||0));
+    if (sortOption === 'price_desc') result.sort((a, b) => (Number(b.price)||0) - (Number(a.price)||0));
+    
+    // UPDATED: Strict createdAt sorting
+    if (sortOption === 'newest') {
+      result.sort((a, b) => {
+        const dateA = a.createdAt || 0;
+        const dateB = b.createdAt || 0;
+        
+        // If timestamps differ, use them (Newest timestamp first)
+        if (dateA !== dateB) return dateB - dateA;
+        
+        // Fallback to model year if timestamps are identical or missing
+        return (Number(b.year)||0) - (Number(a.year)||0);
+      });
+    }
 
     return result;
   }, [filters, sortOption, cars]);
@@ -134,7 +130,6 @@ const Inventory: React.FC = () => {
       selectedSeats: '',
       selectedFeatures: []
     });
-    // Don't close immediately to let user see it reset
   };
 
   const toggleFeatureFilter = (feature: string) => {
@@ -150,8 +145,6 @@ const Inventory: React.FC = () => {
 
   return (
     <div className="min-h-screen pt-24 pb-12 px-4 max-w-7xl mx-auto">
-      
-      {/* Header & Mobile Filter Toggle */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
            <h1 className="text-4xl font-display font-bold text-gray-900 dark:text-white mb-2">Stoc Disponibil</h1>
@@ -174,7 +167,7 @@ const Inventory: React.FC = () => {
                 onChange={(e) => setSortOption(e.target.value as SortOption)}
                 className="w-full bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white px-4 py-3 rounded-lg appearance-none cursor-pointer focus:border-gold-500 outline-none shadow-sm"
               >
-                <option value="newest">Cele mai noi</option>
+                <option value="newest">Cele mai noi (Adăugate)</option>
                 <option value="price_asc">Preț: Crescător</option>
                 <option value="price_desc">Preț: Descrescător</option>
               </select>
@@ -184,7 +177,6 @@ const Inventory: React.FC = () => {
       </div>
 
       <div className="flex gap-8">
-        {/* Sidebar Filters */}
         <aside className={`
           fixed inset-0 z-[100] bg-white dark:bg-[#0a0a0a] p-6 overflow-y-auto transition-transform duration-300 md:relative md:translate-x-0 md:bg-transparent md:p-0 md:w-72 md:block md:z-0
           ${isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -198,7 +190,6 @@ const Inventory: React.FC = () => {
 
           <div className="glass-panel rounded-xl p-6 md:sticky md:top-24 bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 pb-32 md:pb-6">
             
-            {/* LOCATIE - Moved to top for visibility */}
             <FilterSection title="Locație">
                 <div className="space-y-2">
                     {LOCATIONS.map(loc => (
@@ -221,7 +212,6 @@ const Inventory: React.FC = () => {
                 </div>
             </FilterSection>
 
-            {/* PRICE */}
             <FilterSection title="Preț (€)">
               <div className="flex gap-2 items-center">
                  <input 
@@ -242,7 +232,6 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            {/* MARCA */}
             <FilterSection title="Marca">
               <select 
                 value={filters.selectedBrand}
@@ -254,7 +243,6 @@ const Inventory: React.FC = () => {
               </select>
             </FilterSection>
 
-            {/* MODEL */}
             <FilterSection title="Model">
               <div className="relative">
                  <input 
@@ -268,7 +256,6 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            {/* AN */}
             <FilterSection title="An Fabricație">
               <div className="flex gap-2 items-center">
                  <input 
@@ -289,7 +276,6 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            {/* KILOMETRAJ */}
             <FilterSection title="Kilometraj Max">
               <div className="relative">
                  <input 
@@ -303,7 +289,6 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            {/* CUTIE DE VITEZE */}
             <FilterSection title="Cutie de Viteze">
               <div className="flex flex-wrap gap-2">
                 {['Manuală', 'Automată'].map(trans => (
@@ -322,7 +307,6 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            {/* CAROSERIE */}
             <FilterSection title="Caroserie">
               <div className="space-y-2">
                 {BODY_TYPES.map(type => (
@@ -343,7 +327,6 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            {/* COMBUSTIBIL */}
             <FilterSection title="Combustibil">
               <div className="flex flex-wrap gap-2">
                 {FUELS.map(fuel => (
@@ -362,7 +345,6 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            {/* LOCURI (Updated) */}
             <FilterSection title="Locuri">
               <div className="flex flex-wrap gap-2">
                 {[4, 5, 7, 9].map(seats => (
@@ -381,7 +363,6 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            {/* FEATURES (New) */}
             <FilterSection title="Dotări">
                 <div className="max-h-60 overflow-y-auto custom-scrollbar pr-2 space-y-2">
                     {CAR_FEATURES.map(feature => (
@@ -410,7 +391,6 @@ const Inventory: React.FC = () => {
               Resetează Filtrele
             </button>
 
-            {/* Mobile Only: See Results Button */}
             <div className="md:hidden fixed bottom-6 left-6 right-6 z-50">
                <button 
                  onClick={() => setIsMobileFilterOpen(false)}
@@ -423,7 +403,6 @@ const Inventory: React.FC = () => {
           </div>
         </aside>
 
-        {/* Car Grid */}
         <div className="flex-1">
            {isLoading ? (
              <div className="flex flex-col items-center justify-center py-20 min-h-[400px]">

@@ -23,6 +23,7 @@ export interface Car {
   pollutionStandard?: string; // e.g. Euro 6
   traction?: string; // e.g. 4x4
   color?: string; // e.g. Negru
+  createdAt?: number; // Timestamp for sorting by newest upload
 }
 
 export interface Booking {

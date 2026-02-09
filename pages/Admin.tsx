@@ -505,7 +505,8 @@ Oferim servicii complete prin biroul nostru de intermedieri:
       ...currentCar,
       images: finalImages,
       features: currentCar.features || [],
-      location: currentCar.location || 'Satu Mare'
+      location: currentCar.location || 'Satu Mare',
+      createdAt: currentCar.createdAt || Date.now() // Set createdAt if missing (New or Legacy edit)
     } as Car;
 
     const exists = cars.find(c => c.id === cleanedCar.id);
@@ -738,10 +739,12 @@ Oferim servicii complete prin biroul nostru de intermedieri:
     setCurrentCar({ ...currentCar, images: newImages });
   };
 
-  const filteredInventory = cars.filter(c => 
-    c.make.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    c.model.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredInventory = cars
+    .filter(c => 
+      c.make.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      c.model.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
   const SetupGuide = () => (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in">
@@ -809,6 +812,7 @@ Oferim servicii complete prin biroul nostru de intermedieri:
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] pt-24 pb-12">
+      {/* ... (Previous code remains the same) ... */}
       {showSetup && <SetupGuide />}
       
       {/* GLOBAL MODAL */}
@@ -844,6 +848,7 @@ Oferim servicii complete prin biroul nostru de intermedieri:
       )}
 
       <div className="max-w-7xl mx-auto px-4">
+        {/* ... (Header and Stats sections remain the same) ... */}
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
           <div>
@@ -952,7 +957,12 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                       <span className="flex items-center gap-1"><Gauge size={14} className="text-gold-500"/> {car.mileage?.toLocaleString()} km</span>
                       <span className="flex items-center gap-1"><Fuel size={14} className="text-gold-500"/> {car.fuel}</span>
                     </div>
-                    <div className="text-2xl font-display font-bold text-gray-900 dark:text-white">{car.price?.toLocaleString()} €</div>
+                    <div className="flex justify-between items-end">
+                       <div className="text-2xl font-display font-bold text-gray-900 dark:text-white">{car.price?.toLocaleString()} €</div>
+                       <div className="text-xs text-gray-400 mt-1">
+                          Adăugat: {car.createdAt ? new Date(car.createdAt).toLocaleDateString('ro-RO') : 'N/A'}
+                       </div>
+                    </div>
                   </div>
                   <div className="flex md:flex-col gap-3 shrink-0 relative mt-4 md:mt-0">
                     
@@ -996,11 +1006,11 @@ Oferim servicii complete prin biroul nostru de intermedieri:
           </div>
         )}
 
+        {/* ... (Rest of tabs: Settings, Calendar, Messages, Auctions - No changes needed) ... */}
         {/* --- SETTINGS TAB --- */}
         {activeTab === 'settings' && (
            <div className="animate-fade-in space-y-8">
-              
-              {/* Manual Migration Info */}
+              {/* ... settings content ... */}
               <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                     <Database className="text-blue-500" /> 
@@ -1016,14 +1026,12 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                     </p>
                  </div>
               </div>
-
-              {/* Theme Settings */}
+              {/* ... other settings ... */}
               <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                     <Heart className={seasonalTheme === 'valentine' ? "text-red-500 fill-current" : "text-gray-400"} /> 
                     Teme Sezoniere
                  </h3>
-                 
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button 
                        onClick={() => setSeasonalTheme('default')}
@@ -1034,7 +1042,6 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                        </div>
                        <span className={`font-bold ${seasonalTheme === 'default' ? 'text-gold-500' : 'text-gray-500'}`}>Theme Default</span>
                     </button>
-
                     <button 
                        onClick={() => setSeasonalTheme('valentine')}
                        className={`p-4 rounded-xl border flex flex-col items-center gap-3 transition-all ${seasonalTheme === 'valentine' ? 'border-pink-500 bg-pink-500/10' : 'border-gray-200 dark:border-white/10 hover:border-pink-500/50'}`}
@@ -1048,14 +1055,14 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                     </button>
                  </div>
               </div>
-
+              
               {/* HOLIDAY PRIZE SECTION */}
               <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
+                 {/* ... prize content ... */}
                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                     <Gift className="text-gold-500" /> 
                     Premiu & Pop-up Sezonier (Inimioară)
                  </h3>
-                 
                  <div className="space-y-4 max-w-2xl">
                     <div className="flex items-center gap-3 mb-4 p-4 bg-gray-50 dark:bg-white/5 rounded-xl">
                         <input 
@@ -1067,7 +1074,7 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                         />
                         <label htmlFor="prizeEnabled" className="cursor-pointer font-bold text-gray-900 dark:text-white">Activează Pop-up cu Premiu (pe inimioara din stânga jos)</label>
                     </div>
-
+                    {/* ... rest of prize form ... */}
                     <div>
                        <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Imagine Premiu</label>
                        <div className="flex gap-2">
@@ -1088,7 +1095,6 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                             {isPrizeUploading ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
                           </button>
                        </div>
-                       
                        {prizeForm.image && (
                          <div className="mt-4 relative inline-block group">
                            <div className="w-32 h-32 rounded-lg overflow-hidden border border-gray-200 dark:border-white/10">
@@ -1103,7 +1109,6 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                          </div>
                        )}
                     </div>
-
                     <div>
                        <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Titlu Premiu</label>
                        <input 
@@ -1114,7 +1119,6 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                          placeholder="Ex: Cină Romantică" 
                        />
                     </div>
-
                     <div>
                        <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Descriere Detaliată</label>
                        <textarea 
@@ -1125,7 +1129,6 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                          placeholder="Detalii despre premiu..." 
                        />
                     </div>
-
                     <div>
                        <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Link Buton (Opțional)</label>
                        <input 
@@ -1136,7 +1139,6 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                          placeholder="Ex: https://wa.me/..." 
                        />
                     </div>
-
                     <button 
                       onClick={handleSavePrize} 
                       className="px-6 py-3 bg-gold-500 text-black font-bold rounded-lg hover:bg-gold-600 transition-colors shadow-lg flex items-center gap-2"
@@ -1148,7 +1150,7 @@ Oferim servicii complete prin biroul nostru de intermedieri:
            </div>
         )}
 
-        {/* --- CALENDAR, MESSAGES, AUCTIONS TABS (SAME AS BEFORE) --- */}
+        {/* ... calendar, messages, auctions ... */}
         {activeTab === 'calendar' && (
           <div className="animate-fade-in space-y-4">
              {bookings.length > 0 ? (
@@ -1190,7 +1192,7 @@ Oferim servicii complete prin biroul nostru de intermedieri:
 
         {activeTab === 'auctions' && (
            <div className="animate-fade-in space-y-8">
-              {/* Same Auction UI as before */}
+              {/* ... auction content ... */}
               <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                    <Plus size={20} className="text-gold-500" /> Pornește Licitație Nouă
@@ -1203,6 +1205,7 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                           {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
                        </select>
                     </div>
+                    {/* ... other auction fields ... */}
                     <div>
                        <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Model</label>
                        <input type="text" value={auctionForm.model} onChange={e => setAuctionForm({...auctionForm, model: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500" placeholder="Model" required />
@@ -1294,7 +1297,7 @@ Oferim servicii complete prin biroul nostru de intermedieri:
 
       </div>
 
-      {/* EDIT MODAL */}
+      {/* EDIT MODAL (UPDATED SAVE LOGIC) */}
       {isEditing && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
           <div className="bg-white dark:bg-[#121212] w-full max-w-4xl rounded-2xl border border-gray-200 dark:border-white/10 shadow-2xl relative my-8">
@@ -1305,6 +1308,7 @@ Oferim servicii complete prin biroul nostru de intermedieri:
               <button onClick={() => setIsEditing(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"><X size={24} /></button>
             </div>
             
+            {/* ... form content ... */}
             <div className="p-8 space-y-8 max-h-[80vh] overflow-y-auto custom-scrollbar">
               
               {/* Images Section */}
