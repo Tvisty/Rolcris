@@ -369,11 +369,13 @@ const Admin: React.FC = () => {
                         const fileName = `car-images/restored/${car.id}_${Math.random().toString(36).substr(2, 9)}.webp`;
                         const storageRef = ref(storage, fileName);
                         
-                        // ADDED METADATA FOR CACHING
-                        await uploadString(storageRef, webpBase64, 'data_url', {
+                        const metadata = {
                           cacheControl: 'public, max-age=31536000, immutable',
                           contentType: 'image/webp'
-                        });
+                        };
+
+                        // ADDED METADATA FOR CACHING
+                        await uploadString(storageRef, webpBase64, 'data_url', metadata);
                         const url = await getDownloadURL(storageRef);
                         
                         newImages.push(url);
@@ -516,14 +518,13 @@ Oferim servicii complete prin biroul nostru de intermedieri:
     setCurrentCar({});
   };
 
-  // ... (Other handlers like handleStartAuction, addFeature, etc. remain the same but use showAlert where appropriate)
   const handleStartAuction = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auctionForm.make || !auctionForm.model || !auctionForm.startBid) {
       showAlert("Eroare", "Marca, Modelul și Prețul de pornire sunt obligatorii.");
       return;
     }
-    // ... rest of auction logic
+    
     const startTime = Date.now();
     const endTime = startTime + (auctionForm.duration * 60 * 60 * 1000);
     const newAuction: Omit<Auction, 'id'> = {
@@ -540,10 +541,10 @@ Oferim servicii complete prin biroul nostru de intermedieri:
     };
     await createAuction(newAuction);
     showAlert("Succes", "Licitație pornită cu succes!");
-    // reset form...
+    // Reset form but keep last used values for convenience except image
+    setAuctionForm(prev => ({ ...prev, image: '' }));
   };
 
-  // ... (Feature toggling, image input handling - same as previous)
   const addFeature = (e: React.KeyboardEvent | any) => {
     const key = (e as React.KeyboardEvent).key || 'Enter';
     if (key === 'Enter' && featureInput.trim()) {
@@ -613,11 +614,14 @@ Oferim servicii complete prin biroul nostru de intermedieri:
             if (storage) { 
                 try {
                     const storageRef = ref(storage, `car-images/${Date.now()}_${Math.random().toString(36).substring(7)}.webp`);
-                    // ADDED METADATA FOR CACHING
-                    const uploadTask = uploadString(storageRef, compressedBase64, 'data_url', {
+                    
+                    const metadata = {
                       cacheControl: 'public, max-age=31536000, immutable',
                       contentType: 'image/webp'
-                    });
+                    };
+
+                    // ADDED METADATA FOR CACHING
+                    const uploadTask = uploadString(storageRef, compressedBase64, 'data_url', metadata);
                     await Promise.race([ uploadTask, new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 15000)) ]);
                     finalUrl = await getDownloadURL(storageRef);
                 } catch (err) { finalUrl = compressedBase64; }
@@ -646,10 +650,27 @@ Oferim servicii complete prin biroul nostru de intermedieri:
     setIsAuctionUploading(true);
     try {
         const compressedDataUrl = await compressImage(files[0]);
-        // ... (simplified logic similar to car upload)
-        setAuctionForm(prev => ({ ...prev, image: compressedDataUrl })); 
-    } catch (error: any) { showAlert("Eroare", `Eroare la încărcare: ${error.message}`); } 
-    finally { setIsAuctionUploading(false); }
+        
+        // Upload to Storage if available to prevent base64 bloat
+        if (storage) {
+            const storageRef = ref(storage, `auction-images/${Date.now()}_${Math.random().toString(36).substring(7)}.webp`);
+            
+            const metadata = {
+                cacheControl: 'public, max-age=31536000, immutable',
+                contentType: 'image/webp'
+            };
+
+            await uploadString(storageRef, compressedDataUrl, 'data_url', metadata);
+            const url = await getDownloadURL(storageRef);
+            setAuctionForm(prev => ({ ...prev, image: url }));
+        } else {
+            setAuctionForm(prev => ({ ...prev, image: compressedDataUrl })); 
+        }
+    } catch (error: any) { 
+        showAlert("Eroare", `Eroare la încărcare: ${error.message}`); 
+    } finally { 
+        setIsAuctionUploading(false); 
+    }
   };
 
   const handlePrizeFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -658,9 +679,27 @@ Oferim servicii complete prin biroul nostru de intermedieri:
     setIsPrizeUploading(true);
     try {
         const compressedDataUrl = await compressImage(files[0]);
-        setPrizeForm(prev => ({ ...prev, image: compressedDataUrl }));
-    } catch (error: any) { showAlert("Eroare", `Eroare: ${error.message}`); } 
-    finally { setIsPrizeUploading(false); }
+        
+        // Upload to Storage if available
+        if (storage) {
+            const storageRef = ref(storage, `prize-images/${Date.now()}_${Math.random().toString(36).substring(7)}.webp`);
+            
+            const metadata = {
+                cacheControl: 'public, max-age=31536000, immutable',
+                contentType: 'image/webp'
+            };
+
+            await uploadString(storageRef, compressedDataUrl, 'data_url', metadata);
+            const url = await getDownloadURL(storageRef);
+            setPrizeForm(prev => ({ ...prev, image: url }));
+        } else {
+            setPrizeForm(prev => ({ ...prev, image: compressedDataUrl }));
+        }
+    } catch (error: any) { 
+        showAlert("Eroare", `Eroare: ${error.message}`); 
+    } finally { 
+        setIsPrizeUploading(false); 
+    }
   };
 
   const handleSavePrize = async () => {
