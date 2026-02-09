@@ -28,7 +28,7 @@ const Inventory: React.FC = () => {
   const [filters, setFilters] = useState({
     priceRange: [0, Number(searchParams.get('maxPrice')) || 1000000],
     selectedBrand: searchParams.get('make') || '',
-    selectedModel: '',
+    selectedModel: searchParams.get('model') || '', // Capture model from URL
     selectedBody: '',
     selectedFuel: '',
     selectedTransmission: '',
@@ -41,15 +41,30 @@ const Inventory: React.FC = () => {
   
   const [sortOption, setSortOption] = useState<SortOption>('newest');
 
+  // Calculate available models based on selected brand and actual inventory
+  const availableModels = useMemo(() => {
+    const make = filters.selectedBrand;
+    // Filter cars by the selected make if one exists, otherwise use all cars
+    const relevantCars = make 
+        ? cars.filter(c => c.make === make) 
+        : cars;
+    
+    // Extract models and sort them
+    const models = Array.from(new Set(relevantCars.map(c => c.model)));
+    return models.sort();
+  }, [cars, filters.selectedBrand]);
+
   useEffect(() => {
     const make = searchParams.get('make');
+    const model = searchParams.get('model');
     const minYear = searchParams.get('minYear');
     const maxPrice = searchParams.get('maxPrice');
 
-    if (make || minYear || maxPrice) {
+    if (make || model || minYear || maxPrice) {
       setFilters(prev => ({
         ...prev,
         selectedBrand: make || prev.selectedBrand,
+        selectedModel: model || prev.selectedModel,
         yearRange: [minYear ? Number(minYear) : prev.yearRange[0], prev.yearRange[1]],
         priceRange: [prev.priceRange[0], maxPrice ? Number(maxPrice) : prev.priceRange[1]]
       }));
@@ -75,7 +90,9 @@ const Inventory: React.FC = () => {
       const carYear = Number(car.year) || 0;
 
       if (filters.selectedBrand && car.make !== filters.selectedBrand) return false;
-      if (filters.selectedModel && !car.model.toLowerCase().includes(filters.selectedModel.toLowerCase())) return false;
+      // Exact match for model if selected from dropdown
+      if (filters.selectedModel && car.model !== filters.selectedModel) return false;
+      
       if (filters.selectedBody && car.bodyType !== filters.selectedBody) return false;
       if (filters.selectedFuel && car.fuel !== filters.selectedFuel) return false;
       if (filters.selectedTransmission && car.transmission !== filters.selectedTransmission) return false;
@@ -172,7 +189,7 @@ const Inventory: React.FC = () => {
                 <option value="price_desc">Preț: Descrescător</option>
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
-           </div>
+            </div>
         </div>
       </div>
 
@@ -235,7 +252,11 @@ const Inventory: React.FC = () => {
             <FilterSection title="Marca">
               <select 
                 value={filters.selectedBrand}
-                onChange={(e) => setFilters({...filters, selectedBrand: e.target.value})}
+                onChange={(e) => setFilters({
+                    ...filters, 
+                    selectedBrand: e.target.value,
+                    selectedModel: '' // Reset model when make changes
+                })}
                 className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded p-3 focus:border-gold-500 outline-none cursor-pointer"
               >
                 <option value="" className="bg-white dark:bg-[#121212]">Toate</option>
@@ -244,16 +265,19 @@ const Inventory: React.FC = () => {
             </FilterSection>
 
             <FilterSection title="Model">
-              <div className="relative">
-                 <input 
-                   type="text" 
-                   placeholder="Caută model..." 
-                   value={filters.selectedModel}
-                   onChange={(e) => setFilters({...filters, selectedModel: e.target.value})}
-                   className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 pl-10 text-gray-900 dark:text-white focus:border-gold-500 outline-none text-sm placeholder-gray-500"
-                 />
-                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              </div>
+              <select 
+                value={filters.selectedModel}
+                onChange={(e) => setFilters({...filters, selectedModel: e.target.value})}
+                disabled={availableModels.length === 0}
+                className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded p-3 focus:border-gold-500 outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="" className="bg-white dark:bg-[#121212]">
+                    {filters.selectedBrand && availableModels.length === 0 ? "Niciun model" : "Toate Modelele"}
+                </option>
+                {availableModels.map(model => (
+                    <option key={model} value={model} className="bg-white dark:bg-[#121212]">{model}</option>
+                ))}
+              </select>
             </FilterSection>
 
             <FilterSection title="An Fabricație">

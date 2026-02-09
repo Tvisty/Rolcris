@@ -1,18 +1,35 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Search, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BRANDS } from '../constants';
+import { useCars } from '../context/CarContext';
 
 const SearchWidget: React.FC = () => {
   const navigate = useNavigate();
+  const { cars } = useCars(); // Get actual inventory data
+  
   const [make, setMake] = useState('');
   const [model, setModel] = useState('');
   const [minYear, setMinYear] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
+  // Dynamically calculate available models based on selected make and actual inventory
+  const availableModels = useMemo(() => {
+    // 1. Filter cars by the selected make (if any)
+    const filteredByMake = make 
+      ? cars.filter(c => c.make === make) 
+      : cars;
+
+    // 2. Extract unique models
+    const models = Array.from(new Set(filteredByMake.map(c => c.model)));
+    
+    // 3. Sort alphabetically
+    return models.sort();
+  }, [cars, make]);
+
   const handleSearch = () => {
-    navigate(`/inventory?make=${make}&minYear=${minYear}&maxPrice=${maxPrice}`);
+    navigate(`/inventory?make=${make}&model=${model}&minYear=${minYear}&maxPrice=${maxPrice}`);
   };
 
   return (
@@ -26,7 +43,10 @@ const SearchWidget: React.FC = () => {
             <div className="relative">
               <select 
                 value={make}
-                onChange={(e) => setMake(e.target.value)}
+                onChange={(e) => {
+                  setMake(e.target.value);
+                  setModel(''); // Reset model when make changes
+                }}
                 className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-lg p-3 pr-10 appearance-none focus:outline-none focus:border-gold-500 transition-colors cursor-pointer"
               >
                 <option value="" className="bg-white dark:bg-[#121212]">Toate Mărcile</option>
@@ -38,16 +58,25 @@ const SearchWidget: React.FC = () => {
             </div>
           </div>
 
-          {/* Model Input (Simplified for mock) */}
+          {/* Model Select (Dynamic) */}
           <div className="relative group">
             <label className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1 block pl-1">Model</label>
-            <input 
-              type="text"
-              placeholder="Ex: X5, Panamera..."
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-lg p-3 focus:outline-none focus:border-gold-500 transition-colors placeholder-gray-400 dark:placeholder-gray-600"
-            />
+            <div className="relative">
+              <select 
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                disabled={availableModels.length === 0}
+                className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-lg p-3 pr-10 appearance-none focus:outline-none focus:border-gold-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="" className="bg-white dark:bg-[#121212]">
+                  {make && availableModels.length === 0 ? "Niciun model" : "Toate Modelele"}
+                </option>
+                {availableModels.map(m => (
+                  <option key={m} value={m} className="bg-white dark:bg-[#121212]">{m}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
+            </div>
           </div>
 
           {/* Year Select */}
@@ -65,6 +94,7 @@ const SearchWidget: React.FC = () => {
                 <option value="2022" className="bg-white dark:bg-[#121212]">2022</option>
                 <option value="2021" className="bg-white dark:bg-[#121212]">2021</option>
                 <option value="2020" className="bg-white dark:bg-[#121212]">2020</option>
+                <option value="2019" className="bg-white dark:bg-[#121212]">2019</option>
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
             </div>
@@ -80,10 +110,12 @@ const SearchWidget: React.FC = () => {
                 className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-lg p-3 pr-10 appearance-none focus:outline-none focus:border-gold-500 transition-colors cursor-pointer"
               >
                 <option value="" className="bg-white dark:bg-[#121212]">Nelimitat</option>
+                <option value="15000" className="bg-white dark:bg-[#121212]">15.000 €</option>
+                <option value="25000" className="bg-white dark:bg-[#121212]">25.000 €</option>
+                <option value="35000" className="bg-white dark:bg-[#121212]">35.000 €</option>
                 <option value="50000" className="bg-white dark:bg-[#121212]">50.000 €</option>
                 <option value="75000" className="bg-white dark:bg-[#121212]">75.000 €</option>
                 <option value="100000" className="bg-white dark:bg-[#121212]">100.000 €</option>
-                <option value="150000" className="bg-white dark:bg-[#121212]">150.000 €</option>
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
             </div>
