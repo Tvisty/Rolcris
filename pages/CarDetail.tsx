@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle, AlertTriangle, Maximize2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle, AlertTriangle, Maximize2, Palette, Leaf } from 'lucide-react';
 import { useCars } from '../context/CarContext';
 
 const CarDetail: React.FC = () => {
@@ -419,6 +419,14 @@ const CarDetail: React.FC = () => {
               <SpecItem icon={Settings} label="Cutie Viteze" value={car.transmission} />
               <SpecItem icon={CarFront} label="Caroserie" value={car.bodyType} />
               <SpecItem icon={Zap} label="Motorizare" value={`${car.engineSize} • ${car.power} CP`} />
+              
+              {/* Added Color & Pollution (Hidden if 0 or None) */}
+              {car.color && <SpecItem icon={Palette} label="Culoare" value={car.color} />}
+              
+              {car.pollutionStandard && car.pollutionStandard !== '0' && car.pollutionStandard !== 'None' && (
+                 <SpecItem icon={Leaf} label="Norma Poluare" value={car.pollutionStandard} />
+              )}
+
               <SpecItem icon={Layout} label="Portiere" value={car.doors || '4/5'} />
               <SpecItem icon={Fingerprint} label="VIN" value={car.vin || 'Nespecificat'} />
             </div>

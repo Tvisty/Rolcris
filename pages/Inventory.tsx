@@ -1,18 +1,21 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Filter, X, ChevronDown, ChevronUp, Search, Loader2, Check } from 'lucide-react';
+import { Filter, X, ChevronDown, ChevronUp, Search, Loader2, Check, Palette, Leaf } from 'lucide-react';
 import CarCard from '../components/CarCard';
-import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS } from '../constants';
+import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS } from '../constants';
 import { SortOption } from '../types';
 import { useCars } from '../context/CarContext';
 
-const FilterSection: React.FC<React.PropsWithChildren<{ title: string; defaultOpen?: boolean }>> = ({ title, children, defaultOpen = true }) => {
+const FilterSection: React.FC<React.PropsWithChildren<{ title: string; defaultOpen?: boolean; icon?: React.ReactNode }>> = ({ title, children, defaultOpen = true, icon }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
     <div className="border-b border-gray-200 dark:border-white/10 py-5">
       <button className="flex justify-between items-center w-full mb-4" onClick={() => setIsOpen(!isOpen)}>
-        <h3 className="text-gray-900 dark:text-white font-bold font-display tracking-wide">{title}</h3>
+        <h3 className="text-gray-900 dark:text-white font-bold font-display tracking-wide flex items-center gap-2">
+            {icon && <span className="text-gold-500">{icon}</span>}
+            {title}
+        </h3>
         {isOpen ? <ChevronUp size={16} className="text-gold-500" /> : <ChevronDown size={16} className="text-gray-500" />}
       </button>
       {isOpen && <div className="space-y-3 animate-fade-in">{children}</div>}
@@ -28,7 +31,7 @@ const Inventory: React.FC = () => {
   const [filters, setFilters] = useState({
     priceRange: [0, Number(searchParams.get('maxPrice')) || 1000000],
     selectedBrand: searchParams.get('make') || '',
-    selectedModel: searchParams.get('model') || '', // Capture model from URL
+    selectedModel: searchParams.get('model') || '',
     selectedBody: '',
     selectedFuel: '',
     selectedTransmission: '',
@@ -36,6 +39,8 @@ const Inventory: React.FC = () => {
     yearRange: [Number(searchParams.get('minYear')) || 0, new Date().getFullYear() + 1], 
     maxMileage: '',
     selectedSeats: '',
+    selectedPollution: '', // New Filter
+    selectedColor: '',     // New Filter
     selectedFeatures: [] as string[]
   });
   
@@ -90,9 +95,7 @@ const Inventory: React.FC = () => {
       const carYear = Number(car.year) || 0;
 
       if (filters.selectedBrand && car.make !== filters.selectedBrand) return false;
-      // Exact match for model if selected from dropdown
       if (filters.selectedModel && car.model !== filters.selectedModel) return false;
-      
       if (filters.selectedBody && car.bodyType !== filters.selectedBody) return false;
       if (filters.selectedFuel && car.fuel !== filters.selectedFuel) return false;
       if (filters.selectedTransmission && car.transmission !== filters.selectedTransmission) return false;
@@ -101,6 +104,10 @@ const Inventory: React.FC = () => {
       if (carPrice < filters.priceRange[0] || carPrice > filters.priceRange[1]) return false;
       if (filters.maxMileage && car.mileage > Number(filters.maxMileage)) return false;
       if (filters.selectedSeats && car.seats !== Number(filters.selectedSeats)) return false;
+      
+      // New Filters Logic
+      if (filters.selectedPollution && car.pollutionStandard !== filters.selectedPollution) return false;
+      if (filters.selectedColor && !car.color?.toLowerCase().includes(filters.selectedColor.toLowerCase())) return false;
       
       if (filters.selectedFeatures.length > 0) {
         const hasAllSelectedFeatures = filters.selectedFeatures.every(feature => 
@@ -145,6 +152,8 @@ const Inventory: React.FC = () => {
       yearRange: [0, new Date().getFullYear() + 1],
       maxMileage: '',
       selectedSeats: '',
+      selectedPollution: '',
+      selectedColor: '',
       selectedFeatures: []
     });
   };
@@ -278,6 +287,38 @@ const Inventory: React.FC = () => {
                     <option key={model} value={model} className="bg-white dark:bg-[#121212]">{model}</option>
                 ))}
               </select>
+            </FilterSection>
+
+            {/* NEW: Pollution Standard */}
+            <FilterSection title="Norma de Poluare" icon={<Leaf size={16} />}>
+              <div className="flex flex-wrap gap-2">
+                {POLLUTION_STANDARDS.map(norm => (
+                  <button
+                    key={norm}
+                    onClick={() => setFilters({...filters, selectedPollution: filters.selectedPollution === norm ? '' : norm})}
+                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                      filters.selectedPollution === norm 
+                        ? 'bg-green-500 border-green-500 text-white font-bold' 
+                        : 'border-gray-300 dark:border-white/20 text-gray-600 dark:text-gray-400 hover:border-green-500 hover:text-green-500'
+                    }`}
+                  >
+                    {norm}
+                  </button>
+                ))}
+              </div>
+            </FilterSection>
+
+            {/* NEW: Color (Input) */}
+            <FilterSection title="Culoare" icon={<Palette size={16} />}>
+              <div className="relative">
+                 <input 
+                   type="text" 
+                   placeholder="Ex: Negru, Alb..." 
+                   value={filters.selectedColor}
+                   onChange={(e) => setFilters({...filters, selectedColor: e.target.value})}
+                   className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 text-gray-900 dark:text-white focus:border-gold-500 outline-none text-sm placeholder-gray-500"
+                 />
+              </div>
             </FilterSection>
 
             <FilterSection title="An Fabricație">

@@ -11,7 +11,7 @@ import {
   LogIn, Search, 
   Calendar, Gauge, LayoutDashboard, Fuel, Settings, Upload, AlertTriangle, Wifi, WifiOff, Check, Star, Loader2, Phone, User as UserIcon, Clock, Mail, Gavel, Timer, Bell, BellOff, Info, Link as LinkIcon, Clipboard, CloudUpload, ChevronLeft, ChevronRight, Heart, Gift, Tag, Database, RefreshCw, PauseCircle, Wrench, AlertCircle
 } from 'lucide-react';
-import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS } from '../constants';
+import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS } from '../constants';
 import { Link } from 'react-router-dom';
 
 // --- ULTRA-ROBUST COMPRESSOR V2 (WebP Edition - 1920px @ 85%) ---
@@ -1485,6 +1485,32 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                       {LOCATIONS.map(loc => <option key={loc} value={loc}>{loc}</option>)}
                     </select>
                  </div>
+                 
+                 {/* NEW: Pollution Standard */}
+                 <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Norma Poluare</label>
+                    <select 
+                      value={currentCar.pollutionStandard} 
+                      onChange={(e) => setCurrentCar({...currentCar, pollutionStandard: e.target.value})}
+                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500"
+                    >
+                      <option value="">Alege...</option>
+                      {POLLUTION_STANDARDS.map(std => <option key={std} value={std}>{std}</option>)}
+                    </select>
+                 </div>
+
+                 {/* NEW: Color Input (Typeable) */}
+                 <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Culoare</label>
+                    <input 
+                      type="text" 
+                      value={currentCar.color || ''} 
+                      onChange={(e) => setCurrentCar({...currentCar, color: e.target.value})}
+                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500"
+                      placeholder="Ex: Negru Metalizat"
+                    />
+                 </div>
+
                  <div>
                     <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Putere (CP)</label>
                     <input type="number" value={currentCar.power || ''} onChange={(e) => setCurrentCar({...currentCar, power: Number(e.target.value)})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500" />

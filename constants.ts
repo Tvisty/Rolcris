@@ -77,7 +77,7 @@ export const BRANDS = [
 export const BODY_TYPES = ['SUV', 'Sedan', 'Coupe', 'Cabrio', 'Break', 'Hatchback', 'Dube', 'Monovolum'];
 export const FUELS = ['Diesel', 'Benzină', 'Benzină/Gaz', 'Hibrid', 'Electric', 'Diesel/Electric'];
 export const LOCATIONS = ['Satu Mare', 'Seini', 'Tășnad'];
-export const POLLUTION_STANDARDS = ['Euro 5', 'Euro 6', '----'];
+export const POLLUTION_STANDARDS = ['Euro 6', 'Euro 5', '0'];
 export const TRACTIONS = ['Fata', 'Spate', '4x4', '4x4 Automat'];
 export const COLORS = ['Alb', 'Albastru', 'Argintiu', 'Auriu', 'Negru', 'Maro', 'Gri', 'Rosu', 'Galben', 'Verde', 'Orange'];
 
