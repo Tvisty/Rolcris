@@ -339,7 +339,8 @@ const CarDetail: React.FC = () => {
             ))}
           </div>
 
-          <div className="glass-panel p-8 rounded-2xl mt-8 bg-white dark:bg-[#121212]/50 border border-gray-200 dark:border-white/10">
+          {/* Description - DESKTOP ONLY (Hidden on Mobile) */}
+          <div className="hidden lg:block glass-panel p-8 rounded-2xl mt-8 bg-white dark:bg-[#121212]/50 border border-gray-200 dark:border-white/10">
             <h3 className="text-xl font-display font-bold text-gray-900 dark:text-white mb-4">Descriere</h3>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">{car.description}</p>
           </div>
@@ -444,6 +445,12 @@ const CarDetail: React.FC = () => {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Description - MOBILE ONLY (Hidden on Desktop) */}
+            <div className="block lg:hidden glass-panel p-6 rounded-2xl bg-white dark:bg-[#121212]/50 border border-gray-200 dark:border-white/10">
+              <h3 className="text-xl font-display font-bold text-gray-900 dark:text-white mb-4">Descriere</h3>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">{car.description}</p>
             </div>
 
           </div>
