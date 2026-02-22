@@ -1,9 +1,9 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Filter, X, ChevronDown, ChevronUp, Search, Loader2, Check, Palette, Leaf } from 'lucide-react';
+import { Filter, X, ChevronDown, ChevronUp, Search, Loader2, Check, Palette, Leaf, Compass } from 'lucide-react';
 import CarCard from '../components/CarCard';
-import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS } from '../constants';
+import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS } from '../constants';
 import { SortOption } from '../types';
 import { useCars } from '../context/CarContext';
 
@@ -39,8 +39,9 @@ const Inventory: React.FC = () => {
     yearRange: [Number(searchParams.get('minYear')) || 0, new Date().getFullYear() + 1], 
     maxMileage: '',
     selectedSeats: '',
-    selectedPollution: '', // New Filter
-    selectedColor: '',     // New Filter
+    selectedPollution: '', 
+    selectedColor: '',
+    selectedTraction: '', // New Filter
     selectedFeatures: [] as string[]
   });
   
@@ -108,6 +109,7 @@ const Inventory: React.FC = () => {
       // New Filters Logic
       if (filters.selectedPollution && car.pollutionStandard !== filters.selectedPollution) return false;
       if (filters.selectedColor && !car.color?.toLowerCase().includes(filters.selectedColor.toLowerCase())) return false;
+      if (filters.selectedTraction && car.traction !== filters.selectedTraction) return false;
       
       if (filters.selectedFeatures.length > 0) {
         const hasAllSelectedFeatures = filters.selectedFeatures.every(feature => 
@@ -154,6 +156,7 @@ const Inventory: React.FC = () => {
       selectedSeats: '',
       selectedPollution: '',
       selectedColor: '',
+      selectedTraction: '',
       selectedFeatures: []
     });
   };
@@ -303,6 +306,25 @@ const Inventory: React.FC = () => {
                     }`}
                   >
                     {norm}
+                  </button>
+                ))}
+              </div>
+            </FilterSection>
+
+            {/* NEW: Traction */}
+            <FilterSection title="Tracțiune" icon={<Compass size={16} />}>
+              <div className="flex flex-wrap gap-2">
+                {TRACTIONS.map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setFilters({...filters, selectedTraction: filters.selectedTraction === t ? '' : t})}
+                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                      filters.selectedTraction === t 
+                        ? 'bg-gold-500 border-gold-500 text-black font-bold' 
+                        : 'border-gray-300 dark:border-white/20 text-gray-600 dark:text-gray-400 hover:border-gold-500 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {t}
                   </button>
                 ))}
               </div>

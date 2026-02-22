@@ -11,7 +11,7 @@ import {
   LogIn, Search, 
   Calendar, Gauge, LayoutDashboard, Fuel, Settings, Upload, AlertTriangle, Wifi, WifiOff, Check, Star, Loader2, Phone, User as UserIcon, Clock, Mail, Gavel, Timer, Bell, BellOff, Info, Link as LinkIcon, Clipboard, CloudUpload, ChevronLeft, ChevronRight, Heart, Gift, Tag, Database, RefreshCw, PauseCircle, Wrench, AlertCircle
 } from 'lucide-react';
-import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS } from '../constants';
+import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS } from '../constants';
 import { Link } from 'react-router-dom';
 
 // --- ULTRA-ROBUST COMPRESSOR V2 (WebP Edition - 1920px @ 85%) ---
@@ -1006,7 +1006,6 @@ Oferim servicii complete prin biroul nostru de intermedieri:
           </div>
         )}
 
-        {/* ... (Rest of tabs: Settings, Calendar, Messages, Auctions - No changes needed) ... */}
         {/* --- SETTINGS TAB --- */}
         {activeTab === 'settings' && (
            <div className="animate-fade-in space-y-8">
@@ -1116,17 +1115,17 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                          value={prizeForm.title} 
                          onChange={(e) => setPrizeForm({...prizeForm, title: e.target.value})} 
                          className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" 
-                         placeholder="Ex: Cină Romantică" 
+                         placeholder="Ex: Reducere 500€" 
                        />
                     </div>
                     <div>
-                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Descriere Detaliată</label>
+                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Descriere</label>
                        <textarea 
-                         rows={4} 
+                         rows={3}
                          value={prizeForm.description} 
                          onChange={(e) => setPrizeForm({...prizeForm, description: e.target.value})} 
-                         className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" 
-                         placeholder="Detalii despre premiu..." 
+                         className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500 resize-none" 
+                         placeholder="Ex: Felicitări! Ai câștigat o reducere..." 
                        />
                     </div>
                     <div>
@@ -1136,159 +1135,110 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                          value={prizeForm.buttonLink || ''} 
                          onChange={(e) => setPrizeForm({...prizeForm, buttonLink: e.target.value})} 
                          className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-gold-500" 
-                         placeholder="Ex: https://wa.me/..." 
+                         placeholder="https://..." 
                        />
                     </div>
+                    
                     <button 
-                      onClick={handleSavePrize} 
-                      className="px-6 py-3 bg-gold-500 text-black font-bold rounded-lg hover:bg-gold-600 transition-colors shadow-lg flex items-center gap-2"
+                      onClick={handleSavePrize}
+                      className="bg-gold-500 hover:bg-gold-600 text-black font-bold py-3 px-8 rounded-xl shadow-lg transition-transform hover:scale-105 flex items-center gap-2"
                     >
-                      <Save size={18} /> Salvează Premiul
+                      <Save size={18} /> Salvează Setări
                     </button>
                  </div>
               </div>
            </div>
         )}
 
-        {/* ... calendar, messages, auctions ... */}
+        {/* --- CALENDAR TAB --- */}
         {activeTab === 'calendar' && (
-          <div className="animate-fade-in space-y-4">
-             {bookings.length > 0 ? (
-               bookings.map(booking => (
-                 <BookingCard 
-                    key={booking.id} 
-                    booking={booking} 
-                    onUpdateStatus={updateBookingStatus} 
-                    onDelete={deleteBooking} 
-                 />
-               ))
-             ) : (
-                <div className="text-center py-20 text-gray-500 bg-white dark:bg-[#121212] rounded-xl border border-dashed border-gray-300 dark:border-white/10">
-                   <Calendar size={48} className="mx-auto mb-4 opacity-20" />
-                   <p>Nu există programări.</p>
-                </div>
-             )}
-          </div>
-        )}
-
-        {activeTab === 'messages' && (
-           <div className="animate-fade-in grid grid-cols-1 md:grid-cols-2 gap-4">
-              {messages.length > 0 ? (
-                messages.map(msg => (
-                  <MessageCard 
-                    key={msg.id} 
-                    message={msg} 
-                    onDelete={deleteMessage} 
-                  />
-                ))
-              ) : (
-                 <div className="col-span-full text-center py-20 text-gray-500 bg-white dark:bg-[#121212] rounded-xl border border-dashed border-gray-300 dark:border-white/10">
-                    <Mail size={48} className="mx-auto mb-4 opacity-20" />
-                    <p>Nu există mesaje.</p>
-                 </div>
-              )}
+           <div className="animate-fade-in space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Calendar Programări</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 {bookings.map(booking => (
+                   <BookingCard 
+                     key={booking.id} 
+                     booking={booking} 
+                     onUpdateStatus={updateBookingStatus} 
+                     onDelete={deleteBooking} 
+                   />
+                 ))}
+                 {bookings.length === 0 && (
+                   <div className="col-span-2 text-center py-12 text-gray-500 bg-white dark:bg-[#121212] rounded-xl border border-dashed border-gray-300 dark:border-white/10">
+                      Nu există programări.
+                   </div>
+                 )}
+              </div>
            </div>
         )}
 
+        {/* --- MESSAGES TAB --- */}
+        {activeTab === 'messages' && (
+           <div className="animate-fade-in space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Mesaje Clienți</h2>
+              <div className="grid grid-cols-1 gap-4">
+                 {messages.map(msg => (
+                   <MessageCard 
+                     key={msg.id} 
+                     message={msg} 
+                     onDelete={deleteMessage}
+                   />
+                 ))}
+                 {messages.length === 0 && (
+                   <div className="text-center py-12 text-gray-500 bg-white dark:bg-[#121212] rounded-xl border border-dashed border-gray-300 dark:border-white/10">
+                      Nu există mesaje.
+                   </div>
+                 )}
+              </div>
+           </div>
+        )}
+
+        {/* --- AUCTIONS TAB --- */}
         {activeTab === 'auctions' && (
-           <div className="animate-fade-in space-y-8">
-              {/* ... auction content ... */}
-              <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
-                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                   <Plus size={20} className="text-gold-500" /> Pornește Licitație Nouă
-                 </h3>
-                 <form onSubmit={handleStartAuction} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* ... form fields ... */}
-                    <div>
-                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Marcă</label>
-                       <select value={auctionForm.make} onChange={e => setAuctionForm({...auctionForm, make: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500">
-                          {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-                       </select>
-                    </div>
-                    {/* ... other auction fields ... */}
-                    <div>
-                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Model</label>
-                       <input type="text" value={auctionForm.model} onChange={e => setAuctionForm({...auctionForm, model: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500" placeholder="Model" required />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                       <div>
-                          <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">An</label>
-                          <input type="number" value={auctionForm.year} onChange={e => setAuctionForm({...auctionForm, year: Number(e.target.value)})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500" />
-                       </div>
-                       <div>
-                          <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Km</label>
-                          <input type="number" value={auctionForm.mileage} onChange={e => setAuctionForm({...auctionForm, mileage: Number(e.target.value)})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500" />
-                       </div>
-                    </div>
-                    <div>
-                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Combustibil</label>
-                       <select value={auctionForm.fuel} onChange={e => setAuctionForm({...auctionForm, fuel: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500">
-                          {FUELS.map(f => <option key={f} value={f}>{f}</option>)}
-                       </select>
-                    </div>
-                    <div>
-                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Preț Pornire (€)</label>
-                       <input type="number" value={auctionForm.startBid} onChange={e => setAuctionForm({...auctionForm, startBid: Number(e.target.value)})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500" required />
-                    </div>
-                    <div>
-                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Durată (Ore)</label>
-                       <input type="number" value={auctionForm.duration} onChange={e => setAuctionForm({...auctionForm, duration: Number(e.target.value)})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500" min="1" max="72" />
-                    </div>
+           <div className="animate-fade-in space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Administrare Licitații</h2>
+              
+              {/* Add New Auction Form */}
+              <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 mb-8">
+                 <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Pornește Licitație Nouă</h3>
+                 <form onSubmit={handleStartAuction} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" placeholder="Marca" value={auctionForm.make} onChange={e => setAuctionForm({...auctionForm, make: e.target.value})} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500 text-gray-900 dark:text-white" required />
+                    <input type="text" placeholder="Model" value={auctionForm.model} onChange={e => setAuctionForm({...auctionForm, model: e.target.value})} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500 text-gray-900 dark:text-white" required />
+                    <input type="number" placeholder="An" value={auctionForm.year} onChange={e => setAuctionForm({...auctionForm, year: Number(e.target.value)})} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500 text-gray-900 dark:text-white" required />
+                    <input type="number" placeholder="Km" value={auctionForm.mileage} onChange={e => setAuctionForm({...auctionForm, mileage: Number(e.target.value)})} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500 text-gray-900 dark:text-white" required />
+                    <input type="text" placeholder="Combustibil" value={auctionForm.fuel} onChange={e => setAuctionForm({...auctionForm, fuel: e.target.value})} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500 text-gray-900 dark:text-white" required />
+                    <input type="number" placeholder="Preț Pornire (€)" value={auctionForm.startBid} onChange={e => setAuctionForm({...auctionForm, startBid: Number(e.target.value)})} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500 text-gray-900 dark:text-white" required />
+                    <input type="number" placeholder="Durată (ore)" value={auctionForm.duration} onChange={e => setAuctionForm({...auctionForm, duration: Number(e.target.value)})} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500 text-gray-900 dark:text-white" required />
                     
-                    <div className="md:col-span-2">
-                       <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Imagine Principală</label>
-                       <div className="flex gap-2">
-                          <input 
-                            type="text" 
-                            value={auctionForm.image} 
-                            onChange={e => setAuctionForm({...auctionForm, image: e.target.value})} 
-                            className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500" 
-                            placeholder="Link imagine..." 
-                          />
-                          <input type="file" ref={auctionFileInputRef} onChange={handleAuctionFileUpload} accept="image/*" className="hidden" />
-                          <button 
-                             type="button" 
-                             onClick={() => auctionFileInputRef.current?.click()} 
-                             disabled={isAuctionUploading}
-                             className="bg-gold-500 text-black px-4 rounded-lg hover:bg-gold-600 transition-all flex items-center justify-center disabled:opacity-50"
-                          >
-                             {isAuctionUploading ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
-                          </button>
-                       </div>
-                       {auctionForm.image && (
-                          <div className="mt-2 h-24 w-32 rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 relative group">
-                             <img src={auctionForm.image} alt="Preview" className="w-full h-full object-cover" />
-                             <button type="button" onClick={() => setAuctionForm({...auctionForm, image: ''})} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><X size={12} /></button>
-                          </div>
-                       )}
+                    <div className="flex gap-2">
+                        <input type="text" placeholder="URL Imagine" value={auctionForm.image} onChange={e => setAuctionForm({...auctionForm, image: e.target.value})} className="flex-1 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500 text-gray-900 dark:text-white" />
+                        <input type="file" ref={auctionFileInputRef} onChange={handleAuctionFileUpload} accept="image/*" className="hidden" />
+                        <button type="button" onClick={() => auctionFileInputRef.current?.click()} disabled={isAuctionUploading} className="bg-gray-100 dark:bg-white/10 px-4 rounded-lg hover:bg-gold-500 hover:text-black transition-colors disabled:opacity-50">
+                           {isAuctionUploading ? <Loader2 className="animate-spin" /> : <Upload />}
+                        </button>
                     </div>
 
-                    <div className="md:col-span-2">
-                       <button type="submit" className="w-full bg-gold-500 hover:bg-gold-600 text-black font-bold py-3 rounded-xl transition-all shadow-lg">Lansează Licitația</button>
-                    </div>
+                    <textarea placeholder="Descriere Scurtă" value={auctionForm.description} onChange={e => setAuctionForm({...auctionForm, description: e.target.value})} className="md:col-span-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500 text-gray-900 dark:text-white h-24 resize-none" />
+
+                    <button type="submit" className="md:col-span-2 bg-gold-500 hover:bg-gold-600 text-black font-bold py-3 rounded-lg shadow-lg">Pornește Licitația</button>
                  </form>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* List of Auctions */}
+              <div className="space-y-4">
                  {auctions.map(auction => (
-                    <div key={auction.id} className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 flex gap-4">
-                       <div className="w-32 h-24 rounded-lg overflow-hidden shrink-0">
-                          <img src={auction.carImage} alt="Car" className="w-full h-full object-cover" />
-                       </div>
+                    <div key={auction.id} className="bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center">
+                       <img src={auction.carImage} alt="Car" className="w-24 h-24 object-cover rounded-lg" />
                        <div className="flex-1">
-                          <div className="flex justify-between items-start">
-                             <h4 className="font-bold text-lg text-gray-900 dark:text-white">{auction.carMake} {auction.carModel}</h4>
-                             <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase ${auction.status === 'active' && Date.now() < auction.endTime ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                                {auction.status === 'active' && Date.now() < auction.endTime ? 'Activ' : 'Inactiv'}
-                             </span>
-                          </div>
-                          <p className="text-sm text-gray-500 mb-2">Bid: {auction.currentBid} € • {auction.bids.length} oferte</p>
-                          <div className="flex gap-2">
-                             {auction.status === 'active' && Date.now() < auction.endTime && (
-                                <button onClick={() => cancelAuction(auction.id)} className="text-xs bg-red-100 text-red-600 px-3 py-1.5 rounded font-bold hover:bg-red-200">Oprește</button>
-                             )}
-                          </div>
+                          <h4 className="font-bold text-lg text-gray-900 dark:text-white">{auction.carMake} {auction.carModel}</h4>
+                          <p className="text-sm text-gray-500">Status: <span className={`font-bold uppercase ${auction.status === 'active' ? 'text-green-500' : 'text-red-500'}`}>{auction.status}</span></p>
+                          <p className="text-sm text-gray-500">Ofertă Curentă: <span className="text-gold-500 font-bold">{auction.currentBid} €</span></p>
                        </div>
+                       {auction.status === 'active' && (
+                         <button onClick={() => cancelAuction(auction.id)} className="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg font-bold transition-all">
+                            Anulează
+                         </button>
+                       )}
                     </div>
                  ))}
               </div>
@@ -1296,308 +1246,241 @@ Oferim servicii complete prin biroul nostru de intermedieri:
         )}
 
       </div>
-
-      {/* EDIT MODAL (UPDATED SAVE LOGIC) */}
+      
+      {/* Editor Modal for Inventory */}
       {isEditing && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
-          <div className="bg-white dark:bg-[#121212] w-full max-w-4xl rounded-2xl border border-gray-200 dark:border-white/10 shadow-2xl relative my-8">
-            <div className="sticky top-0 z-10 flex justify-between items-center p-6 border-b border-gray-200 dark:border-white/10 bg-white dark:bg-[#121212] rounded-t-2xl">
-              <h2 className="text-2xl font-bold font-display text-gray-900 dark:text-white">
-                {currentCar.id && cars.find(c => c.id === currentCar.id) ? 'Editează Autoturism' : 'Adaugă Autoturism Nou'}
-              </h2>
-              <button onClick={() => setIsEditing(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"><X size={24} /></button>
-            </div>
-            
-            {/* ... form content ... */}
-            <div className="p-8 space-y-8 max-h-[80vh] overflow-y-auto custom-scrollbar">
-              
-              {/* Images Section */}
-              <section>
-                 <h3 className="text-sm font-bold text-gray-500 uppercase mb-4 flex items-center gap-2"><ImageIcon size={16} /> Galerie Foto</h3>
-                 
-                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
-                    {/* Add Image Button */}
-                    <div className="aspect-[4/3] bg-gray-50 dark:bg-white/5 border-2 border-dashed border-gray-300 dark:border-white/10 rounded-xl flex flex-col items-center justify-center text-gray-500 hover:border-gold-500 hover:text-gold-500 transition-colors cursor-pointer relative overflow-hidden group">
-                       <input 
-                         type="file" 
-                         multiple 
-                         accept="image/*"
-                         ref={fileInputRef}
-                         className="absolute inset-0 opacity-0 cursor-pointer z-20"
-                         onChange={handleFileUpload}
-                       />
-                       {uploadingCount > 0 ? (
-                         <div className="flex flex-col items-center animate-pulse">
-                           <Loader2 className="animate-spin mb-2" size={24} />
-                           <span className="text-xs font-bold">Se procesează...</span>
-                         </div>
-                       ) : (
-                         <>
-                           <CloudUpload size={32} className="mb-2" />
-                           <span className="text-xs font-bold text-center px-2">Click sau Drag & Drop</span>
-                         </>
-                       )}
-                    </div>
-
-                    {/* Image Previews */}
-                    {(currentCar.images || []).map((img, idx) => (
-                      <div key={idx} className="relative group aspect-[4/3] rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-black">
-                         <img src={img} alt={`Car ${idx}`} className="w-full h-full object-cover" />
-                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                            <button onClick={() => setAsCover(idx)} className="p-1.5 bg-gold-500 text-black rounded-lg hover:scale-110 transition-transform" title="Setează Principală"><Star size={14} /></button>
-                            <button onClick={() => moveImage(idx, 'left')} disabled={idx === 0} className="p-1.5 bg-white/20 text-white rounded-lg hover:bg-white/40 disabled:opacity-30"><ChevronLeft size={14} /></button>
-                            <button onClick={() => moveImage(idx, 'right')} disabled={idx === (currentCar.images?.length || 0) - 1} className="p-1.5 bg-white/20 text-white rounded-lg hover:bg-white/40 disabled:opacity-30"><ChevronRight size={14} /></button>
-                            <button onClick={() => removeImage(idx)} className="p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600"><Trash2 size={14} /></button>
-                         </div>
-                         {idx === 0 && <div className="absolute top-2 left-2 bg-gold-500 text-black text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">PRINCIPALĂ</div>}
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-fade-in overflow-y-auto">
+          <div className="bg-white dark:bg-[#121212] w-full max-w-4xl rounded-2xl border border-gold-500/30 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden my-auto">
+             <div className="p-6 border-b border-gray-200 dark:border-white/10 flex justify-between items-center bg-gray-50 dark:bg-white/5">
+                <h2 className="text-2xl font-bold font-display text-gray-900 dark:text-white">{currentCar.id ? 'Editează Mașină' : 'Adaugă Mașină Nouă'}</h2>
+                <button onClick={() => setIsEditing(false)} className="text-gray-500 hover:text-red-500"><X size={24} /></button>
+             </div>
+             
+             <div className="p-6 overflow-y-auto custom-scrollbar space-y-8">
+                {/* Basic Info */}
+                <section>
+                   <h3 className="text-gold-500 font-bold uppercase text-xs tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Informații De Bază</h3>
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Marcă</label>
+                         <select value={currentCar.make} onChange={(e) => setCurrentCar({...currentCar, make: e.target.value})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white">
+                            {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+                         </select>
                       </div>
-                    ))}
-                 </div>
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Model</label>
+                         <input type="text" value={currentCar.model || ''} onChange={(e) => setCurrentCar({...currentCar, model: e.target.value})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white" />
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Preț (€)</label>
+                         <input type="number" value={currentCar.price || 0} onChange={(e) => setCurrentCar({...currentCar, price: Number(e.target.value)})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white" />
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">An</label>
+                         <input type="number" value={currentCar.year || new Date().getFullYear()} onChange={(e) => setCurrentCar({...currentCar, year: Number(e.target.value)})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white" />
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Km</label>
+                         <input type="number" value={currentCar.mileage || 0} onChange={(e) => setCurrentCar({...currentCar, mileage: Number(e.target.value)})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white" />
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Combustibil</label>
+                         <select value={currentCar.fuel} onChange={(e) => setCurrentCar({...currentCar, fuel: e.target.value})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white">
+                            {FUELS.map(f => <option key={f} value={f}>{f}</option>)}
+                         </select>
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Transmisie</label>
+                         <select value={currentCar.transmission} onChange={(e) => setCurrentCar({...currentCar, transmission: e.target.value as any})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white">
+                            <option value="Automată">Automată</option>
+                            <option value="Manuală">Manuală</option>
+                         </select>
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Caroserie</label>
+                         <select value={currentCar.bodyType} onChange={(e) => setCurrentCar({...currentCar, bodyType: e.target.value as any})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white">
+                            {BODY_TYPES.map(b => <option key={b} value={b}>{b}</option>)}
+                         </select>
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Putere (CP)</label>
+                         <input type="number" value={currentCar.power || 0} onChange={(e) => setCurrentCar({...currentCar, power: Number(e.target.value)})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white" />
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Motor (cm3/L)</label>
+                         <input type="text" value={currentCar.engineSize || ''} onChange={(e) => setCurrentCar({...currentCar, engineSize: e.target.value})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white" />
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Locație</label>
+                         <select value={currentCar.location} onChange={(e) => setCurrentCar({...currentCar, location: e.target.value})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white">
+                            {LOCATIONS.map(l => <option key={l} value={l}>{l}</option>)}
+                         </select>
+                      </div>
+                       <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Norma Poluare</label>
+                         <select value={currentCar.pollutionStandard} onChange={(e) => setCurrentCar({...currentCar, pollutionStandard: e.target.value})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white">
+                            {POLLUTION_STANDARDS.map(p => <option key={p} value={p}>{p}</option>)}
+                         </select>
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Tracțiune</label>
+                         <select value={currentCar.traction} onChange={(e) => setCurrentCar({...currentCar, traction: e.target.value})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white">
+                            {TRACTIONS.map(t => <option key={t} value={t}>{t}</option>)}
+                         </select>
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Culoare</label>
+                         <input type="text" value={currentCar.color || ''} onChange={(e) => setCurrentCar({...currentCar, color: e.target.value})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white" />
+                      </div>
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">VIN</label>
+                         <input type="text" value={currentCar.vin || ''} onChange={(e) => setCurrentCar({...currentCar, vin: e.target.value})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white" />
+                      </div>
+                   </div>
+                   
+                   <div className="mt-4 flex gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                         <input type="checkbox" checked={currentCar.isHotDeal || false} onChange={(e) => setCurrentCar({...currentCar, isHotDeal: e.target.checked})} className="accent-gold-500 w-5 h-5" />
+                         <span className="text-gray-900 dark:text-white font-bold">Hot Deal (Promo)</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                         <input type="checkbox" checked={currentCar.isSold || false} onChange={(e) => setCurrentCar({...currentCar, isSold: e.target.checked})} className="accent-red-500 w-5 h-5" />
+                         <span className="text-gray-900 dark:text-white font-bold text-red-500">Vândut</span>
+                      </label>
+                   </div>
+                </section>
 
-                 {/* External Link Input */}
-                 <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                      <input 
-                        type="text" 
-                        value={imageInput} 
-                        onChange={(e) => setImageInput(e.target.value)}
-                        onKeyDown={handleImageInputKeyDown}
-                        placeholder="Adaugă link-uri externe (separate prin spațiu)..." 
-                        className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm outline-none focus:border-gold-500"
-                      />
-                    </div>
-                    <button onClick={addImage} className="px-4 bg-gray-200 dark:bg-white/10 hover:bg-gold-500 hover:text-black rounded-lg transition-colors font-bold text-sm">Adaugă</button>
-                    <button onClick={handlePasteFromButton} className="px-4 bg-gray-200 dark:bg-white/10 hover:bg-blue-500 hover:text-white rounded-lg transition-colors flex items-center gap-2 font-bold text-sm"><Clipboard size={16} /> Paste</button>
-                 </div>
-              </section>
+                {/* Images */}
+                <section>
+                   <h3 className="text-gold-500 font-bold uppercase text-xs tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Galerie Foto</h3>
+                   
+                   <div className="flex flex-col md:flex-row gap-4 mb-4">
+                      <div className="flex-1 flex gap-2">
+                         <input 
+                           type="text" 
+                           value={imageInput} 
+                           onChange={(e) => setImageInput(e.target.value)} 
+                           onKeyDown={handleImageInputKeyDown}
+                           placeholder="URL Imagine (sau Paste)" 
+                           className="flex-1 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white" 
+                         />
+                         <button onClick={addImage} className="bg-gray-200 dark:bg-white/10 px-4 rounded hover:bg-gold-500 hover:text-black transition-colors"><Plus /></button>
+                         <button onClick={handlePasteFromButton} className="bg-gray-200 dark:bg-white/10 px-4 rounded hover:bg-gold-500 hover:text-black transition-colors" title="Paste din Clipboard"><Clipboard /></button>
+                      </div>
+                      
+                      <div className="relative">
+                         <input 
+                           type="file" 
+                           multiple 
+                           accept="image/*" 
+                           ref={fileInputRef}
+                           onChange={handleFileUpload} 
+                           className="hidden" 
+                         />
+                         <button 
+                           onClick={() => fileInputRef.current?.click()} 
+                           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded flex items-center gap-2"
+                           disabled={uploadingCount > 0}
+                         >
+                           {uploadingCount > 0 ? <Loader2 className="animate-spin" /> : <CloudUpload />}
+                           Upload
+                         </button>
+                      </div>
+                   </div>
 
-              {/* Basic Info */}
-              <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Marcă</label>
-                    <select 
-                      value={currentCar.make} 
-                      onChange={(e) => setCurrentCar({...currentCar, make: e.target.value})}
-                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500"
-                    >
-                      {BRANDS.map(brand => <option key={brand} value={brand}>{brand}</option>)}
-                    </select>
-                 </div>
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Model</label>
-                    <input 
-                      type="text" 
-                      value={currentCar.model || ''} 
-                      onChange={(e) => setCurrentCar({...currentCar, model: e.target.value})}
-                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500"
-                      placeholder="Ex: X5 M-Sport"
-                    />
-                 </div>
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">An Fabricație</label>
-                    <input 
-                      type="number" 
-                      value={currentCar.year || ''} 
-                      onChange={(e) => setCurrentCar({...currentCar, year: Number(e.target.value)})}
-                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500"
-                    />
-                 </div>
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Preț (€)</label>
-                    <input 
-                      type="number" 
-                      value={currentCar.price || ''} 
-                      onChange={(e) => setCurrentCar({...currentCar, price: Number(e.target.value)})}
-                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500 font-bold"
-                    />
-                 </div>
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Rulaj (km)</label>
-                    <input 
-                      type="number" 
-                      value={currentCar.mileage || ''} 
-                      onChange={(e) => setCurrentCar({...currentCar, mileage: Number(e.target.value)})}
-                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500"
-                    />
-                 </div>
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Combustibil</label>
-                    <select 
-                      value={currentCar.fuel} 
-                      onChange={(e) => setCurrentCar({...currentCar, fuel: e.target.value as any})}
-                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500"
-                    >
-                      {FUELS.map(fuel => <option key={fuel} value={fuel}>{fuel}</option>)}
-                    </select>
-                 </div>
-              </section>
+                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {currentCar.images?.map((img, idx) => (
+                         <div key={idx} className="relative group aspect-video rounded-lg overflow-hidden border border-gray-700">
+                            <img src={img} alt={`Car ${idx}`} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                               <button onClick={() => setAsCover(idx)} className="p-1.5 bg-gold-500 text-black rounded hover:scale-110" title="Setează ca principală"><Star size={16} /></button>
+                               <button onClick={() => moveImage(idx, 'left')} disabled={idx === 0} className="p-1.5 bg-white text-black rounded hover:scale-110 disabled:opacity-50"><ChevronLeft size={16} /></button>
+                               <button onClick={() => moveImage(idx, 'right')} disabled={idx === (currentCar.images?.length || 0) - 1} className="p-1.5 bg-white text-black rounded hover:scale-110 disabled:opacity-50"><ChevronRight size={16} /></button>
+                               <button onClick={() => removeImage(idx)} className="p-1.5 bg-red-500 text-white rounded hover:scale-110"><Trash2 size={16} /></button>
+                            </div>
+                            {idx === 0 && <span className="absolute top-1 left-1 bg-gold-500 text-black text-[10px] font-bold px-1.5 rounded">COVER</span>}
+                         </div>
+                      ))}
+                   </div>
+                </section>
 
-              {/* Status Toggles */}
-              <section className="flex flex-wrap gap-4 p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/5">
-                 <label className="flex items-center gap-3 cursor-pointer">
-                    <div className={`w-12 h-6 rounded-full p-1 transition-colors ${currentCar.isHotDeal ? 'bg-gold-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
-                       <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform ${currentCar.isHotDeal ? 'translate-x-6' : 'translate-x-0'}`} />
-                    </div>
-                    <input type="checkbox" className="hidden" checked={currentCar.isHotDeal || false} onChange={(e) => setCurrentCar({...currentCar, isHotDeal: e.target.checked})} />
-                    <span className="font-bold text-sm">🔥 Hot Deal</span>
-                 </label>
+                {/* Description */}
+                <section>
+                   <h3 className="text-gold-500 font-bold uppercase text-xs tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Descriere</h3>
+                   <textarea 
+                     value={currentCar.description || ''} 
+                     onChange={(e) => setCurrentCar({...currentCar, description: e.target.value})} 
+                     className="w-full h-40 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-4 text-gray-900 dark:text-white resize-none leading-relaxed"
+                     placeholder="Descriere detaliată..."
+                   />
+                </section>
 
-                 <label className="flex items-center gap-3 cursor-pointer">
-                    <div className={`w-12 h-6 rounded-full p-1 transition-colors ${currentCar.isSold ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
-                       <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform ${currentCar.isSold ? 'translate-x-6' : 'translate-x-0'}`} />
-                    </div>
-                    <input type="checkbox" className="hidden" checked={currentCar.isSold || false} onChange={(e) => setCurrentCar({...currentCar, isSold: e.target.checked})} />
-                    <span className="font-bold text-sm text-red-500">❌ Vândut</span>
-                 </label>
-              </section>
-
-              {/* Technical Details */}
-              <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Transmisie</label>
-                    <select 
-                      value={currentCar.transmission} 
-                      onChange={(e) => setCurrentCar({...currentCar, transmission: e.target.value as any})}
-                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500"
-                    >
-                      <option value="Automată">Automată</option>
-                      <option value="Manuală">Manuală</option>
-                    </select>
-                 </div>
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Caroserie</label>
-                    <select 
-                      value={currentCar.bodyType} 
-                      onChange={(e) => setCurrentCar({...currentCar, bodyType: e.target.value as any})}
-                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500"
-                    >
-                      {BODY_TYPES.map(bt => <option key={bt} value={bt}>{bt}</option>)}
-                    </select>
-                 </div>
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Locație</label>
-                    <select 
-                      value={currentCar.location} 
-                      onChange={(e) => setCurrentCar({...currentCar, location: e.target.value})}
-                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500"
-                    >
-                      {LOCATIONS.map(loc => <option key={loc} value={loc}>{loc}</option>)}
-                    </select>
-                 </div>
-                 
-                 {/* NEW: Pollution Standard */}
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Norma Poluare</label>
-                    <select 
-                      value={currentCar.pollutionStandard} 
-                      onChange={(e) => setCurrentCar({...currentCar, pollutionStandard: e.target.value})}
-                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500"
-                    >
-                      <option value="">Alege...</option>
-                      {POLLUTION_STANDARDS.map(std => <option key={std} value={std}>{std}</option>)}
-                    </select>
-                 </div>
-
-                 {/* NEW: Color Input (Typeable) */}
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Culoare</label>
-                    <input 
-                      type="text" 
-                      value={currentCar.color || ''} 
-                      onChange={(e) => setCurrentCar({...currentCar, color: e.target.value})}
-                      className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500"
-                      placeholder="Ex: Negru Metalizat"
-                    />
-                 </div>
-
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Putere (CP)</label>
-                    <input type="number" value={currentCar.power || ''} onChange={(e) => setCurrentCar({...currentCar, power: Number(e.target.value)})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500" />
-                 </div>
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Motor (L)</label>
-                    <input type="text" value={currentCar.engineSize || ''} onChange={(e) => setCurrentCar({...currentCar, engineSize: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500" placeholder="Ex: 2.0L" />
-                 </div>
-                 <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">VIN</label>
-                    <input type="text" value={currentCar.vin || ''} onChange={(e) => setCurrentCar({...currentCar, vin: e.target.value})} className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-3 outline-none focus:border-gold-500" />
-                 </div>
-              </section>
-
-              {/* Description */}
-              <section>
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">Descriere Detaliată</label>
-                 <textarea 
-                   rows={6}
-                   value={currentCar.description || ''}
-                   onChange={(e) => setCurrentCar({...currentCar, description: e.target.value})}
-                   className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg p-4 outline-none focus:border-gold-500 text-sm leading-relaxed"
-                 />
-              </section>
-
-              {/* Features */}
-              <section>
-                 <label className="text-xs font-bold text-gray-500 uppercase mb-3 block">Dotări</label>
-                 
-                 <div className="flex gap-2 mb-4">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                      <input 
-                         type="text" 
-                         value={featureInput}
-                         onChange={(e) => {
+                {/* Features */}
+                <section>
+                   <h3 className="text-gold-500 font-bold uppercase text-xs tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Dotări</h3>
+                   
+                   <div className="flex gap-2 mb-4">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input 
+                          type="text" 
+                          value={featureInput}
+                          onChange={(e) => {
                              setFeatureInput(e.target.value);
                              setFeatureSearch(e.target.value);
-                         }}
-                         onKeyDown={addFeature}
-                         placeholder="Caută sau adaugă dotare..."
-                         className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg pl-10 pr-4 py-3 outline-none focus:border-gold-500"
-                      />
-                    </div>
-                    <button onClick={addFeature} className="px-4 bg-gray-200 dark:bg-white/10 hover:bg-gold-500 hover:text-black rounded-lg transition-colors font-bold text-sm">Adaugă</button>
-                 </div>
+                          }}
+                          onKeyDown={addFeature}
+                          placeholder="Caută sau adaugă dotare..." 
+                          className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded pl-10 pr-4 py-2 text-gray-900 dark:text-white"
+                        />
+                      </div>
+                      <button onClick={addFeature} className="bg-gray-200 dark:bg-white/10 px-4 rounded hover:bg-gold-500 hover:text-black transition-colors"><Plus /></button>
+                   </div>
 
-                 {/* Available Features List */}
-                 <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto custom-scrollbar p-2 border border-gray-200 dark:border-white/5 rounded-lg mb-4">
-                     {CAR_FEATURES.filter(f => f.toLowerCase().includes(featureSearch.toLowerCase())).map(f => (
+                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-h-60 overflow-y-auto custom-scrollbar p-1">
+                      {CAR_FEATURES.filter(f => f.toLowerCase().includes(featureSearch.toLowerCase())).map(feature => (
                          <button 
-                            key={f} 
-                            onClick={() => toggleFeature(f)}
-                            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
-                                (currentCar.features || []).includes(f) 
-                                  ? 'bg-gold-500 border-gold-500 text-black' 
-                                  : 'bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 hover:border-gold-500'
-                            }`}
+                           key={feature}
+                           onClick={() => toggleFeature(feature)}
+                           className={`text-left px-3 py-2 rounded text-sm transition-colors flex items-center justify-between group ${currentCar.features?.includes(feature) ? 'bg-gold-500 text-black font-bold' : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10'}`}
                          >
-                            {f}
+                            {feature}
+                            {currentCar.features?.includes(feature) && <Check size={14} />}
                          </button>
-                     ))}
-                 </div>
+                      ))}
+                   </div>
+                   
+                   {/* Custom added features that are not in the standard list */}
+                   {currentCar.features && currentCar.features.some(f => !CAR_FEATURES.includes(f)) && (
+                      <div className="mt-4">
+                         <h4 className="text-xs font-bold text-gray-500 mb-2">Dotări Extra Adăugate:</h4>
+                         <div className="flex flex-wrap gap-2">
+                            {currentCar.features.filter(f => !CAR_FEATURES.includes(f)).map(f => (
+                               <span key={f} className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded text-sm flex items-center gap-2">
+                                  {f}
+                                  <button onClick={() => toggleFeature(f)} className="hover:text-white"><X size={14} /></button>
+                               </span>
+                            ))}
+                         </div>
+                      </div>
+                   )}
+                </section>
+             </div>
 
-                 {/* Selected Features */}
-                 <div className="flex flex-wrap gap-2">
-                    {(currentCar.features || []).map((f, i) => (
-                       <span key={i} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20">
-                          {f}
-                          <button onClick={() => toggleFeature(f)} className="hover:text-red-500"><X size={12} /></button>
-                       </span>
-                    ))}
-                 </div>
-              </section>
-
-            </div>
-
-            <div className="p-6 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 rounded-b-2xl flex justify-end gap-4">
-              <button onClick={() => setIsEditing(false)} className="px-6 py-3 rounded-xl border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 font-bold hover:bg-white/5 transition-colors">Anulează</button>
-              <button onClick={handleSave} className="px-8 py-3 rounded-xl bg-gold-500 text-black font-bold hover:bg-gold-600 shadow-lg flex items-center gap-2">
-                 <Save size={18} /> Salvează
-              </button>
-            </div>
+             <div className="p-6 border-t border-gray-200 dark:border-white/10 flex justify-end gap-4 bg-gray-50 dark:bg-white/5">
+                <button onClick={() => setIsEditing(false)} className="px-6 py-3 rounded-xl border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-white/10 font-bold transition-colors">Anulează</button>
+                <button 
+                   onClick={handleSave} 
+                   disabled={uploadingCount > 0}
+                   className="px-8 py-3 rounded-xl bg-gold-500 hover:bg-gold-600 text-black font-bold shadow-lg transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                   {uploadingCount > 0 ? <Loader2 className="animate-spin" /> : <Save />}
+                   Salvează
+                </button>
+             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 };

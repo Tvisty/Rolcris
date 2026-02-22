@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle, AlertTriangle, Maximize2, Palette, Leaf } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle, AlertTriangle, Maximize2, Palette, Leaf, Compass } from 'lucide-react';
 import { useCars } from '../context/CarContext';
 
 const CarDetail: React.FC = () => {
@@ -429,6 +429,7 @@ const CarDetail: React.FC = () => {
               )}
 
               <SpecItem icon={Layout} label="Portiere" value={car.doors || '4/5'} />
+              {car.traction && <SpecItem icon={Compass} label="Tracțiune" value={car.traction} />}
               <SpecItem icon={Fingerprint} label="VIN" value={car.vin || 'Nespecificat'} />
             </div>
 
