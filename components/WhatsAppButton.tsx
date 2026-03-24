@@ -3,7 +3,8 @@ import { MessageCircle } from 'lucide-react';
 
 const WhatsAppButton: React.FC = () => {
   const phoneNumber = "40740513713"; 
-  const message = "Salut! Doresc mai multe detalii despre oferta Autoparc RolCris.";
+  const currentUrl = window.location.href;
+  const message = `Salut! Doresc mai multe detalii despre oferta Autoparc RolCris. Link: ${currentUrl}`;
   
   return (
     <a

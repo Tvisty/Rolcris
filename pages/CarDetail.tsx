@@ -150,7 +150,7 @@ const CarDetail: React.FC = () => {
     </div>
   );
 
-  const whatsappMessage = `Salut! Sunt interesat de ${car.make} ${car.model} (${car.year}) - ID: ${car.id}. Vă rog să îmi oferiți mai multe detalii.`;
+  const whatsappMessage = `Salut! Sunt interesat de ${car.make} ${car.model} (${car.year}), preț: ${car.price.toLocaleString()} EUR, rulaj: ${car.mileage.toLocaleString()} km - ID: ${car.id}. Vă rog să îmi oferiți mai multe detalii.`;
   const whatsappLink = `https://wa.me/40740513713?text=${encodeURIComponent(whatsappMessage)}`;
 
   // --- FULL SCREEN GALLERY MODAL ---
