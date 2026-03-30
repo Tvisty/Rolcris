@@ -185,14 +185,15 @@ const About: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-display font-bold text-gray-900 dark:text-white mb-4">Unde ne găsiți</h2>
-            <p className="text-gray-500 max-w-2xl mx-auto">Suntem prezenți în 3 locații strategice pentru a fi mai aproape de tine.</p>
+            <p className="text-gray-500 max-w-2xl mx-auto">Suntem prezenți în 4 locații strategice pentru a fi mai aproape de tine.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               { city: 'Satu Mare', addr: 'B-dul Lucian Blaga 347', tel: '0740 513 713', color: 'gold' },
               { city: 'Seini', addr: 'Piața Unirii 2', tel: '0745 123 456', color: 'gray' },
               { city: 'Tășnad', addr: 'Str. N. Bălcescu 19', tel: '0742 987 654', color: 'gray' },
+              { city: 'Marghita', addr: 'Str. 1 Decembrie Nr. 25', tel: '0740 513 713', color: 'gray' },
             ].map((loc, i) => (
               <div key={i} className="bg-white dark:bg-[#121212] p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 hover:border-gold-500/30 transition-all">
                 <MapPin className="text-gold-500 mb-4" size={32} />

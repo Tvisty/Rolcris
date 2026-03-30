@@ -22,6 +22,7 @@ const WEBSITE_KNOWLEDGE_BASE = `
 1. Satu Mare: B-dul Lucian Blaga 347, Jud. Satu Mare.
 2. Seini: Piața Unirii 2, Jud. Maramureș.
 3. Tășnad: Str. N. Bălcescu 19, Jud. Satu Mare.
+4. Marghita: Str. 1 Decembrie Nr. 25, Jud. Bihor.
 - Telefon General: 0740 513 713 (Răspundem și pe WhatsApp).
 - Email: autoparcrolcris@gmail.com
 - Program: Luni - Vineri (09:00 - 18:00), Sâmbătă (09:00 - 14:00), Duminică (Închis).

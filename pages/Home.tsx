@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle, MapPin, Phone } from 'lucide-react';
 import SearchWidget from '../components/SearchWidget';
 import CarCard from '../components/CarCard';
 import { BRANDS } from '../constants';
@@ -86,7 +86,7 @@ const BrandLogo = ({ brand }: { brand: string }) => {
 const Home: React.FC = () => {
   const { cars } = useCars();
   const hotDeals = cars.filter(c => c.isHotDeal).slice(0, 4);
-  const [heroImage, setHeroImage] = useState("https://i.imgur.com/00Ys6FS.png");
+  const [heroImage, setHeroImage] = useState("https://i.imgur.com/QnHrLRj.jpg");
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Filter out specific brands from the homepage logo display
@@ -103,34 +103,94 @@ const Home: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/90 via-transparent to-transparent z-10" />
           <img 
             src={heroImage} 
-            alt="Luxury Car" 
+            alt="Luxury Car Light" 
             referrerPolicy="no-referrer"
             onLoad={() => setIsLoaded(true)}
-            className="w-full h-full object-cover object-center scale-105 animate-[pulse_10s_ease-in-out_infinite] transform transition-transform duration-[20s] hover:scale-110"
+            className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 animate-[pulse_10s_ease-in-out_infinite] transform transition-transform duration-[20s] hover:scale-110 block dark:hidden"
             style={{ animation: 'none' }} 
             onError={() => {
               setHeroImage("https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=2070&auto=format&fit=crop");
             }}
           />
+          <img 
+            src="https://i.imgur.com/nSNoUsS.jpg" 
+            alt="Luxury Car Dark" 
+            referrerPolicy="no-referrer"
+            onLoad={() => setIsLoaded(true)}
+            className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 animate-[pulse_10s_ease-in-out_infinite] transform transition-transform duration-[20s] hover:scale-110 hidden dark:block"
+            style={{ animation: 'none' }} 
+          />
         </div>
 
-        <div className="relative z-20 text-center max-w-4xl px-4 pt-32 pb-12 md:pt-0 md:mt-[-60px]">
+        <div className="relative z-20 text-center max-w-6xl px-4 pt-32 pb-12 md:pt-0 md:mt-[-60px]">
           <h2 
             className="text-gold-500 font-black tracking-[0.2em] uppercase text-3xl md:text-5xl mb-6 animate-fade-in-up"
             style={{ textShadow: '0 4px 8px rgba(0,0,0,0.9), 0 0 30px rgba(197,160,89,0.4)' }}
           >
             Autoparc RolCris
           </h2>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-white mb-6 leading-tight drop-shadow-2xl">
-            Găsește Mașina <br/> Visurilor Tale
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white mb-6 leading-tight drop-shadow-2xl">
+            Vii cu mașina veche <br/> și pleci cu una nouă!
           </h1>
-          <p className="text-gray-200 text-lg md:text-xl font-light mb-10 max-w-2xl mx-auto drop-shadow-lg shadow-black/50">
-            Calitate Premium. Transparență Totală. O selecție exclusivistă de automobile verificate pentru cei care nu acceptă compromisuri.
-          </p>
-          <div className="flex flex-col md:flex-row gap-4 justify-center">
+          <div className="flex flex-col md:flex-row gap-4 justify-center mb-12">
             <Link to="/inventory" className="bg-gold-500 hover:bg-gold-600 text-black px-8 py-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(197,160,89,0.4)]">
               Vezi Stocul Disponibil
             </Link>
+          </div>
+
+          {/* Location Buttons */}
+          <div className="flex flex-wrap justify-center gap-4 max-w-5xl mx-auto animate-fade-in-up delay-300">
+            {/* Satu Mare */}
+            <div className="flex items-center bg-black/50 backdrop-blur-md border border-white/10 rounded-full pl-4 pr-2 py-2 hover:border-gold-500/50 transition-all shadow-xl">
+              <a href="https://www.google.com/maps?q=Bulevardul+Lucian+Blaga+347,+Satu+Mare" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
+                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
+                <span className="font-semibold text-sm md:text-base pr-2">Satu Mare</span>
+              </a>
+              <div className="w-px h-6 bg-white/20 mx-2"></div>
+              <a href="tel:0740513713" className="flex items-center gap-2 bg-white/5 hover:bg-gold-500/20 text-gray-200 hover:text-white px-3 py-1.5 rounded-full transition-colors">
+                <Phone size={14} className="text-gold-500" />
+                <span className="font-medium text-sm">0740 513 713</span>
+              </a>
+            </div>
+
+            {/* Seini */}
+            <div className="flex items-center bg-black/50 backdrop-blur-md border border-white/10 rounded-full pl-4 pr-2 py-2 hover:border-gold-500/50 transition-all shadow-xl">
+              <a href="https://www.google.com/maps?q=Piața+Unirii+2,+Seini" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
+                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
+                <span className="font-semibold text-sm md:text-base pr-2">Seini</span>
+              </a>
+              <div className="w-px h-6 bg-white/20 mx-2"></div>
+              <a href="tel:0745042593" className="flex items-center gap-2 bg-white/5 hover:bg-gold-500/20 text-gray-200 hover:text-white px-3 py-1.5 rounded-full transition-colors">
+                <Phone size={14} className="text-gold-500" />
+                <span className="font-medium text-sm">0745 042 593</span>
+              </a>
+            </div>
+
+            {/* Tășnad */}
+            <div className="flex items-center bg-black/50 backdrop-blur-md border border-white/10 rounded-full pl-4 pr-2 py-2 hover:border-gold-500/50 transition-all shadow-xl">
+              <a href="https://www.google.com/maps?q=Strada+Nicolae+Bălcescu+19,+Tășnad" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
+                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
+                <span className="font-semibold text-sm md:text-base pr-2">Tășnad</span>
+              </a>
+              <div className="w-px h-6 bg-white/20 mx-2"></div>
+              <a href="tel:0745568886" className="flex items-center gap-2 bg-white/5 hover:bg-gold-500/20 text-gray-200 hover:text-white px-3 py-1.5 rounded-full transition-colors">
+                <Phone size={14} className="text-gold-500" />
+                <span className="font-medium text-sm">0745 568 886</span>
+              </a>
+            </div>
+
+            {/* Marghita */}
+            <div className="flex items-center bg-black/50 backdrop-blur-md border border-white/10 rounded-full pl-4 pr-2 py-2 hover:border-gold-500/50 transition-all shadow-xl">
+              <a href="https://www.google.com/maps?q=Strada+1+Decembrie+Nr.+25,+Marghita,+Bihor" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
+                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
+                <span className="font-semibold text-sm md:text-base pr-2">Marghita</span>
+              </a>
+              <div className="w-px h-6 bg-white/20 mx-2"></div>
+              <a href="tel:0774955698" className="flex items-center gap-2 bg-white/5 hover:bg-gold-500/20 text-gray-200 hover:text-white px-3 py-1.5 rounded-full transition-colors">
+                <Phone size={14} className="text-gold-500" />
+                <span className="font-medium text-sm">0774 955 698</span>
+              </a>
+            </div>
           </div>
         </div>
 

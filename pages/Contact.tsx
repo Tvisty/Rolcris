@@ -64,6 +64,12 @@ const Contact: React.FC = () => {
       tel: '0742 987 654', 
       mapQuery: 'Strada+Nicolae+Bălcescu+19,+Tășnad' 
     },
+    { 
+      city: 'Marghita', 
+      addr: 'Str. 1 Decembrie Nr. 25, Jud. Bihor', 
+      tel: '0740 513 713', 
+      mapQuery: 'Strada+1+Decembrie+Nr.+25,+Marghita,+Bihor' 
+    },
   ];
 
   return (
@@ -250,7 +256,7 @@ const Contact: React.FC = () => {
       {/* Visual Locations Section (Functional Maps) */}
       <section className="max-w-7xl mx-auto mb-16">
         <h2 className="text-3xl font-display font-bold text-gray-900 dark:text-white mb-12 text-center">Harta Locațiilor</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {locations.map((loc, i) => (
             <div key={i} className="flex flex-col bg-white dark:bg-[#121212] rounded-2xl overflow-hidden shadow-xl border border-gray-200 dark:border-white/10 group hover:border-gold-500/50 transition-all">
               {/* Map Container */}
