@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../supabase';
 import { SeasonalTheme, HolidayPrize } from '../types';
 
 type Theme = 'dark' | 'light';
@@ -40,40 +39,43 @@ export const ThemeProvider: React.FC<React.PropsWithChildren> = ({ children }) =
     }
   }, [theme]);
 
-  // Sync Seasonal Theme & Prize from Firebase
+  // Sync Seasonal Theme & Prize from Supabase
   useEffect(() => {
-    if (!db) return;
-
-    try {
-      const unsubscribeConfig = onSnapshot(doc(db, 'settings', 'config'), (doc) => {
-        if (doc.exists()) {
-          const data = doc.data();
-          if (data.theme) {
-            setSeasonalThemeState(data.theme as SeasonalTheme);
-          }
+    const fetchSettings = async () => {
+      try {
+        const { data, error } = await supabase.from('settings').select('*');
+        if (!error && data) {
+           const config = data.find(d => d.id === 'config')?.data;
+           if(config && config.theme) {
+               setSeasonalThemeState(config.theme as SeasonalTheme);
+           }
+           const prize = data.find(d => d.id === 'prize')?.data;
+           if(prize) {
+               setHolidayPrize(prize as HolidayPrize);
+           } else {
+               setHolidayPrize({
+                 isEnabled: false,
+                 image: '',
+                 title: '',
+                 description: ''
+               });
+           }
         }
-      });
+      } catch (e) {
+        console.error("Failed to fetch settings", e);
+      }
+    };
+    
+    fetchSettings();
+    
+    const channel = supabase.channel('settings-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, payload => {
+         fetchSettings();
+      })
+      .subscribe();
 
-      const unsubscribePrize = onSnapshot(doc(db, 'settings', 'prize'), (doc) => {
-        if (doc.exists()) {
-          setHolidayPrize(doc.data() as HolidayPrize);
-        } else {
-          // Default empty prize
-          setHolidayPrize({
-            isEnabled: false,
-            image: '',
-            title: '',
-            description: ''
-          });
-        }
-      });
-
-      return () => {
-        unsubscribeConfig();
-        unsubscribePrize();
-      };
-    } catch (e) {
-      console.error("Failed to sync settings:", e);
+    return () => {
+       supabase.removeChannel(channel);
     }
   }, []);
 
@@ -83,23 +85,19 @@ export const ThemeProvider: React.FC<React.PropsWithChildren> = ({ children }) =
 
   const setSeasonalTheme = async (newTheme: SeasonalTheme) => {
     setSeasonalThemeState(newTheme); // Optimistic update
-    if (db) {
-      try {
-        await setDoc(doc(db, 'settings', 'config'), { theme: newTheme }, { merge: true });
-      } catch (e) {
-        console.error("Failed to save theme to Firebase:", e);
-      }
+    try {
+      await supabase.from('settings').upsert({ id: 'config', data: { theme: newTheme }});
+    } catch (e) {
+      console.error("Failed to save theme:", e);
     }
   };
 
   const saveHolidayPrize = async (prize: HolidayPrize) => {
     setHolidayPrize(prize); // Optimistic
-    if (db) {
-      try {
-        await setDoc(doc(db, 'settings', 'prize'), prize);
-      } catch (e) {
-        console.error("Failed to save prize:", e);
-      }
+    try {
+      await supabase.from('settings').upsert({ id: 'prize', data: prize });
+    } catch (e) {
+      console.error("Failed to save prize:", e);
     }
   };
 

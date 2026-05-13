@@ -1,10 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Car, Booking, ContactMessage, Auction, Bid } from '../types';
-import { db, auth, messaging, getToken, onMessage, storage } from '../firebase';
-import { collection, onSnapshot, addDoc, deleteDoc, updateDoc, doc, query, orderBy, where } from 'firebase/firestore';
-import { ref, deleteObject } from 'firebase/storage';
-import { onAuthStateChanged } from 'firebase/auth';
+import { supabase } from '../supabase';
 
 interface CarContextType {
   cars: Car[];
@@ -46,102 +43,10 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   const prevMessagesCount = useRef<number>(0);
   const isInitialLoad = useRef<boolean>(true);
 
+  // Notifications
   const requestNotificationPermission = async () => {
-    // 1. Check Browser Support
-    if (!('Notification' in window)) {
-      alert("Acest browser nu suportă notificări.");
-      return null;
-    }
-
-    // 2. Check Messaging Initialization
-    if (!messaging) {
-      console.error("Firebase Messaging failed to init.");
-      alert("Eroare Firebase Messaging. Verifică consola pentru detalii (posibil lipsă HTTPS).");
-      return null;
-    }
-
-    try {
-      // 3. Request Permission
-      const permission = await Notification.requestPermission();
-      
-      if (permission === 'denied') {
-        alert("Notificările sunt blocate din setările browserului. Te rog apasă pe lacătul din bara de adresă și permite notificările, apoi reîncarcă pagina.");
-        return null;
-      }
-
-      if (permission === 'granted') {
-        const vapidKey = process.env.VAPID_KEY;
-        
-        // --- VALIDATION START ---
-        if (!vapidKey || vapidKey.includes('PASTE_YOUR') || vapidKey.length < 10) {
-           alert("Eroare Configurare: Cheia VAPID este invalidă sau lipsește din fișierul .env.\n\nMergi în Firebase Console -> Project Settings -> Cloud Messaging -> Web Push Certificates, generează o cheie nouă și copiază 'Key pair'-ul în .env.");
-           return null;
-        }
-        
-        // Remove whitespace just in case
-        const cleanVapidKey = vapidKey.trim();
-        // --- VALIDATION END ---
-
-        // 4. Register Service Worker
-        let registration;
-        try {
-           // Explicitly try to register the SW located in public/firebase-messaging-sw.js
-           registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-           console.log('✅ Service Worker Registered:', registration);
-        } catch (swError: any) {
-           console.error("❌ Service Worker Error:", swError);
-           alert(`Eroare Service Worker: ${swError.message || "Fișierul nu a fost găsit"}. Asigură-te că 'firebase-messaging-sw.js' este în folderul 'public'.`);
-           return null;
-        }
-            
-        // 5. Get Token
-        try {
-          const token = await getToken(messaging, { 
-             vapidKey: cleanVapidKey,
-             serviceWorkerRegistration: registration 
-          });
-          
-          if (token) {
-            console.log('✅ FCM Token:', token);
-            setFcmToken(token);
-            return token;
-          } else {
-            console.warn('No registration token available.');
-          }
-        } catch (tokenError: any) {
-           console.error("❌ Token Error:", tokenError);
-           
-           if (tokenError.message && tokenError.message.includes("applicationServerKey")) {
-             alert("Eroare Critică Cheie VAPID: Cheia din .env nu este validă. Asigură-te că ai copiat 'Key pair' (cheia publică) din Firebase Console și nu altceva.");
-           } else {
-             alert(`Eroare la generarea token-ului: ${tokenError.message}`);
-           }
-        }
-      }
-    } catch (error) {
-      console.error('An error occurred while retrieving token.', error);
-      alert("A apărut o eroare neașteptată la activarea notificărilor.");
-    }
-    return null;
+     return null; // Disabled for now during migration
   };
-
-  useEffect(() => {
-    // Listener for foreground messages
-    if (messaging) {
-      onMessage(messaging, (payload) => {
-        console.log('📩 Message received in foreground:', payload);
-        const title = payload.notification?.title || 'Notificare Nouă';
-        const options = {
-          body: payload.notification?.body,
-          icon: 'https://i.imgur.com/e7JOUNo.png'
-        };
-        
-        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-           new Notification(title, options);
-        }
-      });
-    }
-  }, []);
 
   const triggerLocalNotification = (title: string, body: string) => {
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
@@ -160,264 +65,142 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   };
 
   useEffect(() => {
-    let unsubscribeSnapshot: (() => void) | undefined = undefined;
-    let unsubscribeBookings: (() => void) | undefined = undefined;
-    let unsubscribeMessages: (() => void) | undefined = undefined;
-    let unsubscribeAuctions: (() => void) | undefined = undefined;
-
-    const setupRealtimeListener = (user: any) => {
-      if (!db) {
-        setIsConnected(false);
-        setConnectionError("Firebase not initialized");
-        setCars([]);
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      setConnectionError(null);
-      
-      // Clean up previous listeners
-      if (unsubscribeSnapshot) unsubscribeSnapshot();
-      if (unsubscribeBookings) unsubscribeBookings();
-      if (unsubscribeMessages) unsubscribeMessages();
-      if (unsubscribeAuctions) unsubscribeAuctions();
-
-      console.log("🔄 Connecting to Firestore...");
-      
-      // 1. Cars Listener
-      const qCars = query(collection(db, "cars"));
-      unsubscribeSnapshot = onSnapshot(qCars, 
-        (querySnapshot) => {
-          setIsConnected(true);
-          const carList: Car[] = [];
-          querySnapshot.forEach((doc) => {
-            carList.push({ ...doc.data(), id: doc.id } as Car);
-          });
-          setCars(carList);
-          setIsLoading(false);
-        }, 
-        (error) => {
-          handleFirestoreError(error);
-        }
-      );
-
-      // 2. Bookings Listener (Ordered by date)
-      const qBookings = query(collection(db, "bookings"), orderBy("date", "asc"));
-      unsubscribeBookings = onSnapshot(qBookings, 
-        (querySnapshot) => {
-          const bookingList: Booking[] = [];
-          querySnapshot.forEach((doc) => {
-            bookingList.push({ ...doc.data(), id: doc.id } as Booking);
-          });
-          
-          if (!isInitialLoad.current && bookingList.length > prevBookingsCount.current) {
-             const newBooking = bookingList[bookingList.length - 1]; 
-             if (user) { 
-                triggerLocalNotification("O nouă programare!", `${newBooking.customerName} a solicitat ${newBooking.type}`);
-             }
-          }
-          prevBookingsCount.current = bookingList.length;
-          setBookings(bookingList);
-        },
-        (error) => console.warn("⚠️ Bookings fetch failed:", error.message)
-      );
-
-      // 3. Messages Listener (Ordered by date desc)
-      const qMessages = query(collection(db, "messages"), orderBy("date", "desc"));
-      unsubscribeMessages = onSnapshot(qMessages, 
-        (querySnapshot) => {
-          const messageList: ContactMessage[] = [];
-          querySnapshot.forEach((doc) => {
-            messageList.push({ ...doc.data(), id: doc.id } as ContactMessage);
-          });
-
-          if (!isInitialLoad.current && messageList.length > prevMessagesCount.current) {
-             const newMessage = messageList[0];
-             if (user) {
-                triggerLocalNotification("Mesaj Nou", `De la: ${newMessage.name}`);
-             }
-          }
-          prevMessagesCount.current = messageList.length;
-          setMessages(messageList);
-        },
-        (error) => console.warn("⚠️ Messages fetch failed:", error.message)
-      );
-
-      // 4. Auctions Listener
-      const qAuctions = query(collection(db, "auctions"));
-      unsubscribeAuctions = onSnapshot(qAuctions,
-        (querySnapshot) => {
-          const auctionList: Auction[] = [];
-          querySnapshot.forEach((doc) => {
-            auctionList.push({ ...doc.data(), id: doc.id } as Auction);
-          });
-          setAuctions(auctionList);
-          setTimeout(() => { isInitialLoad.current = false; }, 2000);
-        },
-        (error) => console.warn("⚠️ Auctions fetch failed:", error.message)
-      );
+    const fetchData = async () => {
+       setIsLoading(true);
+       try {
+           const [carsRes, bookingsRes, messagesRes, auctionsRes] = await Promise.all([
+               supabase.from('cars').select('*').order('createdAt', { ascending: false }),
+               supabase.from('bookings').select('*').order('date', { ascending: true }),
+               supabase.from('messages').select('*').order('date', { ascending: false }),
+               supabase.from('auctions').select('*')
+           ]);
+           
+           if(carsRes.data) setCars(carsRes.data as Car[]);
+           if(bookingsRes.data) {
+               setBookings(bookingsRes.data as Booking[]);
+               prevBookingsCount.current = bookingsRes.data.length;
+           }
+           if(messagesRes.data) {
+               setMessages(messagesRes.data as ContactMessage[]);
+               prevMessagesCount.current = messagesRes.data.length;
+           }
+           if(auctionsRes.data) setAuctions(auctionsRes.data as Auction[]);
+           
+           setIsConnected(true);
+           setConnectionError(null);
+           setTimeout(() => { isInitialLoad.current = false; }, 2000);
+       } catch (err: any) {
+           setIsConnected(false);
+           setConnectionError(err.message);
+       } finally {
+           setIsLoading(false);
+       }
     };
+    
+    fetchData();
 
-    const handleFirestoreError = (error: any) => {
-      let errorMessage = error.message;
-      if (error.code === 'permission-denied') {
-         console.warn("⚠️ Firestore Permission Denied.");
-         errorMessage = "Permission Denied: Check Firestore Rules";
-      } else if (error.code === 'unavailable') {
-         errorMessage = "Network/Client Offline";
-      }
-      setConnectionError(errorMessage);
-      setIsConnected(false);
-      setIsLoading(false);
-    }
-
-    let unsubscribeAuth = () => {};
-    if (auth) {
-      unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-        setupRealtimeListener(user);
-      });
-    }
+    // Subscribe to realtime changes
+    const channel = supabase.channel('schema-db-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cars' }, payload => {
+         fetchData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, payload => {
+         fetchData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, payload => {
+         fetchData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'auctions' }, payload => {
+         fetchData();
+      })
+      .subscribe();
 
     return () => {
-      if (unsubscribeSnapshot) unsubscribeSnapshot();
-      if (unsubscribeBookings) unsubscribeBookings();
-      if (unsubscribeMessages) unsubscribeMessages();
-      if (unsubscribeAuctions) unsubscribeAuctions();
-      unsubscribeAuth();
+      supabase.removeChannel(channel);
     };
   }, []);
 
-  // --- CAR ACTIONS ---
-
   const addCar = async (car: Car) => {
+    const { id, ...carData } = car;
     const tempId = Math.random().toString(36).substr(2, 9);
-    setCars(prev => [ { ...car, id: tempId }, ...prev ]);
-
-    if (db && isConnected) {
-      const { id, ...carData } = car;
-      try {
-        await addDoc(collection(db, "cars"), carData);
-      } catch (e: any) {
-        console.error("Add failed:", e);
-        setCars(prev => prev.filter(c => c.id !== tempId));
-      }
-    }
+    setCars(prev => [{ ...car, id: tempId }, ...prev]); // optimistic
+    
+    const payload = {
+        ...carData,
+        id: tempId,
+        createdAt: carData.createdAt || Date.now()
+    };
+    await supabase.from('cars').insert(payload);
   };
 
   const updateCar = async (updatedCar: Car) => {
     setCars(prev => prev.map(c => c.id === updatedCar.id ? updatedCar : c));
-    if (db && isConnected) {
-      try {
-        const carRef = doc(db, "cars", updatedCar.id);
-        const { id, ...carData } = updatedCar;
-        await updateDoc(carRef, carData as any);
-      } catch (e: any) {
-        console.error("Update failed:", e);
-      }
+    const { id, ...carData } = updatedCar;
+    
+    const payload = {
+        ...carData,
+        createdAt: carData.createdAt || Date.now()
     }
+    
+    await supabase.from('cars').update(payload).eq('id', id);
   };
 
   const deleteCar = async (id: string) => {
-    // 1. Find the car to get its images
     const carToDelete = cars.find(c => c.id === id);
-
-    // 2. Delete images from Storage if they exist and we are connected
-    if (carToDelete && carToDelete.images && storage) {
+    if (carToDelete && carToDelete.images) {
       const deletePromises = carToDelete.images.map(async (imgUrl) => {
-        // Only attempt to delete if it looks like a Firebase Storage URL
-        if (imgUrl.includes('firebasestorage.googleapis.com')) {
+        if (imgUrl.includes('supabase.co')) {
           try {
-            // ref() accepts a full URL for the file
-            const imageRef = ref(storage, imgUrl);
-            await deleteObject(imageRef);
-            console.log(`Successfully deleted image: ${imgUrl}`);
-          } catch (error) {
-            console.warn(`Failed to delete image ${imgUrl}:`, error);
-            // Proceed even if image deletion fails
+             // extract path
+             const parts = imgUrl.split('/car-images/');
+             if(parts.length > 1) {
+                 const path = parts[1];
+                 await supabase.storage.from('car-images').remove([path]);
+             }
+          } catch (e) {
+             console.warn('Storage delete err:', e);
           }
         }
       });
-
-      // Wait for image deletions (or failures) before deleting the doc
       await Promise.all(deletePromises);
     }
-
-    // 3. Optimistic UI update
+    
     setCars(prev => prev.filter(c => c.id !== id));
-
-    // 4. Delete Firestore Document
-    if (db && isConnected) {
-      try {
-        await deleteDoc(doc(db, "cars", id));
-      } catch (e: any) {
-        console.error("Delete failed:", e);
-        alert(`Eroare la ștergere: ${e.message}`);
-      }
-    }
+    await supabase.from('cars').delete().eq('id', id);
   };
 
-  // --- BOOKING ACTIONS ---
-
   const addBooking = async (booking: Booking) => {
-    if (db && isConnected) {
-      const { id, ...bookingData } = booking;
-      await addDoc(collection(db, "bookings"), bookingData);
-    } else {
-      setBookings(prev => [...prev, booking]);
-    }
+    const { id, ...bookingData } = booking;
+    await supabase.from('bookings').insert(bookingData);
   };
 
   const updateBookingStatus = async (id: string, status: Booking['status']) => {
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
-    if (db && isConnected) {
-      const bookingRef = doc(db, "bookings", id);
-      await updateDoc(bookingRef, { status });
-    }
+    await supabase.from('bookings').update({ status }).eq('id', id);
   };
 
   const deleteBooking = async (id: string) => {
     setBookings(prev => prev.filter(b => b.id !== id));
-    if (db && isConnected) {
-      await deleteDoc(doc(db, "bookings", id));
-    }
+    await supabase.from('bookings').delete().eq('id', id);
   };
 
-  // --- MESSAGE ACTIONS ---
-
   const addMessage = async (message: ContactMessage) => {
-    if (db && isConnected) {
-      const { id, ...msgData } = message;
-      await addDoc(collection(db, "messages"), msgData);
-    } else {
-      setMessages(prev => [message, ...prev]);
-    }
+    const { id, ...msgData } = message;
+    await supabase.from('messages').insert({ ...msgData, date: new Date(msgData.date).toISOString() });
   };
 
   const deleteMessage = async (id: string) => {
     setMessages(prev => prev.filter(m => m.id !== id));
-    if (db && isConnected) {
-      await deleteDoc(doc(db, "messages", id));
-    }
+    await supabase.from('messages').delete().eq('id', id);
   };
 
-  // --- AUCTION ACTIONS ---
-
   const createAuction = async (auction: Omit<Auction, 'id'>) => {
-    if (db && isConnected) {
-      await addDoc(collection(db, "auctions"), auction);
-    } else {
-      const newAuction = { ...auction, id: Math.random().toString(36).substr(2, 9) };
-      setAuctions(prev => [...prev, newAuction]);
-    }
+    await supabase.from('auctions').insert(auction);
   };
 
   const cancelAuction = async (id: string) => {
-    if (db && isConnected) {
-      await updateDoc(doc(db, "auctions", id), { status: 'cancelled' });
-    } else {
-      setAuctions(prev => prev.map(a => a.id === id ? { ...a, status: 'cancelled' } : a));
-    }
+    setAuctions(prev => prev.map(a => a.id === id ? { ...a, status: 'cancelled' } : a));
+    await supabase.from('auctions').update({ status: 'cancelled' }).eq('id', id);
   };
 
   const placeBid = async (auctionId: string, bid: Bid): Promise<{ success: boolean; message: string }> => {
@@ -444,17 +227,13 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
       extensionCount: newExtensionCount
     };
 
-    if (db && isConnected) {
-      try {
-        await updateDoc(doc(db, "auctions", auctionId), updatedData);
-        return { success: true, message: "Ofertă plasată cu succes!" };
-      } catch (e: any) {
-        return { success: false, message: "Eroare de rețea." };
-      }
-    } else {
-      setAuctions(prev => prev.map(a => a.id === auctionId ? { ...a, ...updatedData } : a));
-      return { success: true, message: "Ofertă plasată (Demo Mode)!" };
+    setAuctions(prev => prev.map(a => a.id === auctionId ? { ...a, ...updatedData } : a));
+    const { error } = await supabase.from('auctions').update(updatedData).eq('id', auctionId);
+    
+    if(error) {
+       return { success: false, message: "Eroare de rețea." };
     }
+    return { success: true, message: "Ofertă plasată cu succes!" };
   };
 
   return (

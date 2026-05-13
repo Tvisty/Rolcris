@@ -3,9 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useCars } from '../context/CarContext';
 import { useTheme } from '../context/ThemeContext';
 import { Car, Booking, ContactMessage, Auction, HolidayPrize } from '../types';
-import { auth, db, storage } from '../firebase';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from 'firebase/auth';
-import { ref, uploadString, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { supabase } from '../supabase';
 import { 
   Plus, Edit, Trash2, Save, X, Image as ImageIcon, 
   LogIn, Search, 
@@ -205,7 +203,7 @@ const Admin: React.FC = () => {
   const { seasonalTheme, setSeasonalTheme, holidayPrize, saveHolidayPrize } = useTheme();
 
   const [activeTab, setActiveTab] = useState<'inventory' | 'calendar' | 'messages' | 'auctions' | 'settings'>('inventory');
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any | null>(null);
   const [isDemoAuth, setIsDemoAuth] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -267,15 +265,16 @@ const Admin: React.FC = () => {
   const totalMessages = messages.length;
 
   useEffect(() => {
-    if (auth) {
-      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        setUser(currentUser);
-        setAuthLoading(false);
-      });
-      return () => unsubscribe();
-    } else {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
       setAuthLoading(false);
-    }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -308,27 +307,28 @@ const Admin: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (auth) {
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (error: any) {
+    try {
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
+        if (error) {
+            // fallback to demo
+            if (password === 'admin123') {
+                setIsDemoAuth(true);
+            } else {
+                showAlert('Eroare Autentificare', error.message + '. Sau folosește parola "admin123" pentru mod demo.');
+            }
+        }
+    } catch (error: any) {
         showAlert('Eroare Autentificare', error.message);
-      }
-    } else {
-      if (password === 'admin123') {
-        setIsDemoAuth(true);
-      } else {
-        showAlert('Eroare', 'Parola pentru Mod Demo este "admin123"');
-      }
     }
   };
 
   const handleLogout = async () => {
-    if (auth) await signOut(auth);
-    else {
-      setIsDemoAuth(false);
-      setPassword('');
-    }
+    await supabase.auth.signOut();
+    setIsDemoAuth(false);
+    setPassword('');
   };
 
   const handleEnableNotifications = async () => {
@@ -341,69 +341,7 @@ const Admin: React.FC = () => {
     }
   };
 
-  // --- SAFE MANUAL REPAIR ---
-  const handleFixCarImages = (e: React.MouseEvent, car: Car) => {
-    e.stopPropagation();
-    if (!storage) {
-        showAlert("Eroare", "Storage nu este configurat.");
-        return;
-    }
-    
-    showConfirm(
-      "Reparare Imagini",
-      `Ești sigur că vrei să repari imaginile pentru ${car.make} ${car.model}?\n\nProcesul va:\n1. Converti imaginile la WebP (rapid, 85% calitate)\n2. Redimensiona la 1920px\n3. Muta fișierele în Cloud Storage.`,
-      async () => {
-        setMigratingId(car.id);
-        const newImages: string[] = [];
-        let hasChanges = false;
-
-        try {
-            for (const img of car.images) {
-                if (isLegacyImage(img)) {
-                    try {
-                        console.log("Compressing legacy image...");
-                        // 1. Re-compress legacy string to optimized WebP base64
-                        const webpBase64 = await recompressBase64ToWebP(img);
-                        
-                        // 2. Upload the optimized WebP to Storage
-                        const fileName = `car-images/restored/${car.id}_${Math.random().toString(36).substr(2, 9)}.webp`;
-                        const storageRef = ref(storage, fileName);
-                        
-                        const metadata = {
-                          cacheControl: 'public, max-age=31536000, immutable',
-                          contentType: 'image/webp'
-                        };
-
-                        // ADDED METADATA FOR CACHING
-                        await uploadString(storageRef, webpBase64, 'data_url', metadata);
-                        const url = await getDownloadURL(storageRef);
-                        
-                        newImages.push(url);
-                        hasChanges = true;
-                    } catch (err) {
-                        console.error("Failed to fix image:", err);
-                        newImages.push(img);
-                    }
-                } else {
-                    newImages.push(img);
-                }
-            }
-
-            if (hasChanges) {
-                await updateCar({ ...car, images: newImages });
-                showAlert("Succes", `Imaginile pentru ${car.make} ${car.model} au fost optimizate și reparate.`);
-            } else {
-                showAlert("Info", "Nu au fost găsite imagini de reparat pentru această mașină.");
-            }
-
-        } catch (error: any) {
-            showAlert("Eroare", error.message);
-        } finally {
-            setMigratingId(null);
-        }
-      }
-    );
-  };
+  // Removed handleFixCarImages
 
   const handleAddNew = () => {
     const newId = Math.random().toString(36).substr(2, 9);
@@ -612,21 +550,28 @@ Oferim servicii complete prin biroul nostru de intermedieri:
         let finalUrl = "";
         try {
             const compressedBase64 = await compressImage(item.file);
-            if (storage) { 
-                try {
-                    const storageRef = ref(storage, `car-images/${Date.now()}_${Math.random().toString(36).substring(7)}.webp`);
-                    
-                    const metadata = {
-                      cacheControl: 'public, max-age=31536000, immutable',
-                      contentType: 'image/webp'
-                    };
-
-                    // ADDED METADATA FOR CACHING
-                    const uploadTask = uploadString(storageRef, compressedBase64, 'data_url', metadata);
-                    await Promise.race([ uploadTask, new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 15000)) ]);
-                    finalUrl = await getDownloadURL(storageRef);
-                } catch (err) { finalUrl = compressedBase64; }
-            } else { finalUrl = compressedBase64; }
+            try {
+                // Remove data:image/webp;base64, prefix
+                const base64Data = compressedBase64.split(',')[1];
+                const byteCharacters = atob(base64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blobUrl = new Blob([byteArray], {type: 'image/webp'});
+                
+                const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+                const { error } = await supabase.storage.from('car-images').upload(filePath, blobUrl, {
+                    contentType: 'image/webp',
+                    cacheControl: '31536000',
+                    upsert: false
+                });
+                
+                if (error) throw error;
+                const { data: { publicUrl } } = supabase.storage.from('car-images').getPublicUrl(filePath);
+                finalUrl = publicUrl;
+            } catch (err) { finalUrl = compressedBase64; }
         } catch (error) {
             setCurrentCar(prev => ({ ...prev, images: (prev.images || []).filter(img => img !== item.blob) }));
         } finally {
@@ -651,22 +596,24 @@ Oferim servicii complete prin biroul nostru de intermedieri:
     setIsAuctionUploading(true);
     try {
         const compressedDataUrl = await compressImage(files[0]);
-        
-        // Upload to Storage if available to prevent base64 bloat
-        if (storage) {
-            const storageRef = ref(storage, `auction-images/${Date.now()}_${Math.random().toString(36).substring(7)}.webp`);
-            
-            const metadata = {
-                cacheControl: 'public, max-age=31536000, immutable',
-                contentType: 'image/webp'
-            };
-
-            await uploadString(storageRef, compressedDataUrl, 'data_url', metadata);
-            const url = await getDownloadURL(storageRef);
-            setAuctionForm(prev => ({ ...prev, image: url }));
-        } else {
-            setAuctionForm(prev => ({ ...prev, image: compressedDataUrl })); 
+        const base64Data = compressedDataUrl.split(',')[1];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blobUrl = new Blob([byteArray], {type: 'image/webp'});
+        const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+        
+        const { error } = await supabase.storage.from('car-images').upload(filePath, blobUrl, {
+            contentType: 'image/webp',
+            cacheControl: '31536000',
+            upsert: false
+        });
+        if (error) throw error;
+        const { data: { publicUrl } } = supabase.storage.from('car-images').getPublicUrl(filePath);
+        setAuctionForm(prev => ({ ...prev, image: publicUrl }));
     } catch (error: any) { 
         showAlert("Eroare", `Eroare la încărcare: ${error.message}`); 
     } finally { 
@@ -680,22 +627,24 @@ Oferim servicii complete prin biroul nostru de intermedieri:
     setIsPrizeUploading(true);
     try {
         const compressedDataUrl = await compressImage(files[0]);
-        
-        // Upload to Storage if available
-        if (storage) {
-            const storageRef = ref(storage, `prize-images/${Date.now()}_${Math.random().toString(36).substring(7)}.webp`);
-            
-            const metadata = {
-                cacheControl: 'public, max-age=31536000, immutable',
-                contentType: 'image/webp'
-            };
-
-            await uploadString(storageRef, compressedDataUrl, 'data_url', metadata);
-            const url = await getDownloadURL(storageRef);
-            setPrizeForm(prev => ({ ...prev, image: url }));
-        } else {
-            setPrizeForm(prev => ({ ...prev, image: compressedDataUrl }));
+        const base64Data = compressedDataUrl.split(',')[1];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blobUrl = new Blob([byteArray], {type: 'image/webp'});
+        const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+        
+        const { error } = await supabase.storage.from('car-images').upload(filePath, blobUrl, {
+            contentType: 'image/webp',
+            cacheControl: '31536000',
+            upsert: false
+        });
+        if (error) throw error;
+        const { data: { publicUrl } } = supabase.storage.from('car-images').getPublicUrl(filePath);
+        setPrizeForm(prev => ({ ...prev, image: publicUrl }));
     } catch (error: any) { 
         showAlert("Eroare", `Eroare: ${error.message}`); 
     } finally { 
@@ -798,7 +747,7 @@ Oferim servicii complete prin biroul nostru de intermedieri:
             </div>
           </div>
           <form onSubmit={handleLogin} className="space-y-6">
-            <input type={auth ? "email" : "text"} value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-gold-500" placeholder="Email / Utilizator" />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-gold-500" placeholder="Email" />
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-gold-500" placeholder="Parolă" />
             <button type="submit" className="w-full bg-gold-500 hover:bg-gold-600 text-black font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
               <LogIn size={20} /> Autentificare
@@ -965,19 +914,6 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                     </div>
                   </div>
                   <div className="flex md:flex-col gap-3 shrink-0 relative mt-4 md:mt-0">
-                    
-                    {/* --- MANUAL REPAIR BUTTON --- */}
-                    {car.images.some(img => isLegacyImage(img)) && (
-                       <button
-                         onClick={(e) => handleFixCarImages(e, car)}
-                         disabled={migratingId === car.id}
-                         className="bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white p-3 rounded-lg transition-all flex items-center justify-center disabled:opacity-50"
-                         title="Repară și convertește la WebP"
-                       >
-                         {migratingId === car.id ? <Loader2 className="animate-spin" size={20} /> : <Wrench size={20} />}
-                       </button>
-                    )}
-
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleEdit(car); }} 
                       className="bg-gray-100 dark:bg-white/10 hover:bg-gold-500 hover:text-black p-3 rounded-lg transition-all"
@@ -1010,22 +946,6 @@ Oferim servicii complete prin biroul nostru de intermedieri:
         {activeTab === 'settings' && (
            <div className="animate-fade-in space-y-8">
               {/* ... settings content ... */}
-              <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
-                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                    <Database className="text-blue-500" /> 
-                    Reparare Bază de Date (Optimizare WebP)
-                 </h3>
-                 <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-3xl">
-                    Dacă aveți mașini cu imagini vechi (Base64), acestea vor încetini site-ul.
-                    Folosiți butonul <strong><Wrench className="inline w-4 h-4 text-blue-500" /> Repară</strong> din tab-ul <strong>Gestiune Stoc</strong> pentru a le converti automat în format <strong>WebP (1920px)</strong> și a le muta în Cloud Storage.
-                 </p>
-                 <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-                    <p className="text-sm text-blue-400 font-bold">
-                       Notă: Erorile "Extension context invalidated" apar din cauza volumului mare de date vechi. Reparați mașinile una câte una pentru a rezolva problema definitiv.
-                    </p>
-                 </div>
-              </div>
-              {/* ... other settings ... */}
               <div className="bg-white dark:bg-[#121212] p-6 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                     <Heart className={seasonalTheme === 'valentine' ? "text-red-500 fill-current" : "text-gray-400"} /> 
