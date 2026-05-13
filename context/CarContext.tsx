@@ -128,9 +128,13 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     const payload = {
         ...carData,
         id: tempId,
-        createdAt: carData.createdAt || Date.now()
+        createdAt: new Date(carData.createdAt || Date.now()).toISOString()
     };
-    await supabase.from('cars').insert(payload);
+    const { error } = await supabase.from('cars').insert(payload);
+    if (error) {
+        console.error("Supabase error (addCar):", error);
+        alert(`Eroare la adaugare (Baza de date): ${error.message}`);
+    }
   };
 
   const updateCar = async (updatedCar: Car) => {
@@ -139,10 +143,14 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     
     const payload = {
         ...carData,
-        createdAt: carData.createdAt || Date.now()
+        createdAt: new Date(carData.createdAt || Date.now()).toISOString()
     }
     
-    await supabase.from('cars').update(payload).eq('id', id);
+    const { error } = await supabase.from('cars').update(payload).eq('id', id);
+    if (error) {
+        console.error("Supabase error (updateCar):", error);
+        alert(`Eroare la modificare (Baza de date): ${error.message}`);
+    }
   };
 
   const deleteCar = async (id: string) => {
