@@ -128,7 +128,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     const payload = {
         ...carData,
         id: tempId,
-        createdAt: new Date(carData.createdAt || Date.now()).toISOString()
+        createdAt: carData.createdAt || Date.now()
     };
     const { error } = await supabase.from('cars').insert(payload);
     if (error) {
@@ -143,7 +143,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     
     const payload = {
         ...carData,
-        createdAt: new Date(carData.createdAt || Date.now()).toISOString()
+        createdAt: carData.createdAt || Date.now()
     }
     
     const { error } = await supabase.from('cars').update(payload).eq('id', id);
