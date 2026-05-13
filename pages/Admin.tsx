@@ -571,8 +571,12 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                 if (error) throw error;
                 const { data: { publicUrl } } = supabase.storage.from('car-images').getPublicUrl(filePath);
                 finalUrl = publicUrl;
-            } catch (err) { finalUrl = compressedBase64; }
-        } catch (error) {
+            } catch (err: any) { 
+                console.error("Storage upload failed", err);
+                throw new Error("Eroare la încărcare imagine: " + (err.message || 'Eroare rețea'));
+            }
+        } catch (error: any) {
+            showAlert("Eroare", error.message);
             setCurrentCar(prev => ({ ...prev, images: (prev.images || []).filter(img => img !== item.blob) }));
         } finally {
             if (finalUrl) {
