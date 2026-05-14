@@ -307,21 +307,25 @@ const Admin: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password === 'admin123') {
+        setIsDemoAuth(true);
+        return;
+    }
+    
     try {
         const { error } = await supabase.auth.signInWithPassword({
             email,
             password
         });
         if (error) {
-            // fallback to demo
-            if (password === 'admin123') {
-                setIsDemoAuth(true);
-            } else {
-                showAlert('Eroare Autentificare', error.message + '. Sau folosește parola "admin123" pentru mod demo.');
-            }
+            showAlert('Eroare Autentificare', error.message + '. Sau folosește parola "admin123" pentru mod demo.');
         }
     } catch (error: any) {
-        showAlert('Eroare Autentificare', error.message);
+        if (password === 'admin123') {
+            setIsDemoAuth(true);
+        } else {
+            showAlert('Eroare Autentificare', error.message + '. Sau folosește parola "admin123" pentru mod demo.');
+        }
     }
   };
 
@@ -551,29 +555,32 @@ Oferim servicii complete prin biroul nostru de intermedieri:
         try {
             const compressedBase64 = await compressImage(item.file);
             try {
-                // Remove data:image/webp;base64, prefix
-                const base64Data = compressedBase64.split(',')[1];
-                const byteCharacters = atob(base64Data);
-                const byteNumbers = new Array(byteCharacters.length);
-                for (let i = 0; i < byteCharacters.length; i++) {
-                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                if (!isConnected) {
+                    finalUrl = compressedBase64;
+                } else {
+                    const base64Data = compressedBase64.split(',')[1];
+                    const byteCharacters = atob(base64Data);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blobUrl = new Blob([byteArray], {type: 'image/webp'});
+                    
+                    const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+                    const { error } = await supabase.storage.from('car-images').upload(filePath, blobUrl, {
+                        contentType: 'image/webp',
+                        cacheControl: '31536000',
+                        upsert: false
+                    });
+                    
+                    if (error) throw error;
+                    const { data: { publicUrl } } = supabase.storage.from('car-images').getPublicUrl(filePath);
+                    finalUrl = publicUrl;
                 }
-                const byteArray = new Uint8Array(byteNumbers);
-                const blobUrl = new Blob([byteArray], {type: 'image/webp'});
-                
-                const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
-                const { error } = await supabase.storage.from('car-images').upload(filePath, blobUrl, {
-                    contentType: 'image/webp',
-                    cacheControl: '31536000',
-                    upsert: false
-                });
-                
-                if (error) throw error;
-                const { data: { publicUrl } } = supabase.storage.from('car-images').getPublicUrl(filePath);
-                finalUrl = publicUrl;
             } catch (err: any) { 
-                console.error("Storage upload failed", err);
-                throw new Error("Eroare la încărcare imagine: " + (err.message || 'Eroare rețea'));
+                console.warn("Storage upload failed, falling back to base64", err);
+                finalUrl = compressedBase64;
             }
         } catch (error: any) {
             showAlert("Eroare", error.message);
@@ -600,24 +607,35 @@ Oferim servicii complete prin biroul nostru de intermedieri:
     setIsAuctionUploading(true);
     try {
         const compressedDataUrl = await compressImage(files[0]);
-        const base64Data = compressedDataUrl.split(',')[1];
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        if (!isConnected) {
+            setAuctionForm(prev => ({ ...prev, image: compressedDataUrl }));
+            setIsAuctionUploading(false);
+            return;
         }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blobUrl = new Blob([byteArray], {type: 'image/webp'});
-        const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
-        
-        const { error } = await supabase.storage.from('car-images').upload(filePath, blobUrl, {
-            contentType: 'image/webp',
-            cacheControl: '31536000',
-            upsert: false
-        });
-        if (error) throw error;
-        const { data: { publicUrl } } = supabase.storage.from('car-images').getPublicUrl(filePath);
-        setAuctionForm(prev => ({ ...prev, image: publicUrl }));
+
+        try {
+            const base64Data = compressedDataUrl.split(',')[1];
+            const byteCharacters = atob(base64Data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blobUrl = new Blob([byteArray], {type: 'image/webp'});
+            const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+            
+            const { error } = await supabase.storage.from('car-images').upload(filePath, blobUrl, {
+                contentType: 'image/webp',
+                cacheControl: '31536000',
+                upsert: false
+            });
+            if (error) throw error;
+            const { data: { publicUrl } } = supabase.storage.from('car-images').getPublicUrl(filePath);
+            setAuctionForm(prev => ({ ...prev, image: publicUrl }));
+        } catch (storageError) {
+            console.warn("Storage fallback to base64");
+            setAuctionForm(prev => ({ ...prev, image: compressedDataUrl }));
+        }
     } catch (error: any) { 
         showAlert("Eroare", `Eroare la încărcare: ${error.message}`); 
     } finally { 
@@ -631,24 +649,35 @@ Oferim servicii complete prin biroul nostru de intermedieri:
     setIsPrizeUploading(true);
     try {
         const compressedDataUrl = await compressImage(files[0]);
-        const base64Data = compressedDataUrl.split(',')[1];
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        if (!isConnected) {
+            setPrizeForm(prev => ({ ...prev, image: compressedDataUrl }));
+            setIsPrizeUploading(false);
+            return;
         }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blobUrl = new Blob([byteArray], {type: 'image/webp'});
-        const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
-        
-        const { error } = await supabase.storage.from('car-images').upload(filePath, blobUrl, {
-            contentType: 'image/webp',
-            cacheControl: '31536000',
-            upsert: false
-        });
-        if (error) throw error;
-        const { data: { publicUrl } } = supabase.storage.from('car-images').getPublicUrl(filePath);
-        setPrizeForm(prev => ({ ...prev, image: publicUrl }));
+
+        try {
+            const base64Data = compressedDataUrl.split(',')[1];
+            const byteCharacters = atob(base64Data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blobUrl = new Blob([byteArray], {type: 'image/webp'});
+            const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+            
+            const { error } = await supabase.storage.from('car-images').upload(filePath, blobUrl, {
+                contentType: 'image/webp',
+                cacheControl: '31536000',
+                upsert: false
+            });
+            if (error) throw error;
+            const { data: { publicUrl } } = supabase.storage.from('car-images').getPublicUrl(filePath);
+            setPrizeForm(prev => ({ ...prev, image: publicUrl }));
+        } catch (storageError) {
+            console.warn("Storage fallback to base64", storageError);
+            setPrizeForm(prev => ({ ...prev, image: compressedDataUrl }));
+        }
     } catch (error: any) { 
         showAlert("Eroare", `Eroare: ${error.message}`); 
     } finally { 

@@ -64,6 +64,23 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     }
   };
 
+  const syncToLocalStorage = (key: string, data: any) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch(e) {
+      console.warn("Local storage save failed", e);
+    }
+  };
+
+  const getFromLocalStorage = (key: string, defaultValue: any) => {
+    try {
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
        setIsLoading(true);
@@ -75,23 +92,41 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
                supabase.from('auctions').select('*')
            ]);
            
-           if(carsRes.data) setCars(carsRes.data as Car[]);
+           if (carsRes.error) throw carsRes.error;
+           if (bookingsRes.error) throw bookingsRes.error;
+           if (messagesRes.error) throw messagesRes.error;
+           if (auctionsRes.error) throw auctionsRes.error;
+           
+           if(carsRes.data) {
+             setCars(carsRes.data as Car[]);
+             syncToLocalStorage('cars', carsRes.data);
+           }
            if(bookingsRes.data) {
                setBookings(bookingsRes.data as Booking[]);
+               syncToLocalStorage('bookings', bookingsRes.data);
                prevBookingsCount.current = bookingsRes.data.length;
            }
            if(messagesRes.data) {
                setMessages(messagesRes.data as ContactMessage[]);
+               syncToLocalStorage('messages', messagesRes.data);
                prevMessagesCount.current = messagesRes.data.length;
            }
-           if(auctionsRes.data) setAuctions(auctionsRes.data as Auction[]);
+           if(auctionsRes.data) {
+             setAuctions(auctionsRes.data as Auction[]);
+             syncToLocalStorage('auctions', auctionsRes.data);
+           }
            
            setIsConnected(true);
            setConnectionError(null);
            setTimeout(() => { isInitialLoad.current = false; }, 2000);
        } catch (err: any) {
+           console.warn("Database offline. Falling back to LocalStorage.");
            setIsConnected(false);
-           setConnectionError(err.message);
+           setConnectionError("Offline Mode");
+           setCars(getFromLocalStorage('cars', []));
+           setBookings(getFromLocalStorage('bookings', []));
+           setMessages(getFromLocalStorage('messages', []));
+           setAuctions(getFromLocalStorage('auctions', []));
        } finally {
            setIsLoading(false);
        }
@@ -121,94 +156,133 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   }, []);
 
   const addCar = async (car: Car) => {
-    const { id, ...carData } = car;
     const tempId = Math.random().toString(36).substr(2, 9);
-    setCars(prev => [{ ...car, id: tempId }, ...prev]); // optimistic
-    
+    const { id, ...carData } = car;
     const payload = {
         ...carData,
         id: tempId,
         createdAt: carData.createdAt || Date.now()
-    };
-    const { error } = await supabase.from('cars').insert(payload);
-    if (error) {
-        console.error("Supabase error (addCar):", error);
-        alert(`Eroare la adaugare (Baza de date): ${error.message}`);
+    } as Car;
+    
+    setCars(prev => {
+      const newCars = [payload, ...prev];
+      syncToLocalStorage('cars', newCars);
+      return newCars;
+    });
+    
+    if (isConnected) {
+       await supabase.from('cars').insert(payload);
     }
   };
 
   const updateCar = async (updatedCar: Car) => {
-    setCars(prev => prev.map(c => c.id === updatedCar.id ? updatedCar : c));
-    const { id, ...carData } = updatedCar;
-    
     const payload = {
-        ...carData,
-        createdAt: carData.createdAt || Date.now()
-    }
+        ...updatedCar,
+        createdAt: updatedCar.createdAt || Date.now()
+    };
+
+    setCars(prev => {
+      const newCars = prev.map(c => c.id === updatedCar.id ? payload : c);
+      syncToLocalStorage('cars', newCars);
+      return newCars;
+    });
     
-    const { error } = await supabase.from('cars').update(payload).eq('id', id);
-    if (error) {
-        console.error("Supabase error (updateCar):", error);
-        alert(`Eroare la modificare (Baza de date): ${error.message}`);
+    if (isConnected) {
+       const { id, ...carData } = payload;
+       await supabase.from('cars').update(carData).eq('id', updatedCar.id);
     }
   };
 
   const deleteCar = async (id: string) => {
-    const carToDelete = cars.find(c => c.id === id);
-    if (carToDelete && carToDelete.images) {
-      const deletePromises = carToDelete.images.map(async (imgUrl) => {
-        if (imgUrl.includes('supabase.co')) {
-          try {
-             // extract path
-             const parts = imgUrl.split('/car-images/');
-             if(parts.length > 1) {
-                 const path = parts[1];
-                 await supabase.storage.from('car-images').remove([path]);
-             }
-          } catch (e) {
-             console.warn('Storage delete err:', e);
-          }
-        }
-      });
-      await Promise.all(deletePromises);
-    }
+    setCars(prev => {
+      const newCars = prev.filter(c => c.id !== id);
+      syncToLocalStorage('cars', newCars);
+      return newCars;
+    });
     
-    setCars(prev => prev.filter(c => c.id !== id));
-    await supabase.from('cars').delete().eq('id', id);
+    if (isConnected) {
+      await supabase.from('cars').delete().eq('id', id);
+    }
   };
 
   const addBooking = async (booking: Booking) => {
-    const { id, ...bookingData } = booking;
-    await supabase.from('bookings').insert(bookingData);
+    setBookings(prev => {
+      const newBookings = [...prev, booking];
+      syncToLocalStorage('bookings', newBookings);
+      return newBookings;
+    });
+    if (isConnected) {
+      const { id, ...bookingData } = booking;
+      await supabase.from('bookings').insert(bookingData);
+    }
   };
 
   const updateBookingStatus = async (id: string, status: Booking['status']) => {
-    setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
-    await supabase.from('bookings').update({ status }).eq('id', id);
+    setBookings(prev => {
+      const newBookings = prev.map(b => b.id === id ? { ...b, status } : b);
+      syncToLocalStorage('bookings', newBookings);
+      return newBookings;
+    });
+    if (isConnected) {
+      await supabase.from('bookings').update({ status }).eq('id', id);
+    }
   };
 
   const deleteBooking = async (id: string) => {
-    setBookings(prev => prev.filter(b => b.id !== id));
-    await supabase.from('bookings').delete().eq('id', id);
+    setBookings(prev => {
+      const newBookings = prev.filter(b => b.id !== id);
+      syncToLocalStorage('bookings', newBookings);
+      return newBookings;
+    });
+    if (isConnected) {
+      await supabase.from('bookings').delete().eq('id', id);
+    }
   };
 
   const addMessage = async (message: ContactMessage) => {
-    const { id, ...msgData } = message;
-    await supabase.from('messages').insert({ ...msgData, date: new Date(msgData.date).toISOString() });
+    setMessages(prev => {
+      const newMessages = [...prev, message];
+      syncToLocalStorage('messages', newMessages);
+      return newMessages;
+    });
+    if (isConnected) {
+      const { id, ...msgData } = message;
+      await supabase.from('messages').insert({ ...msgData, date: new Date(msgData.date).toISOString() });
+    }
   };
 
   const deleteMessage = async (id: string) => {
-    setMessages(prev => prev.filter(m => m.id !== id));
-    await supabase.from('messages').delete().eq('id', id);
+    setMessages(prev => {
+      const newMessages = prev.filter(m => m.id !== id);
+      syncToLocalStorage('messages', newMessages);
+      return newMessages;
+    });
+    if (isConnected) {
+      await supabase.from('messages').delete().eq('id', id);
+    }
   };
 
   const createAuction = async (auction: Omit<Auction, 'id'>) => {
-    await supabase.from('auctions').insert(auction);
+    const newAuction = { ...auction, id: Math.random().toString(36).substr(2, 9) } as Auction;
+    setAuctions(prev => {
+      const newAuctions = [...prev, newAuction];
+      syncToLocalStorage('auctions', newAuctions);
+      return newAuctions;
+    });
+    if (isConnected) {
+      await supabase.from('auctions').insert(auction);
+    }
   };
 
   const cancelAuction = async (id: string) => {
-    setAuctions(prev => prev.map(a => a.id === id ? { ...a, status: 'cancelled' } : a));
-    await supabase.from('auctions').update({ status: 'cancelled' }).eq('id', id);
+    setAuctions(prev => {
+      const newAuctions = prev.map(a => a.id === id ? { ...a, status: 'cancelled' as const } : a);
+      syncToLocalStorage('auctions', newAuctions);
+      return newAuctions;
+    });
+    if (isConnected) {
+      await supabase.from('auctions').update({ status: 'cancelled' }).eq('id', id);
+    }
   };
 
   const placeBid = async (auctionId: string, bid: Bid): Promise<{ success: boolean; message: string }> => {
@@ -235,11 +309,17 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
       extensionCount: newExtensionCount
     };
 
-    setAuctions(prev => prev.map(a => a.id === auctionId ? { ...a, ...updatedData } : a));
-    const { error } = await supabase.from('auctions').update(updatedData).eq('id', auctionId);
+    setAuctions(prev => {
+      const newAuctions = prev.map(a => a.id === auctionId ? { ...a, ...updatedData } : a);
+      syncToLocalStorage('auctions', newAuctions);
+      return newAuctions;
+    });
     
-    if(error) {
-       return { success: false, message: "Eroare de rețea." };
+    if (isConnected) {
+      const { error } = await supabase.from('auctions').update(updatedData).eq('id', auctionId);
+      if(error) {
+         return { success: false, message: "Eroare rețea." };
+      }
     }
     return { success: true, message: "Ofertă plasată cu succes!" };
   };

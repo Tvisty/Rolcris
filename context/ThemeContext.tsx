@@ -27,8 +27,23 @@ export const ThemeProvider: React.FC<React.PropsWithChildren> = ({ children }) =
     }
   });
 
-  const [seasonalTheme, setSeasonalThemeState] = useState<SeasonalTheme>('default');
-  const [holidayPrize, setHolidayPrize] = useState<HolidayPrize | null>(null);
+  const [seasonalTheme, setSeasonalThemeState] = useState<SeasonalTheme>(() => {
+    try {
+      const stored = localStorage.getItem('autoparc_seasonal_theme');
+      return stored ? JSON.parse(stored) : 'default';
+    } catch {
+      return 'default';
+    }
+  });
+
+  const [holidayPrize, setHolidayPrize] = useState<HolidayPrize | null>(() => {
+    try {
+      const stored = localStorage.getItem('autoparc_holiday_prize');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     localStorage.setItem('autoparc_theme', theme);
@@ -48,21 +63,25 @@ export const ThemeProvider: React.FC<React.PropsWithChildren> = ({ children }) =
            const config = data.find(d => d.id === 'config')?.data;
            if(config && config.theme) {
                setSeasonalThemeState(config.theme as SeasonalTheme);
+               localStorage.setItem('autoparc_seasonal_theme', JSON.stringify(config.theme));
            }
            const prize = data.find(d => d.id === 'prize')?.data;
            if(prize) {
                setHolidayPrize(prize as HolidayPrize);
+               localStorage.setItem('autoparc_holiday_prize', JSON.stringify(prize));
            } else {
-               setHolidayPrize({
+               const defaultPrize = {
                  isEnabled: false,
                  image: '',
                  title: '',
                  description: ''
-               });
+               };
+               setHolidayPrize(defaultPrize);
+               localStorage.setItem('autoparc_holiday_prize', JSON.stringify(defaultPrize));
            }
         }
       } catch (e) {
-        console.error("Failed to fetch settings", e);
+        console.warn("Offline: settings sync disabled", e);
       }
     };
     
@@ -85,19 +104,21 @@ export const ThemeProvider: React.FC<React.PropsWithChildren> = ({ children }) =
 
   const setSeasonalTheme = async (newTheme: SeasonalTheme) => {
     setSeasonalThemeState(newTheme); // Optimistic update
+    localStorage.setItem('autoparc_seasonal_theme', JSON.stringify(newTheme));
     try {
       await supabase.from('settings').upsert({ id: 'config', data: { theme: newTheme }});
     } catch (e) {
-      console.error("Failed to save theme:", e);
+      console.warn("Offline: Failed to save theme to DB", e);
     }
   };
 
   const saveHolidayPrize = async (prize: HolidayPrize) => {
     setHolidayPrize(prize); // Optimistic
+    localStorage.setItem('autoparc_holiday_prize', JSON.stringify(prize));
     try {
       await supabase.from('settings').upsert({ id: 'prize', data: prize });
     } catch (e) {
-      console.error("Failed to save prize:", e);
+      console.warn("Offline: Failed to save prize to DB", e);
     }
   };
 
