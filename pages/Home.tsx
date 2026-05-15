@@ -62,6 +62,7 @@ const BrandLogo = ({ brand }: { brand: string }) => {
         src={iconUrl}
         alt=""
         className="hidden"
+        loading="lazy"
         onError={() => setIsError(true)}
       />
       
