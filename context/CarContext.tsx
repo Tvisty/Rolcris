@@ -53,7 +53,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
        try {
          new Notification(title, {
            body: body,
-           icon: 'https://i.imgur.com/e7JOUNo.png'
+           icon: '/logo.webp'
          });
          const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
          audio.volume = 0.5;

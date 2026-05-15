@@ -86,7 +86,7 @@ const BrandLogo = ({ brand }: { brand: string }) => {
 const Home: React.FC = () => {
   const { cars } = useCars();
   const hotDeals = cars.filter(c => c.isHotDeal).slice(0, 4);
-  const [heroImage, setHeroImage] = useState("https://i.imgur.com/QnHrLRj.jpg");
+  const [heroImage, setHeroImage] = useState("/background-light.webp");
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Filter out specific brands from the homepage logo display
@@ -106,6 +106,9 @@ const Home: React.FC = () => {
             alt="Luxury Car Light" 
             referrerPolicy="no-referrer"
             onLoad={() => setIsLoaded(true)}
+            width="1920"
+            height="1080"
+            fetchpriority="high"
             className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 animate-[pulse_10s_ease-in-out_infinite] transform transition-transform duration-[20s] hover:scale-110 block dark:hidden"
             style={{ animation: 'none' }} 
             onError={() => {
@@ -113,10 +116,13 @@ const Home: React.FC = () => {
             }}
           />
           <img 
-            src="https://i.imgur.com/nSNoUsS.jpg" 
+            src="/background-dark.webp" 
             alt="Luxury Car Dark" 
             referrerPolicy="no-referrer"
             onLoad={() => setIsLoaded(true)}
+            width="1920"
+            height="1080"
+            fetchpriority="high"
             className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 animate-[pulse_10s_ease-in-out_infinite] transform transition-transform duration-[20s] hover:scale-110 hidden dark:block"
             style={{ animation: 'none' }} 
           />
@@ -197,8 +203,11 @@ const Home: React.FC = () => {
         {/* Partner Badge - Top Left Placement (Updated) */}
         <div className="absolute top-20 left-2 md:top-32 md:left-12 z-20 animate-fade-in-left delay-400">
            <img 
-             src="https://i.imgur.com/cOPZm14.png" 
+             src="/badge-20-years.webp" 
              alt="Official Partner" 
+             width="256"
+             height="256"
+             fetchpriority="auto"
              className="w-32 md:w-64 h-auto object-contain transform -rotate-12 hover:rotate-0 transition-all duration-500 drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] opacity-90 hover:opacity-100 hover:scale-110"
            />
         </div>

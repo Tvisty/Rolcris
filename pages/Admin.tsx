@@ -765,7 +765,7 @@ Oferim servicii complete prin biroul nostru de intermedieri:
         {showSetup && <SetupGuide />}
         <div className="glass-panel w-full max-w-md p-10 rounded-3xl border border-white/10 bg-[#121212]/60 backdrop-blur-2xl shadow-2xl">
           <div className="text-center mb-8">
-            <img src="https://i.imgur.com/e7JOUNo.png" alt="Logo" className="h-20 mx-auto mb-6 object-contain" />
+            <img src="/logo.webp" alt="Logo" className="h-20 mx-auto mb-6 object-contain" />
             <h1 className="text-2xl font-display font-bold text-white mb-2 uppercase tracking-widest">Admin Portal</h1>
             <div className="flex justify-center mt-4">
               {isConnected ? (

@@ -4,13 +4,13 @@
   "name": "Autoparc RolCris Dealer Portal",
   "icons": [
     {
-      "src": "https://i.imgur.com/e7JOUNo.png",
-      "type": "image/png",
+      "src": "/logo.webp",
+      "type": "image/webp",
       "sizes": "192x192"
     },
     {
-      "src": "https://i.imgur.com/e7JOUNo.png",
-      "type": "image/png",
+      "src": "/logo.webp",
+      "type": "image/webp",
       "sizes": "512x512"
     }
   ],

@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
                   )}
                   {!logoError ? (
                     <img 
-                      src="https://i.imgur.com/e7JOUNo.png" 
+                      src="/logo.webp" 
                       alt="RolCris Autoparc" 
                       referrerPolicy="no-referrer"
                       className="h-20 md:h-24 w-auto object-contain mb-4"
@@ -43,7 +43,7 @@ const Footer: React.FC = () => {
                 
                 {/* Partner Badge */}
                 <img 
-                  src="https://i.imgur.com/cOPZm14.png" 
+                  src="/badge-20-years.webp" 
                   alt="Partner Badge" 
                   className="h-16 w-auto object-contain mb-4"
                 />
@@ -137,13 +137,13 @@ const Footer: React.FC = () => {
         <div className="flex flex-col items-center gap-4 mb-8 border-t border-gray-200 dark:border-white/5 pt-8">
            <div className="flex flex-wrap justify-center gap-6">
               <a href="https://anpc.ro/" target="_blank" rel="noreferrer" className="hover:scale-105 transition-transform duration-300">
-                 <img src="https://i.imgur.com/7OLGTtV.png" alt="ANPC" className="h-10 md:h-12 w-auto object-contain" />
+                 <img src="https://i.imgur.com/7OLGTtV.png" alt="ANPC" width="200" height="48" loading="lazy" className="h-10 md:h-12 w-auto object-contain" />
               </a>
               <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noreferrer" className="hover:scale-105 transition-transform duration-300">
-                 <img src="https://i.imgur.com/iBPA8jN.png" alt="ANPC SAL" className="h-10 md:h-12 w-auto object-contain" />
+                 <img src="https://i.imgur.com/iBPA8jN.png" alt="ANPC SAL" width="200" height="48" loading="lazy" className="h-10 md:h-12 w-auto object-contain" />
               </a>
               <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noreferrer" className="hover:scale-105 transition-transform duration-300">
-                 <img src="https://i.imgur.com/h9PQuSA.png" alt="Solutionarea Online a Litigiilor" className="h-10 md:h-12 w-auto object-contain" />
+                 <img src="https://i.imgur.com/h9PQuSA.png" alt="Solutionarea Online a Litigiilor" width="200" height="48" loading="lazy" className="h-10 md:h-12 w-auto object-contain" />
               </a>
            </div>
         </div>
