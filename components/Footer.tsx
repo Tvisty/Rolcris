@@ -26,13 +26,16 @@ const Footer: React.FC = () => {
                      <Heart className="absolute -top-3 -right-3 text-pink-500 fill-pink-500/20 animate-pulse" size={20} />
                   )}
                   {!logoError ? (
-                    <img 
-                      src="/logo.webp" 
-                      alt="RolCris Autoparc" 
-                      referrerPolicy="no-referrer"
-                      className="h-20 md:h-24 w-auto object-contain mb-4"
-                      onError={() => setLogoError(true)}
-                    />
+                    <picture>
+                      <source media="(max-width: 767px)" srcSet="/logo-mobile.webp" />
+                      <img 
+                        src="/logo.webp" 
+                        alt="RolCris Autoparc" 
+                        referrerPolicy="no-referrer"
+                        className="h-20 md:h-24 w-auto object-contain mb-4"
+                        onError={() => setLogoError(true)}
+                      />
+                    </picture>
                   ) : (
                     <div className="flex flex-col mb-6">
                       <span className="text-2xl font-display font-bold text-gray-900 dark:text-white tracking-wide">ROLCRIS</span>
@@ -42,11 +45,14 @@ const Footer: React.FC = () => {
                 </div>
                 
                 {/* Partner Badge */}
-                <img 
-                  src="/badge-20-years.webp" 
-                  alt="Partner Badge" 
-                  className="h-16 w-auto object-contain mb-4"
-                />
+                <picture>
+                  <source media="(max-width: 767px)" srcSet="/badge-20-years-mobile.webp" />
+                  <img 
+                    src="/badge-20-years.webp" 
+                    alt="Partner Badge" 
+                    className="h-16 w-auto object-contain mb-4"
+                  />
+                </picture>
             </div>
 
             <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6">
@@ -137,13 +143,13 @@ const Footer: React.FC = () => {
         <div className="flex flex-col items-center gap-4 mb-8 border-t border-gray-200 dark:border-white/5 pt-8">
            <div className="flex flex-wrap justify-center gap-6">
               <a href="https://anpc.ro/" target="_blank" rel="noreferrer" className="hover:scale-105 transition-transform duration-300">
-                 <img src="https://i.imgur.com/7OLGTtV.png" alt="ANPC" width="200" height="48" loading="lazy" className="h-10 md:h-12 w-auto object-contain" />
+                 <img src="https://wsrv.nl/?url=i.imgur.com/7OLGTtV.png&w=400&output=webp" alt="ANPC" width="200" height="48" loading="lazy" decoding="async" className="h-10 md:h-12 w-auto object-contain" />
               </a>
               <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noreferrer" className="hover:scale-105 transition-transform duration-300">
-                 <img src="https://i.imgur.com/iBPA8jN.png" alt="ANPC SAL" width="200" height="48" loading="lazy" className="h-10 md:h-12 w-auto object-contain" />
+                 <img src="https://wsrv.nl/?url=i.imgur.com/iBPA8jN.png&w=400&output=webp" alt="ANPC SAL" width="200" height="48" loading="lazy" decoding="async" className="h-10 md:h-12 w-auto object-contain" />
               </a>
               <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noreferrer" className="hover:scale-105 transition-transform duration-300">
-                 <img src="https://i.imgur.com/h9PQuSA.png" alt="Solutionarea Online a Litigiilor" width="200" height="48" loading="lazy" className="h-10 md:h-12 w-auto object-contain" />
+                 <img src="https://wsrv.nl/?url=i.imgur.com/h9PQuSA.png&w=400&output=webp" alt="Solutionarea Online a Litigiilor" width="200" height="48" loading="lazy" decoding="async" className="h-10 md:h-12 w-auto object-contain" />
               </a>
            </div>
         </div>
