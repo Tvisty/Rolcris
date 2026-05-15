@@ -163,6 +163,7 @@ const CarDetail: React.FC = () => {
       {/* Close Button */}
       <button 
         onClick={() => setIsGalleryOpen(false)}
+        aria-label="Închide galeria"
         className="absolute top-4 right-4 md:top-8 md:right-8 text-white/50 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-all z-50"
       >
         <X size={32} />
@@ -173,12 +174,14 @@ const CarDetail: React.FC = () => {
         <>
           <button 
             onClick={prevImage}
+            aria-label="Imaginea anterioară"
             className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-black/50 hover:bg-gold-500/80 p-4 rounded-full transition-all z-50 items-center justify-center"
           >
             <ChevronLeft size={32} />
           </button>
           <button 
             onClick={nextImage}
+            aria-label="Imaginea următoare"
             className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white bg-black/50 hover:bg-gold-500/80 p-4 rounded-full transition-all z-50 items-center justify-center"
           >
             <ChevronRight size={32} />
@@ -231,6 +234,7 @@ const CarDetail: React.FC = () => {
                <button
                  key={idx}
                  onClick={(e) => { e.stopPropagation(); setActiveImage(idx); }}
+                 aria-label={`Vezi imaginea ${idx + 1}`}
                  className={`w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden border-2 shrink-0 transition-all ${idx === activeImage ? 'border-gold-500 brightness-100 scale-110' : 'border-transparent brightness-50 hover:brightness-100'}`}
                >
                  <img src={img} alt="thumb" className="w-full h-full object-cover" />
@@ -251,7 +255,7 @@ const CarDetail: React.FC = () => {
           <ChevronLeft size={20} />
           Înapoi la Stoc
         </button>
-        <button className="text-gray-500 dark:text-gray-400 hover:text-gold-500 transition-colors">
+        <button aria-label="Distribuie" className="text-gray-500 dark:text-gray-400 hover:text-gold-500 transition-colors">
           <Share2 size={20} />
         </button>
       </div>
@@ -295,12 +299,14 @@ const CarDetail: React.FC = () => {
               <>
                 <button 
                   onClick={prevImage}
+                  aria-label="Imaginea anterioară"
                   className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-30 hover:bg-gold-500 hover:text-black"
                 >
                   <ChevronLeft size={24} />
                 </button>
                 <button 
                   onClick={nextImage}
+                  aria-label="Imaginea următoare"
                   className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-30 hover:bg-gold-500 hover:text-black"
                 >
                   <ChevronRight size={24} />
@@ -333,6 +339,7 @@ const CarDetail: React.FC = () => {
               <button 
                 key={idx}
                 onClick={() => setActiveImage(idx)}
+                aria-label={`Vezi imaginea ${idx + 1}`}
                 className={`aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-gold-500 brightness-100 ring-2 ring-gold-500/20' : 'border-transparent brightness-50 hover:brightness-100'}`}
               >
                 <img src={img} alt="thumbnail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -467,7 +474,7 @@ const CarDetail: React.FC = () => {
              {/* Header */}
              <div className="p-6 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 flex justify-between items-center">
                 <h3 className="text-xl font-display font-bold text-gray-900 dark:text-white">Programează Vizionare</h3>
-                <button onClick={() => setIsBookingOpen(false)} className="text-gray-500 hover:text-red-500 transition-colors">
+                <button onClick={() => setIsBookingOpen(false)} aria-label="Închide formularul de programare" className="text-gray-500 hover:text-red-500 transition-colors">
                   <X size={24} />
                 </button>
              </div>

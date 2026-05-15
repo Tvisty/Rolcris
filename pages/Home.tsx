@@ -128,87 +128,87 @@ const Home: React.FC = () => {
           />
         </div>
 
-        <div className="relative z-20 text-center max-w-6xl px-4 pt-32 pb-12 md:pt-0 md:mt-[-60px]">
+        <div className="relative z-20 text-center w-full px-4 pt-32 pb-20 md:pt-0 md:mt-[-40px]">
           <h2 
-            className="text-gold-500 font-black tracking-[0.2em] uppercase text-3xl md:text-5xl mb-6 animate-fade-in-up"
+            className="text-gold-500 font-black tracking-[0.15em] md:tracking-[0.2em] uppercase text-2xl sm:text-3xl md:text-5xl mb-4 md:mb-6 animate-fade-in-up"
             style={{ textShadow: '0 4px 8px rgba(0,0,0,0.9), 0 0 30px rgba(197,160,89,0.4)' }}
           >
             Autoparc RolCris
           </h2>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white mb-6 leading-tight drop-shadow-2xl">
-            Vii cu mașina veche <br/> și pleci cu una nouă!
+          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white mb-6 md:mb-8 leading-tight drop-shadow-2xl px-2">
+            Vii cu mașina veche <br className="hidden sm:block" /> și pleci cu una nouă!
           </h1>
-          <div className="flex flex-col md:flex-row gap-4 justify-center mb-12">
-            <Link to="/inventory" className="bg-gold-500 hover:bg-gold-600 text-black px-8 py-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(197,160,89,0.4)]">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10 md:mb-12">
+            <Link to="/inventory" className="bg-gold-500 hover:bg-gold-600 text-black px-6 md:px-8 py-3 md:py-4 rounded-lg font-bold text-base md:text-lg transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(197,160,89,0.4)]">
               Vezi Stocul Disponibil
             </Link>
           </div>
 
           {/* Location Buttons */}
-          <div className="flex flex-wrap justify-center gap-4 max-w-5xl mx-auto animate-fade-in-up delay-300">
+          <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 md:gap-4 max-w-5xl mx-auto animate-fade-in-up delay-300">
             {/* Satu Mare */}
-            <div className="flex items-center bg-black/50 backdrop-blur-md border border-white/10 rounded-full pl-4 pr-2 py-2 hover:border-gold-500/50 transition-all shadow-xl">
+            <div className="flex items-center justify-between sm:justify-start bg-black/60 sm:bg-black/50 backdrop-blur-md border border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-xl w-full sm:w-auto">
               <a href="https://www.google.com/maps?q=Bulevardul+Lucian+Blaga+347,+Satu+Mare" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
                 <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
-                <span className="font-semibold text-sm md:text-base pr-2">Satu Mare</span>
+                <span className="font-semibold text-sm md:text-base">Satu Mare</span>
               </a>
-              <div className="w-px h-6 bg-white/20 mx-2"></div>
-              <a href="tel:0740513713" className="flex items-center gap-2 bg-white/5 hover:bg-gold-500/20 text-gray-200 hover:text-white px-3 py-1.5 rounded-full transition-colors">
+              <div className="hidden sm:block w-px h-6 bg-white/20 mx-2"></div>
+              <a href="tel:0740513713" className="flex items-center gap-2 bg-white/10 sm:bg-white/5 hover:bg-gold-500/20 text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
                 <Phone size={14} className="text-gold-500" />
-                <span className="font-medium text-sm">0740 513 713</span>
+                <span className="font-bold sm:font-medium text-sm">0740 513 713</span>
               </a>
             </div>
 
             {/* Seini */}
-            <div className="flex items-center bg-black/50 backdrop-blur-md border border-white/10 rounded-full pl-4 pr-2 py-2 hover:border-gold-500/50 transition-all shadow-xl">
+            <div className="flex items-center justify-between sm:justify-start bg-black/60 sm:bg-black/50 backdrop-blur-md border border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-xl w-full sm:w-auto">
               <a href="https://www.google.com/maps?q=Piața+Unirii+2,+Seini" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
                 <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
-                <span className="font-semibold text-sm md:text-base pr-2">Seini</span>
+                <span className="font-semibold text-sm md:text-base">Seini</span>
               </a>
-              <div className="w-px h-6 bg-white/20 mx-2"></div>
-              <a href="tel:0745042593" className="flex items-center gap-2 bg-white/5 hover:bg-gold-500/20 text-gray-200 hover:text-white px-3 py-1.5 rounded-full transition-colors">
+              <div className="hidden sm:block w-px h-6 bg-white/20 mx-2"></div>
+              <a href="tel:0745042593" className="flex items-center gap-2 bg-white/10 sm:bg-white/5 hover:bg-gold-500/20 text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
                 <Phone size={14} className="text-gold-500" />
-                <span className="font-medium text-sm">0745 042 593</span>
+                <span className="font-bold sm:font-medium text-sm">0745 042 593</span>
               </a>
             </div>
 
             {/* Tășnad */}
-            <div className="flex items-center bg-black/50 backdrop-blur-md border border-white/10 rounded-full pl-4 pr-2 py-2 hover:border-gold-500/50 transition-all shadow-xl">
+            <div className="flex items-center justify-between sm:justify-start bg-black/60 sm:bg-black/50 backdrop-blur-md border border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-xl w-full sm:w-auto">
               <a href="https://www.google.com/maps?q=Strada+Nicolae+Bălcescu+19,+Tășnad" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
                 <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
-                <span className="font-semibold text-sm md:text-base pr-2">Tășnad</span>
+                <span className="font-semibold text-sm md:text-base">Tășnad</span>
               </a>
-              <div className="w-px h-6 bg-white/20 mx-2"></div>
-              <a href="tel:0745568886" className="flex items-center gap-2 bg-white/5 hover:bg-gold-500/20 text-gray-200 hover:text-white px-3 py-1.5 rounded-full transition-colors">
+              <div className="hidden sm:block w-px h-6 bg-white/20 mx-2"></div>
+              <a href="tel:0745568886" className="flex items-center gap-2 bg-white/10 sm:bg-white/5 hover:bg-gold-500/20 text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
                 <Phone size={14} className="text-gold-500" />
-                <span className="font-medium text-sm">0745 568 886</span>
+                <span className="font-bold sm:font-medium text-sm">0745 568 886</span>
               </a>
             </div>
 
             {/* Marghita */}
-            <div className="flex items-center bg-black/50 backdrop-blur-md border border-white/10 rounded-full pl-4 pr-2 py-2 hover:border-gold-500/50 transition-all shadow-xl">
+            <div className="flex items-center justify-between sm:justify-start bg-black/60 sm:bg-black/50 backdrop-blur-md border border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-xl w-full sm:w-auto">
               <a href="https://www.google.com/maps?q=Strada+1+Decembrie+Nr.+25,+Marghita,+Bihor" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
                 <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
-                <span className="font-semibold text-sm md:text-base pr-2">Marghita</span>
+                <span className="font-semibold text-sm md:text-base">Marghita</span>
               </a>
-              <div className="w-px h-6 bg-white/20 mx-2"></div>
-              <a href="tel:0774955698" className="flex items-center gap-2 bg-white/5 hover:bg-gold-500/20 text-gray-200 hover:text-white px-3 py-1.5 rounded-full transition-colors">
+              <div className="hidden sm:block w-px h-6 bg-white/20 mx-2"></div>
+              <a href="tel:0774955698" className="flex items-center gap-2 bg-white/10 sm:bg-white/5 hover:bg-gold-500/20 text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
                 <Phone size={14} className="text-gold-500" />
-                <span className="font-medium text-sm">0774 955 698</span>
+                <span className="font-bold sm:font-medium text-sm">0774 955 698</span>
               </a>
             </div>
           </div>
         </div>
 
         {/* Partner Badge - Top Left Placement (Updated) */}
-        <div className="absolute top-20 left-2 md:top-32 md:left-12 z-20 animate-fade-in-left delay-400">
+        <div className="absolute top-24 left-4 md:top-32 md:left-12 z-20 animate-fade-in-left delay-400">
            <img 
              src="/badge-20-years.webp" 
              alt="Official Partner" 
              width="256"
              height="256"
              fetchpriority="auto"
-             className="w-32 md:w-64 h-auto object-contain transform -rotate-12 hover:rotate-0 transition-all duration-500 drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] opacity-90 hover:opacity-100 hover:scale-110"
+             className="w-24 sm:w-32 md:w-48 lg:w-48 h-auto object-contain transform -rotate-12 hover:rotate-0 transition-all duration-500 drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] opacity-90 hover:opacity-100 hover:scale-110"
            />
         </div>
 

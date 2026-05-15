@@ -111,6 +111,7 @@ const Navbar: React.FC = () => {
            {/* Theme Toggle */}
            <button 
              onClick={toggleTheme}
+             aria-label="Schimbă tema"
              className={`p-2 rounded-full transition-colors ${showSolidNav ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10' : 'text-white hover:bg-white/10'}`}
              style={{
                filter: showSolidNav ? 'none' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.9))'
@@ -124,6 +125,7 @@ const Navbar: React.FC = () => {
         <div className="md:hidden flex items-center gap-4">
           <button 
              onClick={toggleTheme}
+             aria-label="Schimbă tema"
              className={`p-2 rounded-full transition-colors ${showSolidNav ? 'text-gray-600 dark:text-gray-300' : 'text-white'}`}
              style={{
                filter: showSolidNav ? 'none' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.9))'
@@ -138,6 +140,7 @@ const Navbar: React.FC = () => {
                filter: showSolidNav ? 'none' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.9))'
              }}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? "Închide meniul" : "Deschide meniul"}
           >
             {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
