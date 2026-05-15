@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle, AlertTriangle, Maximize2, Palette, Leaf, Compass } from 'lucide-react';
 import { useCars } from '../context/CarContext';
 
 const CarDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { cars, addBooking } = useCars();
   const car = cars.find(c => c.id === id);
   const [activeImage, setActiveImage] = useState(0);
@@ -242,14 +243,14 @@ const CarDetail: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 max-w-7xl mx-auto">
+    <div className="min-h-screen pt-32 md:pt-40 pb-12 px-4 max-w-7xl mx-auto relative z-10">
       
       {/* Breadcrumb & Navigation */}
-      <div className="flex justify-between items-center mb-6">
-        <Link to="/inventory" className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+      <div className="flex justify-between items-center mb-6 relative z-20">
+        <button onClick={() => navigate('/inventory')} className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer">
           <ChevronLeft size={20} />
           Înapoi la Stoc
-        </Link>
+        </button>
         <button className="text-gray-500 dark:text-gray-400 hover:text-gold-500 transition-colors">
           <Share2 size={20} />
         </button>

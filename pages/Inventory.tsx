@@ -28,24 +28,55 @@ const Inventory: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   
-  const [filters, setFilters] = useState({
-    priceRange: [0, Number(searchParams.get('maxPrice')) || 1000000],
-    selectedBrand: searchParams.get('make') || '',
-    selectedModel: searchParams.get('model') || '',
-    selectedBody: '',
-    selectedFuel: '',
-    selectedTransmission: '',
-    selectedLocation: '',
-    yearRange: [Number(searchParams.get('minYear')) || 0, new Date().getFullYear() + 1], 
-    maxMileage: '',
-    selectedSeats: '',
-    selectedPollution: '', 
-    selectedColor: '',
-    selectedTraction: '', // New Filter
-    selectedFeatures: [] as string[]
+  const [filters, setFilters] = useState(() => {
+    const saved = sessionStorage.getItem('inventoryFilters');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // If there are search parameters, they take precedence over saved filters
+        if (searchParams.get('make') || searchParams.get('model') || searchParams.get('minYear') || searchParams.get('maxPrice')) {
+           return {
+             ...parsed,
+             priceRange: [0, Number(searchParams.get('maxPrice')) || parsed.priceRange[1] || 1000000],
+             selectedBrand: searchParams.get('make') || parsed.selectedBrand || '',
+             selectedModel: searchParams.get('model') || parsed.selectedModel || '',
+             yearRange: [Number(searchParams.get('minYear')) || parsed.yearRange[0] || 0, new Date().getFullYear() + 1]
+           };
+        }
+        return parsed;
+      } catch (e) {
+        // Fallback
+      }
+    }
+    return {
+      priceRange: [0, Number(searchParams.get('maxPrice')) || 1000000],
+      selectedBrand: searchParams.get('make') || '',
+      selectedModel: searchParams.get('model') || '',
+      selectedBody: '',
+      selectedFuel: '',
+      selectedTransmission: '',
+      selectedLocation: '',
+      yearRange: [Number(searchParams.get('minYear')) || 0, new Date().getFullYear() + 1], 
+      maxMileage: '',
+      selectedSeats: '',
+      selectedPollution: '', 
+      selectedColor: '',
+      selectedTraction: '', 
+      selectedFeatures: [] as string[]
+    };
   });
-  
-  const [sortOption, setSortOption] = useState<SortOption>('newest');
+
+  useEffect(() => {
+    sessionStorage.setItem('inventoryFilters', JSON.stringify(filters));
+  }, [filters]);
+
+  const [sortOption, setSortOption] = useState<SortOption>(() => {
+    return (sessionStorage.getItem('inventorySort') as SortOption) || 'newest';
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('inventorySort', sortOption);
+  }, [sortOption]);
 
   // Calculate available models based on selected brand and actual inventory
   const availableModels = useMemo(() => {
