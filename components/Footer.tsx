@@ -150,11 +150,11 @@ const Footer: React.FC = () => {
 
         <div className="border-t border-gray-200 dark:border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-500 text-xs">
-            <Link to="/admin" className="hover:text-gray-400 transition-colors cursor-default">©</Link> 2024 Autoparc RolCris. Toate drepturile rezervate.
+            <Link to="/admin" className="hover:text-gray-400 transition-colors cursor-default">©</Link> {new Date().getFullYear()} Autoparc RolCris. Toate drepturile rezervate.
           </p>
           <div className="flex gap-6">
-            <a href="#" className="text-gray-500 hover:text-gray-900 dark:hover:text-white text-xs">Termeni și Condiții</a>
-            <a href="#" className="text-gray-500 hover:text-gray-900 dark:hover:text-white text-xs">Politica de Confidențialitate</a>
+            <Link to="/terms-and-conditions" className="text-gray-500 hover:text-gray-900 dark:hover:text-white text-xs">Termeni și Condiții</Link>
+            <Link to="/privacy-policy" className="text-gray-500 hover:text-gray-900 dark:hover:text-white text-xs">Politica de Confidențialitate</Link>
           </div>
         </div>
       </div>
