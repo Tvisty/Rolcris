@@ -82,11 +82,12 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+      const fetchData = async () => {
        setIsLoading(true);
        try {
+           // Step 1: Fetch initial chunk (Limit 6 cars to drastically improve Critical Path Latency)
            const [carsRes, bookingsRes, messagesRes, auctionsRes] = await Promise.all([
-               supabase.from('cars').select('*').order('createdAt', { ascending: false }),
+               supabase.from('cars').select('*').order('createdAt', { ascending: false }).limit(6),
                supabase.from('bookings').select('*').order('date', { ascending: true }),
                supabase.from('messages').select('*').order('date', { ascending: false }),
                supabase.from('auctions').select('*')
@@ -100,6 +101,21 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
            if(carsRes.data) {
              setCars(carsRes.data as Car[]);
              syncToLocalStorage('cars', carsRes.data);
+             
+             // Step 2: Fetch the remaining cars lazily in the background
+             setTimeout(() => {
+                 supabase.from('cars').select('*').order('createdAt', { ascending: false }).range(6, 1000).then(restRes => {
+                     if (restRes.data && !restRes.error) {
+                         setCars(prev => {
+                             const existingIds = new Set(prev.map(c => c.id));
+                             const newCars = (restRes.data as Car[]).filter(c => !existingIds.has(c.id));
+                             const combined = [...prev, ...newCars];
+                             syncToLocalStorage('cars', combined);
+                             return combined;
+                         });
+                     }
+                 });
+             }, 500); // Slight delay helps browser prioritize main UI render
            }
            if(bookingsRes.data) {
                setBookings(bookingsRes.data as Booking[]);
@@ -134,19 +150,27 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     
     fetchData();
 
-    // Subscribe to realtime changes
+    // Subscribe to realtime changes with optimized state updates instead of full refetch
     const channel = supabase.channel('schema-db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'cars' }, payload => {
-         fetchData();
+          if (payload.eventType === 'INSERT') setCars(prev => [payload.new as Car, ...prev]);
+          else if (payload.eventType === 'UPDATE') setCars(prev => prev.map(c => c.id === payload.new.id ? payload.new as Car : c));
+          else if (payload.eventType === 'DELETE') setCars(prev => prev.filter(c => c.id !== payload.old.id));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, payload => {
-         fetchData();
+          if (payload.eventType === 'INSERT') setBookings(prev => [...prev, payload.new as Booking]);
+          else if (payload.eventType === 'UPDATE') setBookings(prev => prev.map(b => b.id === payload.new.id ? payload.new as Booking : b));
+          else if (payload.eventType === 'DELETE') setBookings(prev => prev.filter(b => b.id !== payload.old.id));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, payload => {
-         fetchData();
+          if (payload.eventType === 'INSERT') setMessages(prev => [payload.new as ContactMessage, ...prev]);
+          else if (payload.eventType === 'UPDATE') setMessages(prev => prev.map(m => m.id === payload.new.id ? payload.new as ContactMessage : m));
+          else if (payload.eventType === 'DELETE') setMessages(prev => prev.filter(m => m.id !== payload.old.id));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'auctions' }, payload => {
-         fetchData();
+          if (payload.eventType === 'INSERT') setAuctions(prev => [...prev, payload.new as Auction]);
+          else if (payload.eventType === 'UPDATE') setAuctions(prev => prev.map(a => a.id === payload.new.id ? payload.new as Auction : a));
+          else if (payload.eventType === 'DELETE') setAuctions(prev => prev.filter(a => a.id !== payload.old.id));
       })
       .subscribe();
 
