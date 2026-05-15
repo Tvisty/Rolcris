@@ -269,6 +269,7 @@ const ChatBot: React.FC = () => {
       <div className="fixed bottom-6 right-6 z-[60] flex flex-col items-end">
         <button
           onClick={() => setIsOpen(!isOpen)}
+          aria-label={isOpen ? 'Închide chatul' : 'Deschide chatul'}
           className={`
             p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center group
             ${isOpen ? 'bg-gray-800 text-white' : 'bg-gold-500 text-black'}
@@ -353,6 +354,7 @@ const ChatBot: React.FC = () => {
             <button 
               onClick={handleSend}
               disabled={!input.trim() || isTyping}
+              aria-label="Trimite mesaj"
               className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-gold-500 text-black hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Send size={16} />

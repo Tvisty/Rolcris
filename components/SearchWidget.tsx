@@ -39,10 +39,11 @@ const SearchWidget: React.FC = () => {
           
           {/* Brand Select */}
           <div className="relative group">
-            <label className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1 block pl-1">Marcă</label>
+            <label className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1 block pl-1" id="label-make">Marcă</label>
             <div className="relative">
               <select 
                 value={make}
+                aria-labelledby="label-make"
                 onChange={(e) => {
                   setMake(e.target.value);
                   setModel(''); // Reset model when make changes
@@ -60,10 +61,11 @@ const SearchWidget: React.FC = () => {
 
           {/* Model Select (Dynamic) */}
           <div className="relative group">
-            <label className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1 block pl-1">Model</label>
+            <label className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1 block pl-1" id="label-model">Model</label>
             <div className="relative">
               <select 
                 value={model}
+                aria-labelledby="label-model"
                 onChange={(e) => setModel(e.target.value)}
                 disabled={availableModels.length === 0}
                 className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-lg p-3 pr-10 appearance-none focus:outline-none focus:border-gold-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
@@ -81,10 +83,11 @@ const SearchWidget: React.FC = () => {
 
           {/* Year Select */}
           <div className="relative group">
-            <label className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1 block pl-1">An Min.</label>
+            <label className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1 block pl-1" id="label-year">An Min.</label>
             <div className="relative">
               <select 
                 value={minYear}
+                aria-labelledby="label-year"
                 onChange={(e) => setMinYear(e.target.value)}
                 className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-lg p-3 pr-10 appearance-none focus:outline-none focus:border-gold-500 transition-colors cursor-pointer"
               >
@@ -102,10 +105,11 @@ const SearchWidget: React.FC = () => {
 
           {/* Price Select */}
           <div className="relative group">
-            <label className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1 block pl-1">Preț Max.</label>
+            <label className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1 block pl-1" id="label-price">Preț Max.</label>
             <div className="relative">
               <select 
                 value={maxPrice}
+                aria-labelledby="label-price"
                 onChange={(e) => setMaxPrice(e.target.value)}
                 className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-lg p-3 pr-10 appearance-none focus:outline-none focus:border-gold-500 transition-colors cursor-pointer"
               >
