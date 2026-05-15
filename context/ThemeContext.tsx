@@ -20,10 +20,13 @@ export const ThemeProvider: React.FC<React.PropsWithChildren> = ({ children }) =
   const [theme, setTheme] = useState<Theme>(() => {
     try {
       const saved = localStorage.getItem('autoparc_theme');
-      // Default to light if not found
-      return (saved === 'light' || saved === 'dark') ? saved : 'light';
+      if (saved === 'light' || saved === 'dark') {
+        return saved;
+      }
+      // Use system preference if no saved preference
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     } catch {
-      return 'light';
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
   });
 
