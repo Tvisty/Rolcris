@@ -101,31 +101,37 @@ const Home: React.FC = () => {
         <div className={`absolute inset-0 z-0 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent z-10" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/90 via-transparent to-transparent z-10" />
-          <img 
-            src={heroImage} 
-            alt="Luxury Car Light" 
-            referrerPolicy="no-referrer"
-            onLoad={() => setIsLoaded(true)}
-            width="1920"
-            height="1080"
-            fetchpriority="high"
-            className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 transform transition-transform duration-[20s] hover:scale-110 block dark:hidden"
-            style={{ animation: 'none' }} 
-            onError={() => {
-              setHeroImage("https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=2070&auto=format&fit=crop");
-            }}
-          />
-          <img 
-            src="/background-dark.webp" 
-            alt="Luxury Car Dark" 
-            referrerPolicy="no-referrer"
-            onLoad={() => setIsLoaded(true)}
-            width="1920"
-            height="1080"
-            fetchpriority="high"
-            className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 transform transition-transform duration-[20s] hover:scale-110 hidden dark:block"
-            style={{ animation: 'none' }} 
-          />
+          <picture className="w-full h-full absolute inset-0 block dark:hidden">
+            <source media="(max-width: 768px)" srcSet="/background-mobile.webp" />
+            <img 
+              src={heroImage} 
+              alt="Luxury Car Light" 
+              referrerPolicy="no-referrer"
+              onLoad={() => setIsLoaded(true)}
+              width="1920"
+              height="1080"
+              fetchpriority="high"
+              className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 transform transition-transform duration-[20s] hover:scale-110"
+              style={{ animation: 'none' }} 
+              onError={() => {
+                setHeroImage("https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=2070&auto=format&fit=crop");
+              }}
+            />
+          </picture>
+          <picture className="w-full h-full absolute inset-0 hidden dark:block">
+            <source media="(max-width: 768px)" srcSet="/background-mobile-dark.webp" />
+            <img 
+              src="/background-dark.webp" 
+              alt="Luxury Car Dark" 
+              referrerPolicy="no-referrer"
+              onLoad={() => setIsLoaded(true)}
+              width="1920"
+              height="1080"
+              fetchpriority="high"
+              className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 transform transition-transform duration-[20s] hover:scale-110"
+              style={{ animation: 'none' }} 
+            />
+          </picture>
         </div>
 
         <div className="relative z-20 text-center w-full px-4 pt-32 pb-20 md:pt-0 md:mt-[-40px]">
@@ -202,14 +208,17 @@ const Home: React.FC = () => {
 
         {/* Partner Badge - Top Left Placement (Updated) */}
         <div className="absolute top-24 left-4 md:top-32 md:left-12 z-20 animate-fade-in-left delay-400">
-           <img 
-             src="/badge-20-years.webp" 
-             alt="Official Partner" 
-             width="256"
-             height="256"
-             fetchpriority="auto"
-             className="w-24 sm:w-32 md:w-48 lg:w-48 h-auto object-contain transform -rotate-12 hover:rotate-0 transition-all duration-500 drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] opacity-90 hover:opacity-100 hover:scale-110"
-           />
+           <picture>
+             <source media="(max-width: 768px)" srcSet="/badge-mobile.webp" />
+             <img 
+               src="/badge-20-years.webp" 
+               alt="Official Partner" 
+               width="256"
+               height="256"
+               fetchpriority="auto"
+               className="w-24 sm:w-32 md:w-48 lg:w-48 h-auto object-contain transform -rotate-12 hover:rotate-0 transition-all duration-500 drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] opacity-90 hover:opacity-100 hover:scale-110"
+             />
+           </picture>
         </div>
 
       </section>

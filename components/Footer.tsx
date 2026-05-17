@@ -26,13 +26,16 @@ const Footer: React.FC = () => {
                      <Heart className="absolute -top-3 -right-3 text-pink-500 fill-pink-500/20 animate-pulse" size={20} />
                   )}
                   {!logoError ? (
-                    <img 
-                      src="/logo.webp" 
-                      alt="RolCris Autoparc" 
-                      referrerPolicy="no-referrer"
-                      className="h-20 md:h-24 w-auto object-contain mb-4"
-                      onError={() => setLogoError(true)}
-                    />
+                    <picture>
+                      <source media="(max-width: 768px)" srcSet="/logo-mobile.webp" />
+                      <img 
+                        src="/logo.webp" 
+                        alt="RolCris Autoparc" 
+                        referrerPolicy="no-referrer"
+                        className="h-20 md:h-24 w-auto object-contain mb-4"
+                        onError={() => setLogoError(true)}
+                      />
+                    </picture>
                   ) : (
                     <div className="flex flex-col mb-6">
                       <span className="text-2xl font-display font-bold text-gray-900 dark:text-white tracking-wide">ROLCRIS</span>
@@ -42,11 +45,14 @@ const Footer: React.FC = () => {
                 </div>
                 
                 {/* Partner Badge */}
-                <img 
-                  src="/badge-20-years.webp" 
-                  alt="Partner Badge" 
-                  className="h-16 w-auto object-contain mb-4"
-                />
+                <picture>
+                  <source media="(max-width: 768px)" srcSet="/badge-mobile.webp" />
+                  <img 
+                    src="/badge-20-years.webp" 
+                    alt="Partner Badge" 
+                    className="h-16 w-auto object-contain mb-4"
+                  />
+                </picture>
             </div>
 
             <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6">

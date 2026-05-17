@@ -44,16 +44,19 @@ const Navigation: React.FC = () => {
             <>
               {/* Subtle Glow Effect behind logo */}
               <div className="absolute inset-0 bg-gold-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
-              <img 
-                src="/logo.webp" 
-                alt="RolCris Autoparc" 
-                referrerPolicy="no-referrer"
-                className="relative h-16 md:h-24 w-auto object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  setLogoError(true);
-                }}
-              />
+              <picture>
+                <source media="(max-width: 768px)" srcSet="/logo-mobile.webp" />
+                <img 
+                  src="/logo.webp" 
+                  alt="RolCris Autoparc" 
+                  referrerPolicy="no-referrer"
+                  className="relative h-16 md:h-24 w-auto object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    setLogoError(true);
+                  }}
+                />
+              </picture>
             </>
           ) : (
             <>
