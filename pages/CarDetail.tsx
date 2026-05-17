@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle, AlertTriangle, Maximize2, Palette, Leaf, Compass } from 'lucide-react';
 import { useCars } from '../context/CarContext';
+import { getOptimizedImageUrl } from '../utils/imageHelpers';
 
 const CarDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -200,7 +201,7 @@ const CarDetail: React.FC = () => {
         {car.images.map((img, idx) => (
             <img 
               key={idx}
-              src={img} 
+              src={getOptimizedImageUrl(img, 2000)} 
               alt={`Gallery ${idx + 1}`} 
               loading="eager"
               className="absolute inset-0 m-auto max-w-[100vw] max-h-[100dvh] object-contain select-none"
@@ -237,7 +238,7 @@ const CarDetail: React.FC = () => {
                  aria-label={`Vezi imaginea ${idx + 1}`}
                  className={`w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden border-2 shrink-0 transition-all ${idx === activeImage ? 'border-gold-500 brightness-100 scale-110' : 'border-transparent brightness-50 hover:brightness-100'}`}
                >
-                 <img src={img} alt="thumb" className="w-full h-full object-cover" />
+                 <img src={getOptimizedImageUrl(img, 200)} alt="thumb" className="w-full h-full object-cover" />
                </button>
              ))}
           </div>
@@ -277,7 +278,7 @@ const CarDetail: React.FC = () => {
             {car.images.map((img, idx) => (
               <img 
                 key={idx}
-                src={img} 
+                src={getOptimizedImageUrl(img, 1200)} 
                 alt={`${car.make} ${car.model} - ${idx + 1}`}
                 referrerPolicy="no-referrer"
                 loading="eager"
@@ -342,7 +343,7 @@ const CarDetail: React.FC = () => {
                 aria-label={`Vezi imaginea ${idx + 1}`}
                 className={`aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-gold-500 brightness-100 ring-2 ring-gold-500/20' : 'border-transparent brightness-50 hover:brightness-100'}`}
               >
-                <img src={img} alt="thumbnail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                <img src={getOptimizedImageUrl(img, 400)} alt="thumbnail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               </button>
             ))}
           </div>

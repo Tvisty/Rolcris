@@ -2,6 +2,30 @@
 import { Car } from '../types';
 
 /**
+ * Optimizes a Supabase storage URL by switching to the image rendering API.
+ * This allows reducing image size for better loading performance.
+ */
+export const getOptimizedImageUrl = (url: string, width?: number, height?: number): string => {
+  if (!url || !url.startsWith('http')) return url;
+  
+  if (url.includes('.supabase.co/storage/v1/object/public/')) {
+    let optimizedUrl = url.replace(
+      '/storage/v1/object/public/',
+      '/storage/v1/render/image/public/'
+    );
+    
+    const params = new URLSearchParams();
+    // Only optimize format and quality to avoid any cropping/zooming
+    params.append('quality', '70');
+    params.append('format', 'webp');
+    
+    return `${optimizedUrl}?${params.toString()}`;
+  }
+  
+  return url;
+};
+
+/**
  * Safely retrieves the main image for a car.
  * Handles:
  * 1. Firebase Storage URLs (Optimized)

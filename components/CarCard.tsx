@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Fuel, Gauge, Calendar, ArrowRight, Zap, MapPin } from 'lucide-react';
 import { Car } from '../types';
-import { getCarMainImage } from '../utils/imageHelpers';
+import { getCarMainImage, getOptimizedImageUrl } from '../utils/imageHelpers';
 
 interface CarCardProps {
   car: Car;
@@ -13,6 +13,8 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
   const navigate = useNavigate();
 
   const mainImage = getCarMainImage(car);
+  // Optional width=800 ensures good quality on high-density displays yet small overall payload
+  const optimizedImage = getOptimizedImageUrl(mainImage, 800);
 
   const handleCardClick = () => {
     navigate(`/inventory/${car.id}`);
@@ -52,11 +54,12 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 opacity-60" />
         
         <img
-          src={mainImage}
+          src={optimizedImage}
           alt={`${car.make} ${car.model}`}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           referrerPolicy="no-referrer"
           loading="lazy"
+          decoding="async"
           onError={(e) => {
             e.currentTarget.src = "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop";
           }}
