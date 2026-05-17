@@ -59,8 +59,6 @@ const Navbar: React.FC = () => {
               {/* Subtle Glow Effect behind logo */}
               <div className={`absolute inset-0 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full ${seasonalTheme === 'valentine' ? 'bg-pink-500/30' : 'bg-gold-500/20'}`} />
               <img 
-                srcSet="/logo-mobile.webp 250w, /logo.webp 578w"
-                sizes="(max-width: 768px) 100px, 150px"
                 src="/logo.webp" 
                 alt="RolCris Autoparc" 
                 referrerPolicy="no-referrer"
@@ -68,6 +66,10 @@ const Navbar: React.FC = () => {
                 height="96"
                 fetchpriority="high"
                 className={`relative h-12 md:h-24 w-auto object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] ${theme === 'light' && showSolidNav ? '' : 'brightness-110'}`}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  setLogoError(true);
+                }}
               />
             </>
           ) : (

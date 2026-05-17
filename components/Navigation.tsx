@@ -45,12 +45,14 @@ const Navigation: React.FC = () => {
               {/* Subtle Glow Effect behind logo */}
               <div className="absolute inset-0 bg-gold-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
               <img 
-                srcSet="/logo-mobile.webp 250w, /logo.webp 578w"
-                sizes="(max-width: 768px) 100px, 150px"
                 src="/logo.webp" 
                 alt="RolCris Autoparc" 
                 referrerPolicy="no-referrer"
                 className="relative h-16 md:h-24 w-auto object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  setLogoError(true);
+                }}
               />
             </>
           ) : (

@@ -27,12 +27,11 @@ const Footer: React.FC = () => {
                   )}
                   {!logoError ? (
                     <img 
-                      srcSet="/logo-mobile.webp 250w, /logo.webp 578w"
-                      sizes="(max-width: 768px) 100px, 150px"
                       src="/logo.webp" 
                       alt="RolCris Autoparc" 
                       referrerPolicy="no-referrer"
                       className="h-20 md:h-24 w-auto object-contain mb-4"
+                      onError={() => setLogoError(true)}
                     />
                   ) : (
                     <div className="flex flex-col mb-6">
@@ -44,8 +43,6 @@ const Footer: React.FC = () => {
                 
                 {/* Partner Badge */}
                 <img 
-                  srcSet="/badge-mobile.webp 250w, /badge-20-years.webp 2752w"
-                  sizes="(max-width: 768px) 100px, 150px"
                   src="/badge-20-years.webp" 
                   alt="Partner Badge" 
                   className="h-16 w-auto object-contain mb-4"
