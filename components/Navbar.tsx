@@ -68,10 +68,6 @@ const Navbar: React.FC = () => {
                 height="96"
                 fetchpriority="high"
                 className={`relative h-12 md:h-24 w-auto object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] ${theme === 'light' && showSolidNav ? '' : 'brightness-110'}`}
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  setLogoError(true);
-                }}
               />
             </>
           ) : (

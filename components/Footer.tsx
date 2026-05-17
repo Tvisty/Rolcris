@@ -33,7 +33,6 @@ const Footer: React.FC = () => {
                       alt="RolCris Autoparc" 
                       referrerPolicy="no-referrer"
                       className="h-20 md:h-24 w-auto object-contain mb-4"
-                      onError={() => setLogoError(true)}
                     />
                   ) : (
                     <div className="flex flex-col mb-6">

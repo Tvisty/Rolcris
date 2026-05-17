@@ -51,10 +51,6 @@ const Navigation: React.FC = () => {
                 alt="RolCris Autoparc" 
                 referrerPolicy="no-referrer"
                 className="relative h-16 md:h-24 w-auto object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  setLogoError(true);
-                }}
               />
             </>
           ) : (
