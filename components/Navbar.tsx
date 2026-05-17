@@ -59,6 +59,8 @@ const Navbar: React.FC = () => {
               {/* Subtle Glow Effect behind logo */}
               <div className={`absolute inset-0 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full ${seasonalTheme === 'valentine' ? 'bg-pink-500/30' : 'bg-gold-500/20'}`} />
               <img 
+                srcSet="/logo-mobile.webp 250w, /logo.webp 578w"
+                sizes="(max-width: 768px) 100px, 150px"
                 src="/logo.webp" 
                 alt="RolCris Autoparc" 
                 referrerPolicy="no-referrer"

@@ -102,6 +102,8 @@ const Home: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent z-10" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/90 via-transparent to-transparent z-10" />
           <img 
+            srcSet="/background-mobile.webp 800w, /background-light.webp 1920w"
+            sizes="(max-width: 768px) 800px, 1920px"
             src={heroImage} 
             alt="Luxury Car Light" 
             referrerPolicy="no-referrer"
@@ -109,13 +111,15 @@ const Home: React.FC = () => {
             width="1920"
             height="1080"
             fetchpriority="high"
-            className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 animate-[pulse_10s_ease-in-out_infinite] transform transition-transform duration-[20s] hover:scale-110 block dark:hidden"
+            className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 transform transition-transform duration-[20s] hover:scale-110 block dark:hidden"
             style={{ animation: 'none' }} 
             onError={() => {
               setHeroImage("https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=2070&auto=format&fit=crop");
             }}
           />
           <img 
+            srcSet="/background-mobile-dark.webp 800w, /background-dark.webp 1920w"
+            sizes="(max-width: 768px) 800px, 1920px"
             src="/background-dark.webp" 
             alt="Luxury Car Dark" 
             referrerPolicy="no-referrer"
@@ -123,7 +127,7 @@ const Home: React.FC = () => {
             width="1920"
             height="1080"
             fetchpriority="high"
-            className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 animate-[pulse_10s_ease-in-out_infinite] transform transition-transform duration-[20s] hover:scale-110 hidden dark:block"
+            className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 transform transition-transform duration-[20s] hover:scale-110 hidden dark:block"
             style={{ animation: 'none' }} 
           />
         </div>
@@ -203,6 +207,8 @@ const Home: React.FC = () => {
         {/* Partner Badge - Top Left Placement (Updated) */}
         <div className="absolute top-24 left-4 md:top-32 md:left-12 z-20 animate-fade-in-left delay-400">
            <img 
+             srcSet="/badge-mobile.webp 250w, /badge-20-years.webp 2752w"
+             sizes="(max-width: 768px) 150px, 256px"
              src="/badge-20-years.webp" 
              alt="Official Partner" 
              width="256"
