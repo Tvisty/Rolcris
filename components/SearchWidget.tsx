@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { BRANDS } from '../constants';
+import { BRANDS, MOTO_BRANDS } from '../constants';
 import { useCars } from '../context/CarContext';
 
 const SearchWidget: React.FC = () => {
@@ -51,7 +51,7 @@ const SearchWidget: React.FC = () => {
                 className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-lg p-3 pr-10 appearance-none focus:outline-none focus:border-gold-500 transition-colors cursor-pointer"
               >
                 <option value="" className="bg-white dark:bg-[#121212]">Toate Mărcile</option>
-                {BRANDS.map(brand => (
+                {Array.from(new Set([...BRANDS, ...MOTO_BRANDS])).sort().map(brand => (
                   <option key={brand} value={brand} className="bg-white dark:bg-[#121212]">{brand}</option>
                 ))}
               </select>

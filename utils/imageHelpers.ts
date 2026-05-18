@@ -33,11 +33,21 @@ export const getOptimizedImageUrl = (url: string, width?: number, height?: numbe
  * 3. Missing images (Placeholder)
  */
 export const getCarMainImage = (car: Car): string => {
+  const isMoto = car.vehicleType === 'Motocicletă';
+  const placeholder = isMoto 
+    ? "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop"
+    : "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop";
+
   if (!car.images || car.images.length === 0) {
-    return "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop";
+    return placeholder;
   }
 
   const image = car.images[0];
+
+  // Fix case where car placeholder is saved in database for a motorcycle
+  if (isMoto && image === "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop") {
+    return placeholder;
+  }
 
   // If it's already a URL (http/https), return it directly
   if (image.startsWith('http')) {
@@ -53,5 +63,5 @@ export const getCarMainImage = (car: Car): string => {
     return `data:image/jpeg;base64,${image}`;
   }
 
-  return "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop";
+  return placeholder;
 };

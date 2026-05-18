@@ -1,6 +1,7 @@
 
 export interface Car {
   id: string;
+  vehicleType?: 'Autoturism' | 'Motocicletă';
   make: string;
   model: string;
   year: number;
@@ -8,7 +9,7 @@ export interface Car {
   mileage: number;
   fuel: 'Diesel' | 'Benzină' | 'Benzină/Gaz' | 'Hibrid' | 'Electric' | 'Diesel/Electric';
   transmission: 'Automată' | 'Manuală';
-  bodyType: 'SUV' | 'Sedan' | 'Coupe' | 'Cabrio' | 'Break' | 'Hatchback' | 'Dube' | 'Monovolum';
+  bodyType: 'SUV' | 'Sedan' | 'Coupe' | 'Cabrio' | 'Break' | 'Hatchback' | 'Dube' | 'Monovolum' | string;
   power: number; // HP
   engineSize: string; // e.g. 3.0L
   vin?: string;

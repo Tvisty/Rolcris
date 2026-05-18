@@ -74,7 +74,23 @@ export const BRANDS = [
   'Volvo'
 ];
 
+export const MOTO_BRANDS = [
+  'Aprilia',
+  'BMW',
+  'Ducati',
+  'Harley-Davidson',
+  'Honda',
+  'Husqvarna',
+  'Kawasaki',
+  'KTM',
+  'Suzuki',
+  'Triumph',
+  'Yamaha',
+  'Vespa'
+];
+
 export const BODY_TYPES = ['SUV', 'Sedan', 'Coupe', 'Cabrio', 'Break', 'Hatchback', 'Dube', 'Monovolum'];
+export const MOTO_BODY_TYPES = ['Sport', 'Naked', 'Cruiser', 'Touring', 'Enduro', 'Cross', 'Scrambler', 'Chopper', 'Scuter', 'ATV'];
 export const FUELS = ['Diesel', 'Benzină', 'Benzină/Gaz', 'Hibrid', 'Electric', 'Diesel/Electric'];
 export const LOCATIONS = ['Satu Mare', 'Seini', 'Tășnad', 'Marghita'];
 export const POLLUTION_STANDARDS = ['Euro 6', 'Euro 5', '0'];
