@@ -195,11 +195,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     });
     
     if (isConnected) {
-       const { error } = await supabase.from('cars').insert(payload);
-       if (error) {
-           console.error("Supabase insert error:", error);
-           alert("Eroare Bază de Date: " + error.message + " (S-ar putea să lipsească o coloană în Supabase)");
-       }
+       await supabase.from('cars').insert(payload);
     }
   };
 
@@ -217,11 +213,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     
     if (isConnected) {
        const { id, ...carData } = payload;
-       const { error } = await supabase.from('cars').update(carData).eq('id', updatedCar.id);
-       if (error) {
-           console.error("Supabase update error:", error);
-           alert("Eroare actualizare: " + error.message);
-       }
+       await supabase.from('cars').update(carData).eq('id', updatedCar.id);
     }
   };
 

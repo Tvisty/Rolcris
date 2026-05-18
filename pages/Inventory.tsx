@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Filter, X, ChevronDown, ChevronUp, Search, Loader2, Check, Palette, Leaf, Compass } from 'lucide-react';
 import CarCard from '../components/CarCard';
-import { BRANDS, MOTO_BRANDS, BODY_TYPES, MOTO_BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS } from '../constants';
+import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS } from '../constants';
 import { SortOption } from '../types';
 import { useCars } from '../context/CarContext';
 
@@ -52,7 +52,6 @@ const Inventory: React.FC = () => {
       priceRange: [0, Number(searchParams.get('maxPrice')) || 1000000],
       selectedBrand: searchParams.get('make') || '',
       selectedModel: searchParams.get('model') || '',
-      selectedVehicleType: '',
       selectedBody: '',
       selectedFuel: '',
       selectedTransmission: '',
@@ -129,7 +128,6 @@ const Inventory: React.FC = () => {
 
       if (filters.selectedBrand && car.make !== filters.selectedBrand) return false;
       if (filters.selectedModel && car.model !== filters.selectedModel) return false;
-      if (filters.selectedVehicleType && (car.vehicleType || 'Autoturism') !== filters.selectedVehicleType) return false;
       if (filters.selectedBody && car.bodyType !== filters.selectedBody) return false;
       if (filters.selectedFuel && car.fuel !== filters.selectedFuel) return false;
       if (filters.selectedTransmission && car.transmission !== filters.selectedTransmission) return false;
@@ -252,23 +250,6 @@ const Inventory: React.FC = () => {
 
           <div className="glass-panel rounded-xl p-6 md:sticky md:top-24 bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 pb-32 md:pb-6">
             
-            <FilterSection title="Tip Vehicul">
-              <select 
-                value={filters.selectedVehicleType}
-                onChange={(e) => setFilters({
-                    ...filters, 
-                    selectedVehicleType: e.target.value,
-                    selectedBrand: '', // Reset make when type changes
-                    selectedModel: ''
-                })}
-                className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded p-3 focus:border-gold-500 outline-none cursor-pointer mb-2"
-              >
-                <option value="" className="bg-white dark:bg-[#121212]">Oricare</option>
-                <option value="Autoturism" className="bg-white dark:bg-[#121212]">Autoturism</option>
-                <option value="Motocicletă" className="bg-white dark:bg-[#121212]">Motocicletă</option>
-              </select>
-            </FilterSection>
-
             <FilterSection title="Locație">
                 <div className="space-y-2">
                     {LOCATIONS.map(loc => (
@@ -322,7 +303,7 @@ const Inventory: React.FC = () => {
                 className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded p-3 focus:border-gold-500 outline-none cursor-pointer"
               >
                 <option value="" className="bg-white dark:bg-[#121212]">Toate</option>
-                {(filters.selectedVehicleType === 'Motocicletă' ? MOTO_BRANDS : filters.selectedVehicleType === 'Autoturism' ? BRANDS : Array.from(new Set([...BRANDS, ...MOTO_BRANDS])).sort()).map(b => <option key={b} value={b} className="bg-white dark:bg-[#121212]">{b}</option>)}
+                {BRANDS.map(b => <option key={b} value={b} className="bg-white dark:bg-[#121212]">{b}</option>)}
               </select>
             </FilterSection>
 
@@ -444,9 +425,9 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            <FilterSection title="Caroserie / Tip">
+            <FilterSection title="Caroserie">
               <div className="space-y-2">
-                {(filters.selectedVehicleType === 'Motocicletă' ? MOTO_BODY_TYPES : filters.selectedVehicleType === 'Autoturism' ? BODY_TYPES : Array.from(new Set([...BODY_TYPES, ...MOTO_BODY_TYPES])).sort()).map(type => (
+                {BODY_TYPES.map(type => (
                   <label key={type} className="flex items-center gap-2 cursor-pointer group">
                     <div className={`w-4 h-4 rounded-sm border ${filters.selectedBody === type ? 'bg-gold-500 border-gold-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-gold-500'} transition-colors flex items-center justify-center`}>
                       {filters.selectedBody === type && <div className="w-2 h-2 bg-black rounded-[1px]" />}

@@ -9,9 +9,8 @@ import {
   LogIn, Search, 
   Calendar, Gauge, LayoutDashboard, Fuel, Settings, Upload, AlertTriangle, Wifi, WifiOff, Check, Star, Loader2, Phone, User as UserIcon, Clock, Mail, Gavel, Timer, Bell, BellOff, Info, Link as LinkIcon, Clipboard, CloudUpload, ChevronLeft, ChevronRight, Heart, Gift, Tag, Database, RefreshCw, PauseCircle, Wrench, AlertCircle
 } from 'lucide-react';
-import { BRANDS, MOTO_BRANDS, BODY_TYPES, MOTO_BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS } from '../constants';
+import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS } from '../constants';
 import { Link } from 'react-router-dom';
-import { getCarMainImage } from '../utils/imageHelpers';
 
 // --- ULTRA-ROBUST COMPRESSOR V2 (WebP Edition - 1920px @ 85%) ---
 const compressImage = (file: File): Promise<string> => {
@@ -352,7 +351,6 @@ const Admin: React.FC = () => {
     const newId = Math.random().toString(36).substr(2, 9);
     setCurrentCar({
       id: isConnected ? undefined : newId,
-      vehicleType: 'Autoturism',
       make: 'BMW',
       model: '',
       year: new Date().getFullYear(),
@@ -443,12 +441,7 @@ Oferim servicii complete prin biroul nostru de intermedieri:
     }
 
     const validImages = (currentCar.images || []).filter(img => !img.startsWith('blob:'));
-    
-    const fallbackImage = currentCar.vehicleType === 'Motocicletă'
-      ? "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop"
-      : "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop";
-    
-    const finalImages = validImages.length > 0 ? validImages : [fallbackImage];
+    const finalImages = validImages.length > 0 ? validImages : ["https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop"];
 
     const cleanedCar = {
       ...currentCar,
@@ -924,11 +917,11 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                 <div key={car.id} className={`group glass-panel p-4 rounded-xl flex flex-col md:flex-row items-center gap-6 border border-gray-200 dark:border-white/5 bg-white dark:bg-[#121212] hover:border-gold-500/50 transition-all shadow-sm ${car.isSold ? 'opacity-80 grayscale' : ''}`}>
                   <div className="relative w-full md:w-48 h-32 rounded-lg overflow-hidden shrink-0">
                     <img 
-                      src={getCarMainImage(car)} 
+                      src={car.images[0]} 
                       alt={car.model} 
                       className="w-full h-full object-cover" 
                       referrerPolicy="no-referrer"
-                      onError={(e) => { e.currentTarget.src = car.vehicleType === 'Motocicletă' ? "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop" : "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop"; }}
+                      onError={(e) => { e.currentTarget.src = "https://placehold.co/600x400/121212/C5A059?text=Link+Invalid"; }}
                     />
                     {/* Status Badges */}
                     <div className="absolute top-2 left-2 flex gap-1 flex-col items-start">
@@ -1220,18 +1213,11 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                 {/* Basic Info */}
                 <section>
                    <h3 className="text-gold-500 font-bold uppercase text-xs tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Informații De Bază</h3>
-                   <div className="mb-4">
-                      <label className="text-xs text-gray-500 font-bold">Tip Vehicul</label>
-                      <select value={currentCar.vehicleType || 'Autoturism'} onChange={(e) => setCurrentCar({...currentCar, vehicleType: e.target.value as any, make: e.target.value === 'Motocicletă' ? MOTO_BRANDS[0] : BRANDS[0], bodyType: e.target.value === 'Motocicletă' ? MOTO_BODY_TYPES[0] : BODY_TYPES[0] })} className="w-full md:w-1/3 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white mt-1 block">
-                         <option value="Autoturism">Autoturism</option>
-                         <option value="Motocicletă">Motocicletă</option>
-                      </select>
-                   </div>
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-1">
                          <label className="text-xs text-gray-500 font-bold">Marcă</label>
                          <select value={currentCar.make} onChange={(e) => setCurrentCar({...currentCar, make: e.target.value})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white">
-                            {(currentCar.vehicleType === 'Motocicletă' ? MOTO_BRANDS : BRANDS).map(b => <option key={b} value={b}>{b}</option>)}
+                            {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
                          </select>
                       </div>
                       <div className="space-y-1">
@@ -1264,9 +1250,9 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                          </select>
                       </div>
                       <div className="space-y-1">
-                         <label className="text-xs text-gray-500 font-bold">Caroserie / Tip</label>
+                         <label className="text-xs text-gray-500 font-bold">Caroserie</label>
                          <select value={currentCar.bodyType} onChange={(e) => setCurrentCar({...currentCar, bodyType: e.target.value as any})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white">
-                            {(currentCar.vehicleType === 'Motocicletă' ? MOTO_BODY_TYPES : BODY_TYPES).map(b => <option key={b} value={b}>{b}</option>)}
+                            {BODY_TYPES.map(b => <option key={b} value={b}>{b}</option>)}
                          </select>
                       </div>
                       <div className="space-y-1">

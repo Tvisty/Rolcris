@@ -61,9 +61,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
           loading="lazy"
           decoding="async"
           onError={(e) => {
-            e.currentTarget.src = car.vehicleType === 'Motocicletă' 
-              ? "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop"
-              : "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop";
+            e.currentTarget.src = "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop";
           }}
         />
 
