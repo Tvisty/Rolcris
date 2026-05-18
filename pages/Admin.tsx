@@ -9,7 +9,7 @@ import {
   LogIn, Search, 
   Calendar, Gauge, LayoutDashboard, Fuel, Settings, Upload, AlertTriangle, Wifi, WifiOff, Check, Star, Loader2, Phone, User as UserIcon, Clock, Mail, Gavel, Timer, Bell, BellOff, Info, Link as LinkIcon, Clipboard, CloudUpload, ChevronLeft, ChevronRight, Heart, Gift, Tag, Database, RefreshCw, PauseCircle, Wrench, AlertCircle
 } from 'lucide-react';
-import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS } from '../constants';
+import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS, VEHICLE_TYPES, MOTO_BRANDS, MOTO_CATEGORIES } from '../constants';
 import { Link } from 'react-router-dom';
 
 // --- ULTRA-ROBUST COMPRESSOR V2 (WebP Edition - 1920px @ 85%) ---
@@ -387,6 +387,7 @@ Oferim servicii complete prin biroul nostru de intermedieri:
       features: [],
       seats: 5,
       doors: 5,
+      vehicleType: 'Autoturism',
       isHotDeal: false,
       isSold: false,
       location: 'Satu Mare',
@@ -1214,10 +1215,18 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                 <section>
                    <h3 className="text-gold-500 font-bold uppercase text-xs tracking-wider mb-4 border-b border-gray-200 dark:border-white/10 pb-2">Informații De Bază</h3>
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Tip Vehicul */}
+                      <div className="space-y-1">
+                         <label className="text-xs text-gray-500 font-bold">Tip Vehicul</label>
+                         <select value={currentCar.vehicleType || 'Autoturism'} onChange={(e) => setCurrentCar({...currentCar, vehicleType: e.target.value, make: e.target.value === 'Motocicletă' ? MOTO_BRANDS[0] : BRANDS[0], bodyType: e.target.value === 'Motocicletă' ? MOTO_CATEGORIES[0] as any : BODY_TYPES[0] as any})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white">
+                            {VEHICLE_TYPES.map(v => <option key={v} value={v}>{v}</option>)}
+                         </select>
+                      </div>
+
                       <div className="space-y-1">
                          <label className="text-xs text-gray-500 font-bold">Marcă</label>
                          <select value={currentCar.make} onChange={(e) => setCurrentCar({...currentCar, make: e.target.value})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white">
-                            {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+                            {(currentCar.vehicleType === 'Motocicletă' ? MOTO_BRANDS : BRANDS).map(b => <option key={b} value={b}>{b}</option>)}
                          </select>
                       </div>
                       <div className="space-y-1">
@@ -1250,15 +1259,29 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                          </select>
                       </div>
                       <div className="space-y-1">
-                         <label className="text-xs text-gray-500 font-bold">Caroserie</label>
+                         <label className="text-xs text-gray-500 font-bold">{currentCar.vehicleType === 'Motocicletă' ? 'Categorie' : 'Caroserie'}</label>
                          <select value={currentCar.bodyType} onChange={(e) => setCurrentCar({...currentCar, bodyType: e.target.value as any})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white">
-                            {BODY_TYPES.map(b => <option key={b} value={b}>{b}</option>)}
+                            {(currentCar.vehicleType === 'Motocicletă' ? MOTO_CATEGORIES : BODY_TYPES).map(b => <option key={b} value={b}>{b}</option>)}
                          </select>
                       </div>
                       <div className="space-y-1">
                          <label className="text-xs text-gray-500 font-bold">Putere (CP)</label>
                          <input type="number" value={currentCar.power || 0} onChange={(e) => setCurrentCar({...currentCar, power: Number(e.target.value)})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white" />
                       </div>
+                      
+                      {currentCar.vehicleType !== 'Motocicletă' && (
+                        <>
+                           <div className="space-y-1">
+                              <label className="text-xs text-gray-500 font-bold">Număr Uși</label>
+                              <input type="number" value={currentCar.doors || 5} onChange={(e) => setCurrentCar({...currentCar, doors: Number(e.target.value)})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white" />
+                           </div>
+                           <div className="space-y-1">
+                              <label className="text-xs text-gray-500 font-bold">Număr Locuri</label>
+                              <input type="number" value={currentCar.seats || 5} onChange={(e) => setCurrentCar({...currentCar, seats: Number(e.target.value)})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white" />
+                           </div>
+                        </>
+                      )}
+
                       <div className="space-y-1">
                          <label className="text-xs text-gray-500 font-bold">Motor (cm3/L)</label>
                          <input type="text" value={currentCar.engineSize || ''} onChange={(e) => setCurrentCar({...currentCar, engineSize: e.target.value})} className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded p-2 text-gray-900 dark:text-white" />

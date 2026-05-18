@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Filter, X, ChevronDown, ChevronUp, Search, Loader2, Check, Palette, Leaf, Compass } from 'lucide-react';
 import CarCard from '../components/CarCard';
-import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS } from '../constants';
+import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS, VEHICLE_TYPES, MOTO_BRANDS, MOTO_CATEGORIES } from '../constants';
 import { SortOption } from '../types';
 import { useCars } from '../context/CarContext';
 
@@ -50,6 +50,7 @@ const Inventory: React.FC = () => {
     }
     return {
       priceRange: [0, Number(searchParams.get('maxPrice')) || 1000000],
+      selectedVehicleType: searchParams.get('vehicleType') || '',
       selectedBrand: searchParams.get('make') || '',
       selectedModel: searchParams.get('model') || '',
       selectedBody: '',
@@ -126,6 +127,11 @@ const Inventory: React.FC = () => {
       const carPrice = Number(car.price) || 0;
       const carYear = Number(car.year) || 0;
 
+      if (filters.selectedVehicleType && filters.selectedVehicleType !== 'Oricare') {
+        const carType = car.vehicleType || 'Autoturism';
+        if (carType !== filters.selectedVehicleType) return false;
+      }
+      
       if (filters.selectedBrand && car.make !== filters.selectedBrand) return false;
       if (filters.selectedModel && car.model !== filters.selectedModel) return false;
       if (filters.selectedBody && car.bodyType !== filters.selectedBody) return false;
@@ -176,6 +182,7 @@ const Inventory: React.FC = () => {
   const resetFilters = () => {
     setFilters({
       priceRange: [0, 1000000],
+      selectedVehicleType: '',
       selectedBrand: '',
       selectedModel: '',
       selectedBody: '',
@@ -250,6 +257,22 @@ const Inventory: React.FC = () => {
 
           <div className="glass-panel rounded-xl p-6 md:sticky md:top-24 bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 pb-32 md:pb-6">
             
+            <FilterSection title="Tip Vehicul">
+               <select 
+                 value={filters.selectedVehicleType || 'Oricare'}
+                 onChange={(e) => setFilters({
+                     ...filters, 
+                     selectedVehicleType: e.target.value === 'Oricare' ? '' : e.target.value,
+                     selectedBrand: '',
+                     selectedBody: ''
+                 })}
+                 className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded p-3 focus:border-gold-500 outline-none cursor-pointer"
+               >
+                 <option value="Oricare" className="bg-white dark:bg-[#121212]">Oricare</option>
+                 {VEHICLE_TYPES.map(v => <option key={v} value={v} className="bg-white dark:bg-[#121212]">{v}</option>)}
+               </select>
+            </FilterSection>
+
             <FilterSection title="Locație">
                 <div className="space-y-2">
                     {LOCATIONS.map(loc => (
@@ -303,7 +326,12 @@ const Inventory: React.FC = () => {
                 className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded p-3 focus:border-gold-500 outline-none cursor-pointer"
               >
                 <option value="" className="bg-white dark:bg-[#121212]">Toate</option>
-                {BRANDS.map(b => <option key={b} value={b} className="bg-white dark:bg-[#121212]">{b}</option>)}
+                {(filters.selectedVehicleType === 'Motocicletă' 
+                    ? MOTO_BRANDS 
+                    : filters.selectedVehicleType === 'Autoturism' 
+                        ? BRANDS 
+                        : Array.from(new Set([...BRANDS, ...MOTO_BRANDS])).sort()
+                ).map(b => <option key={b} value={b} className="bg-white dark:bg-[#121212]">{b}</option>)}
               </select>
             </FilterSection>
 
@@ -425,9 +453,14 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            <FilterSection title="Caroserie">
+            <FilterSection title={filters.selectedVehicleType === 'Motocicletă' ? 'Categorie' : 'Caroserie'}>
               <div className="space-y-2">
-                {BODY_TYPES.map(type => (
+                {(filters.selectedVehicleType === 'Motocicletă' 
+                    ? MOTO_CATEGORIES 
+                    : filters.selectedVehicleType === 'Autoturism' 
+                        ? BODY_TYPES 
+                        : Array.from(new Set([...BODY_TYPES, ...MOTO_CATEGORIES])).sort()
+                ).map(type => (
                   <label key={type} className="flex items-center gap-2 cursor-pointer group">
                     <div className={`w-4 h-4 rounded-sm border ${filters.selectedBody === type ? 'bg-gold-500 border-gold-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-gold-500'} transition-colors flex items-center justify-center`}>
                       {filters.selectedBody === type && <div className="w-2 h-2 bg-black rounded-[1px]" />}
@@ -463,23 +496,25 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            <FilterSection title="Locuri">
-              <div className="flex flex-wrap gap-2">
-                {[4, 5, 7, 9].map(seats => (
-                  <button
-                    key={seats}
-                    onClick={() => setFilters({...filters, selectedSeats: filters.selectedSeats === String(seats) ? '' : String(seats)})}
-                    className={`px-3 py-2 rounded-lg border text-sm font-bold transition-all ${
-                      filters.selectedSeats === String(seats)
-                        ? 'bg-gold-500 border-gold-500 text-black' 
-                        : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-gold-500 hover:text-gray-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {seats === 9 ? '8+1' : seats}
-                  </button>
-                ))}
-              </div>
-            </FilterSection>
+            {filters.selectedVehicleType !== 'Motocicletă' && (
+                <FilterSection title="Locuri">
+                  <div className="flex flex-wrap gap-2">
+                    {[2, 4, 5, 7, 9].map(seats => (
+                      <button
+                        key={seats}
+                        onClick={() => setFilters({...filters, selectedSeats: filters.selectedSeats === String(seats) ? '' : String(seats)})}
+                        className={`px-3 py-2 rounded-lg border text-sm font-bold transition-all ${
+                          filters.selectedSeats === String(seats)
+                            ? 'bg-gold-500 border-gold-500 text-black' 
+                            : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:border-gold-500 hover:text-gray-900 dark:hover:text-white'
+                        }`}
+                      >
+                        {seats === 9 ? '8+1' : seats}
+                      </button>
+                    ))}
+                  </div>
+                </FilterSection>
+            )}
 
             <FilterSection title="Dotări">
                 <div className="max-h-60 overflow-y-auto custom-scrollbar pr-2 space-y-2">

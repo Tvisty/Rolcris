@@ -30,6 +30,8 @@ export const MOCK_REVIEWS: Review[] = [
   }
 ];
 
+export const VEHICLE_TYPES = ['Autoturism', 'Motocicletă'];
+
 export const BRANDS = [
   'Alfa Romeo',
   'Audi',
@@ -72,6 +74,34 @@ export const BRANDS = [
   'Toyota',
   'Volkswagen',
   'Volvo'
+];
+
+export const MOTO_BRANDS = [
+  'Yamaha',
+  'Honda',
+  'Kawasaki',
+  'Ducati',
+  'Suzuki',
+  'BMW Motorrad',
+  'KTM',
+  'Harley-Davidson',
+  'Triumph',
+  'Aprilia',
+  'Husqvarna',
+  'CFMOTO',
+  'Benelli'
+];
+
+export const MOTO_CATEGORIES = [
+  'Sport',
+  'Naked',
+  'Cruiser',
+  'Touring',
+  'Enduro / Cross',
+  'Scrambler',
+  'Chopper',
+  'Maxi-Scooter',
+  'Scooter'
 ];
 
 export const BODY_TYPES = ['SUV', 'Sedan', 'Coupe', 'Cabrio', 'Break', 'Hatchback', 'Dube', 'Monovolum'];

@@ -17,6 +17,7 @@ export interface Car {
   isSold?: boolean; // New field for Sold status
   description: string;
   features: string[];
+  vehicleType?: string; // e.g. Autoturism, Motocicletă
   seats: number;
   doors?: number; // New field for Number of doors
   location?: string; // New field for location filtering
@@ -104,6 +105,7 @@ export interface FilterState {
   fuel: string[];
   bodyType: string[];
   location?: string;
+  vehicleType?: string;
 }
 
 export type SeasonalTheme = 'default' | 'valentine' | 'halloween' | 'martisor' | 'romania' | 'easter' | 'christmas' | 'blackfriday';

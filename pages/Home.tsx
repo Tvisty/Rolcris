@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, MapPin, Phone } from 'lucide-react';
 import SearchWidget from '../components/SearchWidget';
@@ -88,6 +88,33 @@ const Home: React.FC = () => {
   const hotDeals = cars.filter(c => c.isHotDeal).slice(0, 4);
   const [heroImage, setHeroImage] = useState("/background-light.webp");
   const [isLoaded, setIsLoaded] = useState(false);
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroIndex(prev => (prev === 0 ? 1 : 0));
+    }, 6000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const heroSlides = [
+    {
+      subtitle: "Autoparc RolCris",
+      title: "Vii cu mașina veche <br className=\"hidden sm:block\" /> și pleci cu una nouă!",
+      buttonText: "Vezi Stoc auto",
+      buttonLink: "/inventory",
+      bgLight: heroImage,
+      bgDark: "/background-dark.webp"
+    },
+    {
+      subtitle: "Nou! Secțiunea Moto",
+      title: "Descoperă pasiunea pe două roți. <br className=\"hidden sm:block\" /> Stoc nou de motociclete!",
+      buttonText: "Vezi Motocicletele",
+      buttonLink: "/inventory?vehicleType=Motocicletă",
+      bgLight: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop",
+      bgDark: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop"
+    }
+  ];
 
   // Filter out specific brands from the homepage logo display
   const brandsToExclude = ['BYD', 'Cupra', 'Lexus', 'Dodge', 'SsangYong'];
@@ -99,57 +126,71 @@ const Home: React.FC = () => {
       <section className="relative min-h-screen md:h-screen flex items-center justify-center overflow-hidden bg-black pb-20 md:pb-0">
         {/* Background */}
         <div className={`absolute inset-0 z-0 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent z-10" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/90 via-transparent to-transparent z-10" />
-          <picture className="w-full h-full absolute inset-0 block dark:hidden">
-            <source media="(max-width: 768px)" srcSet="/background-mobile.webp" />
-            <img 
-              src={heroImage} 
-              alt="Luxury Car Light" 
-              referrerPolicy="no-referrer"
-              onLoad={() => setIsLoaded(true)}
-              width="1920"
-              height="1080"
-              fetchpriority="high"
-              className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 transform transition-transform duration-[20s] hover:scale-110"
-              style={{ animation: 'none' }} 
-              onError={() => {
-                setHeroImage("https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=2070&auto=format&fit=crop");
-              }}
-            />
-          </picture>
-          <picture className="w-full h-full absolute inset-0 hidden dark:block">
-            <source media="(max-width: 768px)" srcSet="/background-mobile-dark.webp" />
-            <img 
-              src="/background-dark.webp" 
-              alt="Luxury Car Dark" 
-              referrerPolicy="no-referrer"
-              onLoad={() => setIsLoaded(true)}
-              width="1920"
-              height="1080"
-              fetchpriority="high"
-              className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 transform transition-transform duration-[20s] hover:scale-110"
-              style={{ animation: 'none' }} 
-            />
-          </picture>
+          
+          {heroSlides.map((slide, idx) => (
+            <div key={idx} className={`absolute inset-0 transition-opacity duration-1000 ${heroIndex === idx ? 'opacity-100 z-0' : 'opacity-0 -z-10'}`}>
+              <picture className="w-full h-full absolute inset-0 block dark:hidden">
+                <source media="(max-width: 768px)" srcSet={idx === 0 ? "/background-mobile.webp" : slide.bgLight} />
+                <img 
+                  src={slide.bgLight} 
+                  alt="Hero Background Light" 
+                  referrerPolicy="no-referrer"
+                  onLoad={() => { if (idx === 0) setIsLoaded(true); }}
+                  width="1920"
+                  height="1080"
+                  fetchpriority={idx === 0 ? "high" : "auto"}
+                  className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 transform transition-transform duration-[20s] hover:scale-110"
+                  style={{ animation: 'none' }} 
+                  onError={() => {
+                    if (idx === 0) setHeroImage("https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=2070&auto=format&fit=crop");
+                  }}
+                />
+              </picture>
+              <picture className="w-full h-full absolute inset-0 hidden dark:block">
+                <source media="(max-width: 768px)" srcSet={idx === 0 ? "/background-mobile-dark.webp" : slide.bgDark} />
+                <img 
+                  src={slide.bgDark} 
+                  alt="Hero Background Dark" 
+                  referrerPolicy="no-referrer"
+                  onLoad={() => { if (idx === 0) setIsLoaded(true); }}
+                  width="1920"
+                  height="1080"
+                  fetchpriority={idx === 0 ? "high" : "auto"}
+                  className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 transform transition-transform duration-[20s] hover:scale-110"
+                  style={{ animation: 'none' }} 
+                />
+              </picture>
+            </div>
+          ))}
+
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent z-10 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/90 via-transparent to-transparent z-10 pointer-events-none" />
         </div>
 
         <div className="relative z-20 text-center w-full px-4 pt-32 pb-20 md:pt-0 md:mt-[-40px]">
-          <h2 
-            className="text-gold-500 font-black tracking-[0.15em] md:tracking-[0.2em] uppercase text-2xl sm:text-3xl md:text-5xl mb-4 md:mb-6 animate-fade-in-up"
-            style={{ textShadow: '0 4px 8px rgba(0,0,0,0.9), 0 0 30px rgba(197,160,89,0.4)' }}
-          >
-            Autoparc RolCris
-          </h2>
-          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white mb-6 md:mb-8 leading-tight drop-shadow-2xl px-2">
-            Vii cu mașina veche <br className="hidden sm:block" /> și pleci cu una nouă!
-          </h1>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10 md:mb-12">
-            <Link to="/inventory" className="bg-gold-500 hover:bg-gold-600 text-black px-6 md:px-8 py-3 md:py-4 rounded-lg font-bold text-base md:text-lg transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(197,160,89,0.4)]">
-              Vezi Stocul Disponibil
-            </Link>
+          <div className="min-h-[200px] flex flex-col justify-center items-center">
+            <h2 
+              className="text-gold-500 font-black tracking-[0.15em] md:tracking-[0.2em] uppercase text-2xl sm:text-3xl md:text-5xl mb-4 md:mb-6 transition-all duration-500 transform animate-fade-in-up"
+              style={{ textShadow: '0 4px 8px rgba(0,0,0,0.9), 0 0 30px rgba(197,160,89,0.4)', opacity: 1 }}
+              key={`subtitle-${heroIndex}`}
+            >
+              {heroSlides[heroIndex].subtitle}
+            </h2>
+            <h1 
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white mb-6 md:mb-8 leading-tight drop-shadow-2xl px-2 transition-all duration-500 delay-100"
+              key={`title-${heroIndex}`}
+              dangerouslySetInnerHTML={{ __html: heroSlides[heroIndex].title }}
+            />
+            <div 
+              className="flex flex-col sm:flex-row gap-4 justify-center mb-10 md:mb-12 transition-all duration-500 delay-200"
+              key={`btn-${heroIndex}`}
+            >
+              <Link to={heroSlides[heroIndex].buttonLink} className="bg-gold-500 hover:bg-gold-600 text-black px-6 md:px-8 py-3 md:py-4 rounded-lg font-bold text-base md:text-lg transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(197,160,89,0.4)]">
+                {heroSlides[heroIndex].buttonText}
+              </Link>
+            </div>
           </div>
-
+          
           {/* Location Buttons */}
           <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 md:gap-4 max-w-5xl mx-auto animate-fade-in-up delay-300">
             {/* Satu Mare */}
@@ -204,6 +245,19 @@ const Home: React.FC = () => {
               </a>
             </div>
           </div>
+
+          {/* Slide Indicators */}
+          <div className="mt-8 md:mt-10 flex justify-center gap-3 z-30">
+            {heroSlides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setHeroIndex(idx)}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${heroIndex === idx ? 'bg-gold-500 w-8' : 'bg-white/50 hover:bg-white/80'}`}
+                aria-label={`Slide ${idx + 1}`}
+              />
+            ))}
+          </div>
+
         </div>
 
         {/* Partner Badge - Top Left Placement (Updated) */}
