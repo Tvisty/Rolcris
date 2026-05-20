@@ -102,7 +102,7 @@ const Home: React.FC = () => {
       subtitle: "Autoparc RolCris",
       title: "Vii cu mașina veche <br className=\"hidden sm:block\" /> și pleci cu una nouă!",
       buttonText: "Vezi Stoc auto",
-      buttonLink: "/inventory",
+      buttonLink: "/inventory?vehicleType=Autoturism",
       bgLight: heroImage,
       bgDark: "/background-dark.webp"
     },

@@ -1,11 +1,21 @@
 
-import React, { Suspense } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { Suspense, useEffect } from 'react';
+import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import { CarProvider } from './context/CarContext';
 import { ThemeProvider } from './context/ThemeContext';
+
+const RouteChangeListener = () => {
+  const location = useLocation();
+  useEffect(() => {
+    if (!location.pathname.startsWith('/inventory')) {
+      sessionStorage.removeItem('inventoryFilters');
+    }
+  }, [location]);
+  return null;
+};
 
 // Lazy loaded components
 const Inventory = React.lazy(() => import('./pages/Inventory'));
@@ -32,6 +42,7 @@ const App: React.FC = () => {
     <CarProvider>
       <ThemeProvider>
         <Router>
+          <RouteChangeListener />
           <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-100 font-sans selection:bg-gold-500 selection:text-black transition-colors duration-300 relative">
             <Suspense fallback={null}>
               <SeasonalEffects />

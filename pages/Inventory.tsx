@@ -34,13 +34,14 @@ const Inventory: React.FC = () => {
       try {
         const parsed = JSON.parse(saved);
         // If there are search parameters, they take precedence over saved filters
-        if (searchParams.get('make') || searchParams.get('model') || searchParams.get('minYear') || searchParams.get('maxPrice')) {
+        if (searchParams.get('make') || searchParams.get('model') || searchParams.get('minYear') || searchParams.get('maxPrice') || searchParams.get('vehicleType')) {
            return {
              ...parsed,
-             priceRange: [0, Number(searchParams.get('maxPrice')) || parsed.priceRange[1] || 1000000],
+             priceRange: [0, Number(searchParams.get('maxPrice')) || parsed.priceRange?.[1] || 1000000],
              selectedBrand: searchParams.get('make') || parsed.selectedBrand || '',
              selectedModel: searchParams.get('model') || parsed.selectedModel || '',
-             yearRange: [Number(searchParams.get('minYear')) || parsed.yearRange[0] || 0, new Date().getFullYear() + 1]
+             selectedVehicleType: searchParams.get('vehicleType') || parsed.selectedVehicleType || '',
+             yearRange: [Number(searchParams.get('minYear')) || parsed.yearRange?.[0] || 0, new Date().getFullYear() + 1]
            };
         }
         return parsed;
@@ -97,12 +98,14 @@ const Inventory: React.FC = () => {
     const model = searchParams.get('model');
     const minYear = searchParams.get('minYear');
     const maxPrice = searchParams.get('maxPrice');
+    const vehicleType = searchParams.get('vehicleType');
 
-    if (make || model || minYear || maxPrice) {
+    if (make || model || minYear || maxPrice || vehicleType) {
       setFilters(prev => ({
         ...prev,
         selectedBrand: make || prev.selectedBrand,
         selectedModel: model || prev.selectedModel,
+        selectedVehicleType: vehicleType || prev.selectedVehicleType,
         yearRange: [minYear ? Number(minYear) : prev.yearRange[0], prev.yearRange[1]],
         priceRange: [prev.priceRange[0], maxPrice ? Number(maxPrice) : prev.priceRange[1]]
       }));
