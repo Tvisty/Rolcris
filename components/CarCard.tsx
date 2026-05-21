@@ -17,7 +17,8 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
   const optimizedImage = getOptimizedImageUrl(mainImage, 800);
 
   const handleCardClick = () => {
-    navigate(`/inventory/${car.id}`);
+    const routePrefix = car.vehicleType === 'Motocicletă' ? '/moto-inventory' : '/inventory';
+    navigate(`${routePrefix}/${car.id}`);
   };
 
   return (

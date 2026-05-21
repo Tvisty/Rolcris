@@ -22,6 +22,7 @@ const Navigation: React.FC = () => {
   const navLinks = [
     { name: 'Acasă', path: '/' },
     { name: 'Stoc Auto', path: '/inventory' },
+    { name: 'Stoc Moto', path: '/moto-inventory' },
     { name: 'Servicii', path: '/services' },
     { name: 'Finanțare', path: '/finance' },
     { name: 'Licitații', path: '/auctions' },

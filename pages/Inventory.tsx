@@ -23,13 +23,20 @@ const FilterSection: React.FC<React.PropsWithChildren<{ title: string; defaultOp
   );
 };
 
-const Inventory: React.FC = () => {
+interface InventoryProps {
+  pageType?: 'auto' | 'moto';
+}
+
+const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
   const { cars, isLoading } = useCars();
   const [searchParams] = useSearchParams();
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   
+  const filterStorageKey = pageType === 'moto' ? 'motoInventoryFilters' : 'inventoryFilters';
+  const sortStorageKey = pageType === 'moto' ? 'motoInventorySort' : 'inventorySort';
+
   const [filters, setFilters] = useState(() => {
-    const saved = sessionStorage.getItem('inventoryFilters');
+    const saved = sessionStorage.getItem(filterStorageKey);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -69,24 +76,31 @@ const Inventory: React.FC = () => {
   });
 
   useEffect(() => {
-    sessionStorage.setItem('inventoryFilters', JSON.stringify(filters));
-  }, [filters]);
+    sessionStorage.setItem(filterStorageKey, JSON.stringify(filters));
+  }, [filters, filterStorageKey]);
 
   const [sortOption, setSortOption] = useState<SortOption>(() => {
-    return (sessionStorage.getItem('inventorySort') as SortOption) || 'newest';
+    return (sessionStorage.getItem(sortStorageKey) as SortOption) || 'newest';
   });
 
   useEffect(() => {
-    sessionStorage.setItem('inventorySort', sortOption);
-  }, [sortOption]);
+    sessionStorage.setItem(sortStorageKey, sortOption);
+  }, [sortOption, sortStorageKey]);
 
   // Calculate available models based on selected brand and actual inventory
   const availableModels = useMemo(() => {
     const make = filters.selectedBrand;
     // Filter cars by the selected make if one exists, otherwise use all cars
-    const relevantCars = make 
+    let relevantCars = make 
         ? cars.filter(c => c.make === make) 
         : cars;
+        
+    relevantCars = relevantCars.filter(c => {
+      const type = c.vehicleType || 'Autoturism';
+      if (pageType === 'moto' && type !== 'Motocicletă') return false;
+      if (pageType === 'auto' && type === 'Motocicletă') return false;
+      return true;
+    });
     
     // Extract models and sort them
     const models = Array.from(new Set(relevantCars.map(c => c.model)));
@@ -129,9 +143,12 @@ const Inventory: React.FC = () => {
     let result = cars.filter(car => {
       const carPrice = Number(car.price) || 0;
       const carYear = Number(car.year) || 0;
+      const carType = car.vehicleType || 'Autoturism';
+
+      if (pageType === 'moto' && carType !== 'Motocicletă') return false;
+      if (pageType === 'auto' && carType === 'Motocicletă') return false;
 
       if (filters.selectedVehicleType && filters.selectedVehicleType !== 'Oricare') {
-        const carType = car.vehicleType || 'Autoturism';
         if (carType !== filters.selectedVehicleType) return false;
       }
       
@@ -217,9 +234,11 @@ const Inventory: React.FC = () => {
     <div className="min-h-screen pt-24 pb-12 px-4 max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-           <h1 className="text-4xl font-display font-bold text-gray-900 dark:text-white mb-2">Stoc Disponibil</h1>
+           <h1 className="text-4xl font-display font-bold text-gray-900 dark:text-white mb-2">
+             {pageType === 'moto' ? 'Stoc Motociclete' : pageType === 'auto' ? 'Stoc Auto' : 'Stoc Disponibil'}
+           </h1>
            <p className="text-gray-500 dark:text-gray-400 text-sm">
-             {isLoading ? 'Se încarcă...' : `${filteredCars.length} autoturisme găsite`}
+             {isLoading ? 'Se încarcă...' : `${filteredCars.length} ${pageType === 'moto' ? 'motociclete găsite' : 'autoturisme găsite'}`}
            </p>
         </div>
         
@@ -260,22 +279,6 @@ const Inventory: React.FC = () => {
 
           <div className="glass-panel rounded-xl p-6 md:sticky md:top-24 bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 pb-32 md:pb-6">
             
-            <FilterSection title="Tip Vehicul">
-               <select 
-                 value={filters.selectedVehicleType || 'Oricare'}
-                 onChange={(e) => setFilters({
-                     ...filters, 
-                     selectedVehicleType: e.target.value === 'Oricare' ? '' : e.target.value,
-                     selectedBrand: '',
-                     selectedBody: ''
-                 })}
-                 className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded p-3 focus:border-gold-500 outline-none cursor-pointer"
-               >
-                 <option value="Oricare" className="bg-white dark:bg-[#121212]">Oricare</option>
-                 {VEHICLE_TYPES.map(v => <option key={v} value={v} className="bg-white dark:bg-[#121212]">{v}</option>)}
-               </select>
-            </FilterSection>
-
             <FilterSection title="Locație">
                 <div className="space-y-2">
                     {LOCATIONS.map(loc => (
@@ -329,9 +332,9 @@ const Inventory: React.FC = () => {
                 className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded p-3 focus:border-gold-500 outline-none cursor-pointer"
               >
                 <option value="" className="bg-white dark:bg-[#121212]">Toate</option>
-                {(filters.selectedVehicleType === 'Motocicletă' 
+                {(pageType === 'moto' 
                     ? MOTO_BRANDS 
-                    : filters.selectedVehicleType === 'Autoturism' 
+                    : pageType === 'auto' 
                         ? BRANDS 
                         : Array.from(new Set([...BRANDS, ...MOTO_BRANDS])).sort()
                 ).map(b => <option key={b} value={b} className="bg-white dark:bg-[#121212]">{b}</option>)}
@@ -456,11 +459,11 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            <FilterSection title={filters.selectedVehicleType === 'Motocicletă' ? 'Categorie' : 'Caroserie'}>
+            <FilterSection title={pageType === 'moto' ? 'Categorie' : 'Caroserie'}>
               <div className="space-y-2">
-                {(filters.selectedVehicleType === 'Motocicletă' 
+                {(pageType === 'moto' 
                     ? MOTO_CATEGORIES 
-                    : filters.selectedVehicleType === 'Autoturism' 
+                    : pageType === 'auto' 
                         ? BODY_TYPES 
                         : Array.from(new Set([...BODY_TYPES, ...MOTO_CATEGORIES])).sort()
                 ).map(type => (
@@ -499,7 +502,7 @@ const Inventory: React.FC = () => {
               </div>
             </FilterSection>
 
-            {filters.selectedVehicleType !== 'Motocicletă' && (
+            {pageType !== 'moto' && (
                 <FilterSection title="Locuri">
                   <div className="flex flex-wrap gap-2">
                     {[2, 4, 5, 7, 9].map(seats => (

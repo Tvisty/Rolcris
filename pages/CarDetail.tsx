@@ -252,9 +252,9 @@ const CarDetail: React.FC = () => {
       
       {/* Breadcrumb & Navigation */}
       <div className="flex justify-between items-center mb-6 relative z-20">
-        <button onClick={() => navigate('/inventory')} className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer">
+        <button onClick={() => navigate(car.vehicleType === 'Motocicletă' ? '/moto-inventory' : '/inventory')} className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer">
           <ChevronLeft size={20} />
-          Înapoi la Stoc
+          {car.vehicleType === 'Motocicletă' ? 'Înapoi la Stoc Moto' : 'Înapoi la Stoc Auto'}
         </button>
         <button aria-label="Distribuie" className="text-gray-500 dark:text-gray-400 hover:text-gold-500 transition-colors">
           <Share2 size={20} />

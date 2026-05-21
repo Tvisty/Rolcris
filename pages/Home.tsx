@@ -102,7 +102,7 @@ const Home: React.FC = () => {
       subtitle: "Autoparc RolCris",
       title: "Vii cu mașina veche <br className=\"hidden sm:block\" /> și pleci cu una nouă!",
       buttonText: "Vezi Stoc auto",
-      buttonLink: "/inventory?vehicleType=Autoturism",
+      buttonLink: "/inventory",
       bgLight: heroImage,
       bgDark: "/background-dark.webp"
     },
@@ -110,7 +110,7 @@ const Home: React.FC = () => {
       subtitle: "Nou! Secțiunea Moto",
       title: "Descoperă pasiunea pe două roți. <br className=\"hidden sm:block\" /> Stoc nou de motociclete!",
       buttonText: "Vezi Motocicletele",
-      buttonLink: "/inventory?vehicleType=Motocicletă",
+      buttonLink: "/moto-inventory",
       bgLight: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop",
       bgDark: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop"
     }

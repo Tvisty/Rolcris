@@ -10,8 +10,9 @@ import { ThemeProvider } from './context/ThemeContext';
 const RouteChangeListener = () => {
   const location = useLocation();
   useEffect(() => {
-    if (!location.pathname.startsWith('/inventory')) {
+    if (!location.pathname.startsWith('/inventory') && !location.pathname.startsWith('/moto-inventory')) {
       sessionStorage.removeItem('inventoryFilters');
+      sessionStorage.removeItem('motoInventoryFilters');
     }
   }, [location]);
   return null;
@@ -52,8 +53,10 @@ const App: React.FC = () => {
               <Suspense fallback={<LoadingFallback />}>
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route path="/inventory" element={<Inventory />} />
+                  <Route path="/inventory" element={<Inventory key="auto" pageType="auto" />} />
+                  <Route path="/moto-inventory" element={<Inventory key="moto" pageType="moto" />} />
                   <Route path="/inventory/:id" element={<CarDetail />} />
+                  <Route path="/moto-inventory/:id" element={<CarDetail />} />
                   <Route path="/auctions" element={<Auctions />} />
                   <Route path="/services" element={<Services />} />
                   <Route path="/finance" element={<Finance />} />
