@@ -46,11 +46,11 @@ const syncToLocalStorage = (key: string, data: any) => {
 };
 
 export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const [cars, setCars] = useState<Car[]>(() => getFromLocalStorage('cars', []));
+  const [cars, setCars] = useState<Car[]>(() => getFromLocalStorage('cars_v2', []));
   const [bookings, setBookings] = useState<Booking[]>(() => getFromLocalStorage('bookings', []));
   const [messages, setMessages] = useState<ContactMessage[]>(() => getFromLocalStorage('messages', []));
   const [auctions, setAuctions] = useState<Auction[]>(() => getFromLocalStorage('auctions', []));
-  const [isLoading, setIsLoading] = useState(() => getFromLocalStorage('cars', []).length === 0);
+  const [isLoading, setIsLoading] = useState(() => getFromLocalStorage('cars_v2', []).length === 0);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [fcmToken, setFcmToken] = useState<string | null>(null);
@@ -102,7 +102,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
            
            if(carsRes.data) {
              setCars(carsRes.data as Car[]);
-             syncToLocalStorage('cars', carsRes.data);
+             syncToLocalStorage('cars_v2', carsRes.data);
            }
            if(bookingsRes.data) {
                setBookings(bookingsRes.data as Booking[]);
@@ -177,7 +177,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     
     setCars(prev => {
       const newCars = [payload, ...prev];
-      syncToLocalStorage('cars', newCars);
+      syncToLocalStorage('cars_v2', newCars);
       return newCars;
     });
     
@@ -194,7 +194,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
 
     setCars(prev => {
       const newCars = prev.map(c => c.id === updatedCar.id ? payload : c);
-      syncToLocalStorage('cars', newCars);
+      syncToLocalStorage('cars_v2', newCars);
       return newCars;
     });
     
@@ -207,7 +207,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   const deleteCar = async (id: string) => {
     setCars(prev => {
       const newCars = prev.filter(c => c.id !== id);
-      syncToLocalStorage('cars', newCars);
+      syncToLocalStorage('cars_v2', newCars);
       return newCars;
     });
     
