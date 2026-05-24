@@ -137,6 +137,16 @@ const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
     };
   }, [isMobileFilterOpen]);
 
+  const totalCarsOfType = useMemo(() => {
+    if (!cars) return 0;
+    return cars.filter(car => {
+      const type = car.vehicleType || 'Autoturism';
+      if (pageType === 'moto' && type !== 'Motocicletă') return false;
+      if (pageType === 'auto' && type === 'Motocicletă') return false;
+      return true;
+    }).length;
+  }, [cars, pageType]);
+
   const filteredCars = useMemo(() => {
     if (!cars) return [];
     
@@ -238,7 +248,7 @@ const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
              {pageType === 'moto' ? 'Stoc Motociclete' : pageType === 'auto' ? 'Stoc Auto' : 'Stoc Disponibil'}
            </h1>
            <p className="text-gray-500 dark:text-gray-400 text-sm">
-             {isLoading ? 'Se încarcă...' : `${filteredCars.length} ${pageType === 'moto' ? 'motociclete găsite' : 'autoturisme găsite'}`}
+             {isLoading ? 'Se încarcă...' : `${totalCarsOfType} ${pageType === 'moto' ? 'motociclete găsite' : 'autoturisme găsite'}`}
            </p>
         </div>
         
