@@ -28,12 +28,29 @@ interface CarContextType {
 
 const CarContext = createContext<CarContextType | undefined>(undefined);
 
+const getFromLocalStorage = (key: string, defaultValue: any) => {
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : defaultValue;
+  } catch {
+    return defaultValue;
+  }
+};
+
+const syncToLocalStorage = (key: string, data: any) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch(e) {
+    console.warn("Local storage save failed", e);
+  }
+};
+
 export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const [cars, setCars] = useState<Car[]>([]);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [messages, setMessages] = useState<ContactMessage[]>([]);
-  const [auctions, setAuctions] = useState<Auction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [cars, setCars] = useState<Car[]>(() => getFromLocalStorage('cars', []));
+  const [bookings, setBookings] = useState<Booking[]>(() => getFromLocalStorage('bookings', []));
+  const [messages, setMessages] = useState<ContactMessage[]>(() => getFromLocalStorage('messages', []));
+  const [auctions, setAuctions] = useState<Auction[]>(() => getFromLocalStorage('auctions', []));
+  const [isLoading, setIsLoading] = useState(() => getFromLocalStorage('cars', []).length === 0);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [fcmToken, setFcmToken] = useState<string | null>(null);
@@ -64,26 +81,11 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     }
   };
 
-  const syncToLocalStorage = (key: string, data: any) => {
-    try {
-      localStorage.setItem(key, JSON.stringify(data));
-    } catch(e) {
-      console.warn("Local storage save failed", e);
-    }
-  };
-
-  const getFromLocalStorage = (key: string, defaultValue: any) => {
-    try {
-      const stored = localStorage.getItem(key);
-      return stored ? JSON.parse(stored) : defaultValue;
-    } catch {
-      return defaultValue;
-    }
-  };
-
   useEffect(() => {
       const fetchData = async () => {
-       setIsLoading(true);
+       if (cars.length === 0) {
+           setIsLoading(true);
+       }
        try {
            // Fetch all data
            const [carsRes, bookingsRes, messagesRes, auctionsRes] = await Promise.all([
