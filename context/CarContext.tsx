@@ -85,9 +85,9 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
       const fetchData = async () => {
        setIsLoading(true);
        try {
-           // Step 1: Fetch initial chunk (Limit 6 cars to drastically improve Critical Path Latency)
+           // Fetch all data
            const [carsRes, bookingsRes, messagesRes, auctionsRes] = await Promise.all([
-               supabase.from('cars').select('*').order('createdAt', { ascending: false }).limit(6),
+               supabase.from('cars').select('*').order('createdAt', { ascending: false }),
                supabase.from('bookings').select('*').order('date', { ascending: true }),
                supabase.from('messages').select('*').order('date', { ascending: false }),
                supabase.from('auctions').select('*')
@@ -101,21 +101,6 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
            if(carsRes.data) {
              setCars(carsRes.data as Car[]);
              syncToLocalStorage('cars', carsRes.data);
-             
-             // Step 2: Fetch the remaining cars lazily in the background
-             setTimeout(() => {
-                 supabase.from('cars').select('*').order('createdAt', { ascending: false }).range(6, 1000).then(restRes => {
-                     if (restRes.data && !restRes.error) {
-                         setCars(prev => {
-                             const existingIds = new Set(prev.map(c => c.id));
-                             const newCars = (restRes.data as Car[]).filter(c => !existingIds.has(c.id));
-                             const combined = [...prev, ...newCars];
-                             syncToLocalStorage('cars', combined);
-                             return combined;
-                         });
-                     }
-                 });
-             }, 500); // Slight delay helps browser prioritize main UI render
            }
            if(bookingsRes.data) {
                setBookings(bookingsRes.data as Booking[]);
