@@ -46,10 +46,10 @@ const syncToLocalStorage = (key: string, data: any) => {
 };
 
 export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const [cars, setCars] = useState<Car[]>(() => getFromLocalStorage('cars', []));
-  const [bookings, setBookings] = useState<Booking[]>(() => getFromLocalStorage('bookings', []));
-  const [messages, setMessages] = useState<ContactMessage[]>(() => getFromLocalStorage('messages', []));
-  const [auctions, setAuctions] = useState<Auction[]>(() => getFromLocalStorage('auctions', []));
+  const [cars, setCars] = useState<Car[]>(() => getFromLocalStorage('cars_all', []));
+  const [bookings, setBookings] = useState<Booking[]>(() => getFromLocalStorage('bookings_all', []));
+  const [messages, setMessages] = useState<ContactMessage[]>(() => getFromLocalStorage('messages_all', []));
+  const [auctions, setAuctions] = useState<Auction[]>(() => getFromLocalStorage('auctions_all', []));
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
@@ -102,7 +102,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
            
            if(carsRes.data) {
              setCars(carsRes.data as Car[]);
-             syncToLocalStorage('cars', carsRes.data);
+             syncToLocalStorage('cars_all', carsRes.data);
            }
            if(bookingsRes.data) {
                setBookings(bookingsRes.data as Booking[]);
@@ -126,10 +126,10 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
            console.warn("Database offline. Falling back to LocalStorage.");
            setIsConnected(false);
            setConnectionError("Offline Mode");
-           setCars(getFromLocalStorage('cars', []));
-           setBookings(getFromLocalStorage('bookings', []));
-           setMessages(getFromLocalStorage('messages', []));
-           setAuctions(getFromLocalStorage('auctions', []));
+           setCars(getFromLocalStorage('cars_all', []));
+           setBookings(getFromLocalStorage('bookings_all', []));
+           setMessages(getFromLocalStorage('messages_all', []));
+           setAuctions(getFromLocalStorage('auctions_all', []));
        } finally {
            setIsLoading(false);
        }
@@ -177,7 +177,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     
     setCars(prev => {
       const newCars = [payload, ...prev];
-      syncToLocalStorage('cars', newCars);
+      syncToLocalStorage('cars_all', newCars);
       return newCars;
     });
     
@@ -194,7 +194,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
 
     setCars(prev => {
       const newCars = prev.map(c => c.id === updatedCar.id ? payload : c);
-      syncToLocalStorage('cars', newCars);
+      syncToLocalStorage('cars_all', newCars);
       return newCars;
     });
     
@@ -207,7 +207,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   const deleteCar = async (id: string) => {
     setCars(prev => {
       const newCars = prev.filter(c => c.id !== id);
-      syncToLocalStorage('cars', newCars);
+      syncToLocalStorage('cars_all', newCars);
       return newCars;
     });
     
