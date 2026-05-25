@@ -301,14 +301,14 @@ const CarDetail: React.FC = () => {
                 <button 
                   onClick={prevImage}
                   aria-label="Imaginea anterioară"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-30 hover:bg-gold-500 hover:text-black"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity z-30 hover:bg-gold-500 hover:text-black"
                 >
                   <ChevronLeft size={24} />
                 </button>
                 <button 
                   onClick={nextImage}
                   aria-label="Imaginea următoare"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-30 hover:bg-gold-500 hover:text-black"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity z-30 hover:bg-gold-500 hover:text-black"
                 >
                   <ChevronRight size={24} />
                 </button>
@@ -336,7 +336,7 @@ const CarDetail: React.FC = () => {
           
           {/* Thumbnails Grid */}
           <div className="grid grid-cols-4 gap-4">
-            {car.images.map((img, idx) => (
+            {car.images.slice(0, 4).map((img, idx) => (
               <button 
                 key={idx}
                 onClick={() => setActiveImage(idx)}
