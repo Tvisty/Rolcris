@@ -37,7 +37,9 @@ const CarDetail: React.FC = () => {
     if (car?.images) {
       car.images.forEach((src) => {
         const img = new Image();
-        img.src = src;
+        img.src = getOptimizedImageUrl(src, 1200);
+        const img2 = new Image();
+        img2.src = getOptimizedImageUrl(src, 2000);
       });
     }
   }, [car]);
@@ -156,7 +158,7 @@ const CarDetail: React.FC = () => {
   const whatsappLink = `https://wa.me/40740513713?text=${encodeURIComponent(whatsappMessage)}`;
 
   // --- FULL SCREEN GALLERY MODAL ---
-  const GalleryModal = () => (
+  const galleryModalContent = (
     <div 
       className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center animate-fade-in"
       onClick={() => setIsGalleryOpen(false)}
@@ -190,32 +192,31 @@ const CarDetail: React.FC = () => {
         </>
       )}
 
-      {/* Stacked Images Container */}
+      {/* Flex Container for Instant Switching */}
       <div 
-        className="relative w-full h-full"
+        className="relative w-full h-full overflow-hidden"
         onClick={(e) => e.stopPropagation()} 
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {car.images.map((img, idx) => (
-            <img 
-              key={idx}
-              src={getOptimizedImageUrl(img, 2000)} 
-              alt={`Gallery ${idx + 1}`} 
-              loading="eager"
-              className="absolute inset-0 m-auto max-w-[100vw] max-h-[100dvh] object-contain select-none"
-              style={{ 
-                opacity: activeImage === idx ? 1 : 0,
-                zIndex: activeImage === idx ? 20 : 10,
-                pointerEvents: activeImage === idx ? 'auto' : 'none',
-                transition: 'none',
-                willChange: 'opacity'
-              }}
-              draggable={false}
-              referrerPolicy="no-referrer"
-            />
-        ))}
+        <div 
+          className="flex w-full h-full"
+          style={{ transform: `translateX(-${activeImage * 100}%)`, transition: 'none' }}
+        >
+          {car.images.map((img, idx) => (
+            <div key={idx} className="w-full h-full shrink-0 relative flex items-center justify-center">
+              <img 
+                src={getOptimizedImageUrl(img, 2000)} 
+                alt={`Gallery ${idx + 1}`} 
+                loading="eager"
+                className="max-w-[100vw] max-h-[100dvh] object-contain select-none"
+                draggable={false}
+                referrerPolicy="no-referrer"
+              />
+            </div>
+          ))}
+        </div>
         
         {/* Counter */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-3 pointer-events-none z-30">
@@ -274,26 +275,24 @@ const CarDetail: React.FC = () => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            {/* Stacked Images for Zero Flash */}
-            {car.images.map((img, idx) => (
-              <img 
-                key={idx}
-                src={getOptimizedImageUrl(img, 1200)} 
-                alt={`${car.make} ${car.model} - ${idx + 1}`}
-                referrerPolicy="no-referrer"
-                loading="eager"
-                // CHANGED: object-cover to remove black stripes and fill container
-                className={`absolute inset-0 w-full h-full object-cover select-none ${car.isSold ? 'grayscale-[50%]' : ''}`}
-                style={{ 
-                  opacity: activeImage === idx ? 1 : 0,
-                  zIndex: activeImage === idx ? 20 : 10,
-                  transition: 'none', // Critical: No fade transition
-                  pointerEvents: 'none', // Clicks pass to container
-                  willChange: 'opacity'
-                }}
-                draggable={false}
-              />
-            ))}
+            {/* Flex Container for Instant Switching without Decode Delay */}
+            <div 
+              className="flex w-full h-full"
+              style={{ transform: `translateX(-${activeImage * 100}%)`, transition: 'none' }}
+            >
+              {car.images.map((img, idx) => (
+                <div key={idx} className="w-full h-full shrink-0 relative">
+                  <img 
+                    src={getOptimizedImageUrl(img, 1200)} 
+                    alt={`${car.make} ${car.model} - ${idx + 1}`}
+                    referrerPolicy="no-referrer"
+                    loading="eager"
+                    className={`absolute inset-0 w-full h-full object-cover select-none ${car.isSold ? 'grayscale-[50%]' : ''}`}
+                    draggable={false}
+                  />
+                </div>
+              ))}
+            </div>
             
             {/* Navigation Arrows on Preview (Appears on Hover) */}
             {car.images.length > 1 && (
@@ -564,7 +563,7 @@ const CarDetail: React.FC = () => {
       )}
       
       {/* Gallery Modal */}
-      {isGalleryOpen && createPortal(<GalleryModal />, document.body)}
+      {isGalleryOpen && createPortal(galleryModalContent, document.body)}
     </div>
   );
 };
