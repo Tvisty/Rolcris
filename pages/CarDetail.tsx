@@ -9,7 +9,7 @@ import { getOptimizedImageUrl } from '../utils/imageHelpers';
 const CarDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { cars, addBooking } = useCars();
+  const { cars, addBooking, isLoading } = useCars();
   const car = cars.find(c => c.id === id);
   const [activeImage, setActiveImage] = useState(0);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -31,18 +31,6 @@ const CarDetail: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
-
-  // Explicit Browser Cache Preload
-  useEffect(() => {
-    if (car?.images) {
-      car.images.forEach((src) => {
-        const img = new Image();
-        img.src = getOptimizedImageUrl(src, 1200);
-        const img2 = new Image();
-        img2.src = getOptimizedImageUrl(src, 2000);
-      });
-    }
-  }, [car]);
 
   // Lock body scroll when gallery is open
   useEffect(() => {
@@ -70,7 +58,18 @@ const CarDetail: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isGalleryOpen, activeImage]);
 
-  if (!car) return <div className="h-screen flex items-center justify-center text-gray-900 dark:text-white">Car not found</div>;
+  if (isLoading && !car) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center dark:bg-[#121212]">
+        <div className="flex flex-col items-center gap-4 animate-fade-in">
+          <div className="w-10 h-10 border-4 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">Se încarcă detaliile mașinii...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!car) return <div className="h-screen flex items-center justify-center text-xl text-gray-900 dark:text-white">Mașina nu a fost găsită (ID valid invalid sau mașina a fost ștearsă)</div>;
 
   const nextImage = (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -209,7 +208,7 @@ const CarDetail: React.FC = () => {
               <img 
                 src={getOptimizedImageUrl(img, 2000)} 
                 alt={`Gallery ${idx + 1}`} 
-                loading="eager"
+                loading={idx === 0 ? "eager" : "lazy"}
                 className="max-w-[100vw] max-h-[100dvh] object-contain select-none"
                 draggable={false}
                 referrerPolicy="no-referrer"
@@ -286,7 +285,7 @@ const CarDetail: React.FC = () => {
                     src={getOptimizedImageUrl(img, 1200)} 
                     alt={`${car.make} ${car.model} - ${idx + 1}`}
                     referrerPolicy="no-referrer"
-                    loading="eager"
+                    loading={idx === 0 ? "eager" : "lazy"}
                     className={`absolute inset-0 w-full h-full object-cover select-none ${car.isSold ? 'grayscale-[50%]' : ''}`}
                     draggable={false}
                   />
