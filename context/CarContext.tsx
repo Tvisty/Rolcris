@@ -46,11 +46,12 @@ const syncToLocalStorage = (key: string, data: any) => {
 };
 
 export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const [cars, setCars] = useState<Car[]>(() => getFromLocalStorage('cars_all', []));
+  const initialCars = getFromLocalStorage('cars_all', []);
+  const [cars, setCars] = useState<Car[]>(initialCars);
   const [bookings, setBookings] = useState<Booking[]>(() => getFromLocalStorage('bookings_all', []));
   const [messages, setMessages] = useState<ContactMessage[]>(() => getFromLocalStorage('messages_all', []));
   const [auctions, setAuctions] = useState<Auction[]>(() => getFromLocalStorage('auctions_all', []));
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(initialCars.length === 0);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [fcmToken, setFcmToken] = useState<string | null>(null);
