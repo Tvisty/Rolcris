@@ -212,6 +212,8 @@ const Admin: React.FC = () => {
   const [showSetup, setShowSetup] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState<string>('default');
   
+  const [thumbnailProgress, setThumbnailProgress] = useState<{current: number, total: number} | null>(null);
+
   // Custom Modal State (replaces window.confirm/alert)
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
@@ -411,14 +413,16 @@ Oferim servicii complete prin biroul nostru de intermedieri:
       return showAlert("Info", "Toate mașinile au deja thumbnails generate.");
     }
 
-    const confirm = await showConfirm("Confirmare Generare", `S-au găsit ${carsToUpdate.length} mașini fără thumbnail. Generarea poate dura câteva minute, doriți să continuați?`);
+    const confirm = await showConfirm("Confirmare Generare", `S-au găsit ${carsToUpdate.length} mașini fără thumbnail. Generarea poate dura câteva minute (se descarcă și procesează local fiecare imagine), doriți să continuați?`);
     if (!confirm) return;
 
     setUploadingCount(prev => prev + 1); // just to show loading state in UI
+    setThumbnailProgress({ current: 0, total: carsToUpdate.length });
     let generatedCount = 0;
     
     try {
-      for (const car of carsToUpdate) {
+      for (let i = 0; i < carsToUpdate.length; i++) {
+        const car = carsToUpdate[i];
         try {
             const firstImg = car.images[0];
             // Only try if it's not base64 directly
@@ -435,8 +439,8 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                 const thumbData = thumbnailBase64.split(',')[1];
                 const thumbChars = atob(thumbData);
                 const thumbNumbers = new Array(thumbChars.length);
-                for (let i = 0; i < thumbChars.length; i++) {
-                   thumbNumbers[i] = thumbChars.charCodeAt(i);
+                for (let j = 0; j < thumbChars.length; j++) {
+                   thumbNumbers[j] = thumbChars.charCodeAt(j);
                 }
                 const thumbArray = new Uint8Array(thumbNumbers);
                 const thumbBlobUrl = new Blob([thumbArray], {type: 'image/webp'});
@@ -459,12 +463,14 @@ Oferim servicii complete prin biroul nostru de intermedieri:
         } catch (err) {
             console.error(`Nu s-a putut genera thumbnail pentru mașina ID ${car.id}`, err);
         }
+        setThumbnailProgress({ current: i + 1, total: carsToUpdate.length });
       }
       showAlert("Succes", `S-au generat cu succes ${generatedCount} thumbnails.`);
     } catch (err: any) {
       showAlert("Eroare", err.message);
     } finally {
       setUploadingCount(prev => prev - 1);
+      setThumbnailProgress(null);
     }
   };
 
@@ -1014,8 +1020,12 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                 <input type="text" placeholder="Căutare după marcă..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-gray-100 dark:bg-white/5 border border-transparent focus:border-gold-500 rounded-lg py-2.5 pl-10 text-gray-900 dark:text-white outline-none" />
               </div>
               <div className="flex gap-2 w-full md:w-auto">
-                <button onClick={handleGenerateThumbnails} className="w-full md:w-auto bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-900 dark:text-white font-bold px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all">
-                  <RefreshCw size={20} /> Generează Thumbnails
+                <button onClick={handleGenerateThumbnails} disabled={thumbnailProgress !== null} className="w-full md:w-auto bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-900 dark:text-white font-bold px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                  {thumbnailProgress !== null ? (
+                    <><Loader2 size={20} className="animate-spin" /> Procesare ({thumbnailProgress.current}/{thumbnailProgress.total})</>
+                  ) : (
+                    <><RefreshCw size={20} /> Generează Thumbnails</>
+                  )}
                 </button>
                 <button onClick={handleAddNew} className="w-full md:w-auto bg-gold-500 hover:bg-gold-600 text-black font-bold px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-lg hover:scale-[1.05] transition-all">
                   <Plus size={20} /> Adaugă în Stoc
