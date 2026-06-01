@@ -12,6 +12,11 @@ const CarDetail: React.FC = () => {
   const { cars, addBooking, isLoading } = useCars();
   const car = cars.find(c => c.id === id);
   const [activeImage, setActiveImage] = useState(0);
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set([0, 1]));
+  
+  useEffect(() => {
+    setLoadedImages(prev => new Set([...Array.from(prev), activeImage - 1, activeImage, activeImage + 1]));
+  }, [activeImage]);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
@@ -205,14 +210,21 @@ const CarDetail: React.FC = () => {
         >
           {car.images.map((img, idx) => (
             <div key={idx} className="w-full h-full shrink-0 relative flex items-center justify-center">
-              <img 
-                src={getOptimizedImageUrl(img, 2000)} 
-                alt={`Gallery ${idx + 1}`} 
-                loading={idx === 0 ? "eager" : "lazy"}
-                className="max-w-[100vw] max-h-[100dvh] object-contain select-none"
-                draggable={false}
-                referrerPolicy="no-referrer"
-              />
+              {loadedImages.has(idx) ? (
+                <img 
+                  src={idx === 0 && car.thumbnailUrl ? car.thumbnailUrl : getOptimizedImageUrl(img, 2000)} 
+                  alt={`Gallery ${idx + 1}`} 
+                  loading={idx === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                  className="max-w-[100vw] max-h-[100dvh] object-contain select-none"
+                  draggable={false}
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                   <div className="w-16 h-16 border-4 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -238,7 +250,13 @@ const CarDetail: React.FC = () => {
                  aria-label={`Vezi imaginea ${idx + 1}`}
                  className={`w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden border-2 shrink-0 transition-all ${idx === activeImage ? 'border-gold-500 brightness-100 scale-110' : 'border-transparent brightness-50 hover:brightness-100'}`}
                >
-                 <img src={getOptimizedImageUrl(img, 200)} alt="thumb" className="w-full h-full object-cover" />
+                 <img 
+                   src={idx === 0 && car.thumbnailUrl ? car.thumbnailUrl : getOptimizedImageUrl(img, 200)} 
+                   alt="thumb" 
+                   loading="lazy"
+                   decoding="async"
+                   className="w-full h-full object-cover" 
+                 />
                </button>
              ))}
           </div>
@@ -280,15 +298,18 @@ const CarDetail: React.FC = () => {
               style={{ transform: `translateX(-${activeImage * 100}%)`, transition: 'none' }}
             >
               {car.images.map((img, idx) => (
-                <div key={idx} className="w-full h-full shrink-0 relative">
-                  <img 
-                    src={getOptimizedImageUrl(img, 1200)} 
-                    alt={`${car.make} ${car.model} - ${idx + 1}`}
-                    referrerPolicy="no-referrer"
-                    loading={idx === 0 ? "eager" : "lazy"}
-                    className={`absolute inset-0 w-full h-full object-cover select-none ${car.isSold ? 'grayscale-[50%]' : ''}`}
-                    draggable={false}
-                  />
+                <div key={idx} className="w-full h-full shrink-0 relative bg-gray-100 dark:bg-white/5">
+                  {loadedImages.has(idx) && (
+                    <img 
+                      src={idx === 0 && car.thumbnailUrl ? car.thumbnailUrl : getOptimizedImageUrl(img, 1200)} 
+                      alt={`${car.make} ${car.model} - ${idx + 1}`}
+                      referrerPolicy="no-referrer"
+                      loading={idx === 0 ? "eager" : "lazy"}
+                      decoding="async"
+                      className={`absolute inset-0 w-full h-full object-cover select-none transition-opacity duration-300 ${car.isSold ? 'grayscale-[50%]' : ''}`}
+                      draggable={false}
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -339,9 +360,16 @@ const CarDetail: React.FC = () => {
                 key={idx}
                 onClick={() => setActiveImage(idx)}
                 aria-label={`Vezi imaginea ${idx + 1}`}
-                className={`aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-gold-500 brightness-100 ring-2 ring-gold-500/20' : 'border-transparent brightness-50 hover:brightness-100'}`}
+                className={`relative aspect-[16/10] rounded-lg overflow-hidden border-2 transition-all bg-gray-100 dark:bg-white/5 ${activeImage === idx ? 'border-gold-500 brightness-100 ring-2 ring-gold-500/20' : 'border-transparent brightness-50 hover:brightness-100'}`}
               >
-                <img src={getOptimizedImageUrl(img, 400)} alt="thumbnail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                <img 
+                  src={idx === 0 && car.thumbnailUrl ? car.thumbnailUrl : getOptimizedImageUrl(img, 400)} 
+                  alt="thumbnail" 
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover" 
+                  referrerPolicy="no-referrer" 
+                />
               </button>
             ))}
           </div>
