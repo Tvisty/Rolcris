@@ -294,8 +294,8 @@ const Home: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {hotDeals.map(car => (
-              <CarCard key={car.id} car={car} />
+            {hotDeals.map((car, index) => (
+              <CarCard key={car.id} car={car} priority={index < 4} />
             ))}
           </div>
           

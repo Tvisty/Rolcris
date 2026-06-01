@@ -351,7 +351,7 @@ const Admin: React.FC = () => {
   const handleAddNew = () => {
     const newId = Math.random().toString(36).substr(2, 9);
     setCurrentCar({
-      id: isConnected ? undefined : newId,
+      id: newId,
       make: 'BMW',
       model: '',
       year: new Date().getFullYear(),
@@ -445,12 +445,12 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                     }
                     const thumbArray = new Uint8Array(thumbNumbers);
                     const thumbBlobUrl = new Blob([thumbArray], {type: 'image/webp'});
-                    const thumbFilePath = `thumb_${car.id}_${Date.now()}.webp`;
+                    const thumbFilePath = `thumb_${car.id}.webp`;
                     
                     const { error: thumbErr } = await supabase.storage.from('car-images').upload(thumbFilePath, thumbBlobUrl, {
                        contentType: 'image/webp',
                        cacheControl: '31536000',
-                       upsert: false
+                       upsert: true
                     });
                     
                     if (thumbErr) throw thumbErr;
@@ -673,12 +673,12 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                         }
                         const thumbArray = new Uint8Array(thumbNumbers);
                         const thumbBlobUrl = new Blob([thumbArray], {type: 'image/webp'});
-                        const thumbFilePath = `thumb_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+                        const thumbFilePath = `thumb_${currentCar.id}.webp`;
                         
                         const { error: thumbErr } = await supabase.storage.from('car-images').upload(thumbFilePath, thumbBlobUrl, {
                            contentType: 'image/webp',
                            cacheControl: '31536000',
-                           upsert: false
+                           upsert: true
                         });
                         
                         if (!thumbErr) {

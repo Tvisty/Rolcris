@@ -7,14 +7,24 @@ import { getCarMainImage, getOptimizedImageUrl } from '../utils/imageHelpers';
 
 interface CarCardProps {
   car: Car;
+  priority?: boolean;
 }
 
-const CarCard: React.FC<CarCardProps> = ({ car }) => {
+const CarCard: React.FC<CarCardProps> = ({ car, priority = false }) => {
   const navigate = useNavigate();
 
-  const mainImage = getCarMainImage(car);
-  // Optional width=800 ensures good quality on high-density displays yet small overall payload
-  const optimizedImage = getOptimizedImageUrl(mainImage, 800);
+  // Predictable thumbnail logic
+  const mainImage = car.images?.[0] || "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop";
+  const getPredictableThumbnail = (imgUrl: string, carId: string) => {
+    if (!imgUrl) return "";
+    if (imgUrl.includes('/car-images/')) {
+        const parts = imgUrl.split('/car-images/');
+        return `${parts[0]}/car-images/thumb_${carId}.webp`;
+    }
+    return imgUrl;
+  };
+
+  const optimizedImage = car.thumbnailUrl || getPredictableThumbnail(mainImage, car.id);
 
   const handleCardClick = () => {
     const routePrefix = car.vehicleType === 'Motocicletă' ? '/moto-inventory' : '/inventory';
@@ -59,10 +69,14 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
           alt={`${car.make} ${car.model}`}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           referrerPolicy="no-referrer"
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
           decoding="async"
           onError={(e) => {
-            e.currentTarget.src = "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop";
+            if (e.currentTarget.src !== mainImage && mainImage) {
+               e.currentTarget.src = mainImage;
+            } else {
+               e.currentTarget.src = "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop";
+            }
           }}
         />
 
