@@ -12,8 +12,8 @@ import {
 import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS, VEHICLE_TYPES, MOTO_BRANDS, MOTO_CATEGORIES } from '../constants';
 import { Link } from 'react-router-dom';
 
-// --- ULTRA-ROBUST COMPRESSOR V2 (WebP Edition - 1920px @ 85%) ---
-const compressImage = (file: File): Promise<string> => {
+// --- ULTRA-ROBUST COMPRESSOR V2 (WebP Edition) ---
+const compressImage = (file: File, maxWidthParam = 1920, qualityParam = 0.85): Promise<string> => {
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
       reject(new Error("Procesarea imaginii a durat prea mult."));
@@ -31,7 +31,7 @@ const compressImage = (file: File): Promise<string> => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
-        const MAX_WIDTH = 1920; 
+        const MAX_WIDTH = maxWidthParam; 
         let width = img.width;
         let height = img.height;
 
@@ -52,8 +52,7 @@ const compressImage = (file: File): Promise<string> => {
         ctx.fillRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
         
-        // CHANGED: Quality set to 0.85 (85%)
-        const dataUrl = canvas.toDataURL('image/webp', 0.85); 
+        const dataUrl = canvas.toDataURL('image/webp', qualityParam); 
         resolve(dataUrl);
       };
       
@@ -551,13 +550,23 @@ Oferim servicii complete prin biroul nostru de intermedieri:
     setCurrentCar(prev => ({ ...prev, images: [...(prev.images || []), ...newImages.map(i => i.blob)] }));
     setUploadingCount(prev => prev + fileArray.length);
 
+    let isFirstImageInThisBatch = true;
+
     for (const item of newImages) {
         let finalUrl = "";
+        let finalThumbnailUrl = "";
         try {
             const compressedBase64 = await compressImage(item.file);
+            let thumbnailBase64 = "";
+            
+            if (!currentCar.thumbnailUrl && isFirstImageInThisBatch) {
+               thumbnailBase64 = await compressImage(item.file, 600, 0.70);
+            }
+            
             try {
                 if (!isConnected) {
                     finalUrl = compressedBase64;
+                    if (thumbnailBase64) finalThumbnailUrl = thumbnailBase64;
                 } else {
                     const base64Data = compressedBase64.split(',')[1];
                     const byteCharacters = atob(base64Data);
@@ -578,10 +587,34 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                     if (error) throw error;
                     const { data: { publicUrl } } = supabase.storage.from('car-images').getPublicUrl(filePath);
                     finalUrl = publicUrl;
+                    
+                    if (thumbnailBase64) {
+                        const thumbData = thumbnailBase64.split(',')[1];
+                        const thumbChars = atob(thumbData);
+                        const thumbNumbers = new Array(thumbChars.length);
+                        for (let i = 0; i < thumbChars.length; i++) {
+                           thumbNumbers[i] = thumbChars.charCodeAt(i);
+                        }
+                        const thumbArray = new Uint8Array(thumbNumbers);
+                        const thumbBlobUrl = new Blob([thumbArray], {type: 'image/webp'});
+                        const thumbFilePath = `thumb_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+                        
+                        const { error: thumbErr } = await supabase.storage.from('car-images').upload(thumbFilePath, thumbBlobUrl, {
+                           contentType: 'image/webp',
+                           cacheControl: '31536000',
+                           upsert: false
+                        });
+                        
+                        if (!thumbErr) {
+                           const { data: { publicUrl: tUrl } } = supabase.storage.from('car-images').getPublicUrl(thumbFilePath);
+                           finalThumbnailUrl = tUrl;
+                        }
+                    }
                 }
             } catch (err: any) { 
                 console.warn("Storage upload failed, falling back to base64", err);
                 finalUrl = compressedBase64;
+                if (thumbnailBase64) finalThumbnailUrl = thumbnailBase64;
             }
         } catch (error: any) {
             showAlert("Eroare", error.message);
@@ -592,11 +625,16 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                     const currentImages = [...(prev.images || [])];
                     const index = currentImages.indexOf(item.blob);
                     if (index !== -1) currentImages[index] = finalUrl;
-                    return { ...prev, images: currentImages };
+                    return { 
+                       ...prev, 
+                       images: currentImages,
+                       ...(finalThumbnailUrl ? { thumbnailUrl: finalThumbnailUrl } : {})
+                    };
                 });
             }
             URL.revokeObjectURL(item.blob);
             setUploadingCount(prev => Math.max(0, prev - 1));
+            isFirstImageInThisBatch = false;
         }
     }
     if (fileInputRef.current) fileInputRef.current.value = '';
