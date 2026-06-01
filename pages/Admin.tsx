@@ -413,65 +413,68 @@ Oferim servicii complete prin biroul nostru de intermedieri:
       return showAlert("Info", "Toate mașinile au deja thumbnails generate.");
     }
 
-    const confirm = await showConfirm("Confirmare Generare", `S-au găsit ${carsToUpdate.length} mașini fără thumbnail. Generarea poate dura câteva minute (se descarcă și procesează local fiecare imagine), doriți să continuați?`);
-    if (!confirm) return;
-
-    setUploadingCount(prev => prev + 1); // just to show loading state in UI
-    setThumbnailProgress({ current: 0, total: carsToUpdate.length });
-    let generatedCount = 0;
-    
-    try {
-      for (let i = 0; i < carsToUpdate.length; i++) {
-        const car = carsToUpdate[i];
+    showConfirm(
+      "Confirmare Generare", 
+      `S-au găsit ${carsToUpdate.length} mașini fără thumbnail. Generarea poate dura câteva minute (se descarcă și procesează local fiecare imagine), doriți să continuați?`,
+      async () => {
+        setUploadingCount(prev => prev + 1); // just to show loading state in UI
+        setThumbnailProgress({ current: 0, total: carsToUpdate.length });
+        let generatedCount = 0;
+        
         try {
-            const firstImg = car.images[0];
-            // Only try if it's not base64 directly
-            if (!firstImg.startsWith('data:image')) {
-                // Fetch the image
-                const response = await fetch(firstImg, { mode: 'cors' });
-                const blob = await response.blob();
-                const file = new File([blob], "thumbnail.webp", { type: "image/webp" });
-                
-                // Compress it heavily for thumbnail usage
-                const thumbnailBase64 = await compressImage(file, 600, 0.70);
-                
-                // Extract base64 and create a blob to upload
-                const thumbData = thumbnailBase64.split(',')[1];
-                const thumbChars = atob(thumbData);
-                const thumbNumbers = new Array(thumbChars.length);
-                for (let j = 0; j < thumbChars.length; j++) {
-                   thumbNumbers[j] = thumbChars.charCodeAt(j);
+          for (let i = 0; i < carsToUpdate.length; i++) {
+            const car = carsToUpdate[i];
+            try {
+                const firstImg = car.images[0];
+                // Only try if it's not base64 directly
+                if (!firstImg.startsWith('data:image')) {
+                    // Fetch the image
+                    const response = await fetch(firstImg, { mode: 'cors' });
+                    const blob = await response.blob();
+                    const file = new File([blob], "thumbnail.webp", { type: "image/webp" });
+                    
+                    // Compress it heavily for thumbnail usage
+                    const thumbnailBase64 = await compressImage(file, 600, 0.70);
+                    
+                    // Extract base64 and create a blob to upload
+                    const thumbData = thumbnailBase64.split(',')[1];
+                    const thumbChars = atob(thumbData);
+                    const thumbNumbers = new Array(thumbChars.length);
+                    for (let j = 0; j < thumbChars.length; j++) {
+                       thumbNumbers[j] = thumbChars.charCodeAt(j);
+                    }
+                    const thumbArray = new Uint8Array(thumbNumbers);
+                    const thumbBlobUrl = new Blob([thumbArray], {type: 'image/webp'});
+                    const thumbFilePath = `thumb_${car.id}_${Date.now()}.webp`;
+                    
+                    const { error: thumbErr } = await supabase.storage.from('car-images').upload(thumbFilePath, thumbBlobUrl, {
+                       contentType: 'image/webp',
+                       cacheControl: '31536000',
+                       upsert: false
+                    });
+                    
+                    if (thumbErr) throw thumbErr;
+                    
+                    const { data: { publicUrl: tUrl } } = supabase.storage.from('car-images').getPublicUrl(thumbFilePath);
+                    
+                    // Update car with new thumbnail url
+                    await updateCar({ ...car, thumbnailUrl: tUrl });
+                    generatedCount++;
                 }
-                const thumbArray = new Uint8Array(thumbNumbers);
-                const thumbBlobUrl = new Blob([thumbArray], {type: 'image/webp'});
-                const thumbFilePath = `thumb_${car.id}_${Date.now()}.webp`;
-                
-                const { error: thumbErr } = await supabase.storage.from('car-images').upload(thumbFilePath, thumbBlobUrl, {
-                   contentType: 'image/webp',
-                   cacheControl: '31536000',
-                   upsert: false
-                });
-                
-                if (thumbErr) throw thumbErr;
-                
-                const { data: { publicUrl: tUrl } } = supabase.storage.from('car-images').getPublicUrl(thumbFilePath);
-                
-                // Update car with new thumbnail url
-                await updateCar({ ...car, thumbnailUrl: tUrl });
-                generatedCount++;
+            } catch (err) {
+                console.error(`Nu s-a putut genera thumbnail pentru mașina ID ${car.id}`, err);
             }
-        } catch (err) {
-            console.error(`Nu s-a putut genera thumbnail pentru mașina ID ${car.id}`, err);
+            setThumbnailProgress({ current: i + 1, total: carsToUpdate.length });
+          }
+          showAlert("Succes", `S-au generat cu succes ${generatedCount} thumbnails.`);
+        } catch (err: any) {
+          showAlert("Eroare", err.message);
+        } finally {
+          setUploadingCount(prev => prev - 1);
+          setThumbnailProgress(null);
         }
-        setThumbnailProgress({ current: i + 1, total: carsToUpdate.length });
       }
-      showAlert("Succes", `S-au generat cu succes ${generatedCount} thumbnails.`);
-    } catch (err: any) {
-      showAlert("Eroare", err.message);
-    } finally {
-      setUploadingCount(prev => prev - 1);
-      setThumbnailProgress(null);
-    }
+    );
   };
 
   const handleEdit = (car: Car) => {
