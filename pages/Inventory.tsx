@@ -580,7 +580,7 @@ const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
              </div>
            ) : filteredCars.length > 0 ? (
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-               {filteredCars.map((car, index) => <CarCard key={car.id} car={car} priority={index < 4} />)}
+               {filteredCars.map(car => <CarCard key={car.id} car={car} />)}
              </div>
            ) : (
              <div className="flex flex-col items-center justify-center py-20 text-center glass-panel rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#121212]">

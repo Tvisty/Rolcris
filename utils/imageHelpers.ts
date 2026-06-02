@@ -17,10 +17,6 @@ export const getOptimizedImageUrl = (url: string, width?: number, height?: numbe
  * 3. Missing images (Placeholder)
  */
 export const getCarMainImage = (car: Car): string => {
-  if (car.thumbnailUrl) {
-    return car.thumbnailUrl;
-  }
-
   if (!car.images || car.images.length === 0) {
     return "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop";
   }

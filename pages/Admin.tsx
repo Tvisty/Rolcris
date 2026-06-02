@@ -12,8 +12,8 @@ import {
 import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS, VEHICLE_TYPES, MOTO_BRANDS, MOTO_CATEGORIES } from '../constants';
 import { Link } from 'react-router-dom';
 
-// --- ULTRA-ROBUST COMPRESSOR V2 (WebP Edition) ---
-const compressImage = (file: File, maxWidthParam = 1920, qualityParam = 0.85): Promise<string> => {
+// --- ULTRA-ROBUST COMPRESSOR V2 (WebP Edition - 1920px @ 85%) ---
+const compressImage = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
       reject(new Error("Procesarea imaginii a durat prea mult."));
@@ -31,7 +31,7 @@ const compressImage = (file: File, maxWidthParam = 1920, qualityParam = 0.85): P
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
-        const MAX_WIDTH = maxWidthParam; 
+        const MAX_WIDTH = 1920; 
         let width = img.width;
         let height = img.height;
 
@@ -52,7 +52,8 @@ const compressImage = (file: File, maxWidthParam = 1920, qualityParam = 0.85): P
         ctx.fillRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
         
-        const dataUrl = canvas.toDataURL('image/webp', qualityParam); 
+        // CHANGED: Quality set to 0.85 (85%)
+        const dataUrl = canvas.toDataURL('image/webp', 0.85); 
         resolve(dataUrl);
       };
       
@@ -212,8 +213,6 @@ const Admin: React.FC = () => {
   const [showSetup, setShowSetup] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState<string>('default');
   
-  const [thumbnailProgress, setThumbnailProgress] = useState<{current: number, total: number} | null>(null);
-
   // Custom Modal State (replaces window.confirm/alert)
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
@@ -351,7 +350,7 @@ const Admin: React.FC = () => {
   const handleAddNew = () => {
     const newId = Math.random().toString(36).substr(2, 9);
     setCurrentCar({
-      id: newId,
+      id: isConnected ? undefined : newId,
       make: 'BMW',
       model: '',
       year: new Date().getFullYear(),
@@ -401,80 +400,6 @@ Oferim servicii complete prin biroul nostru de intermedieri:
     setImageInput('');
     setUploadingCount(0);
     setIsEditing(true);
-  };
-
-  const handleGenerateThumbnails = async () => {
-    if (!isConnected) return showAlert("Eroare", "Trebuie să fiți conectat la baza de date pentru a genera miniaturile.");
-    
-    // Find cars without thumbnails but with images
-    const carsToUpdate = cars.filter(c => !c.thumbnailUrl && c.images && c.images.length > 0);
-    
-    if (carsToUpdate.length === 0) {
-      return showAlert("Info", "Toate mașinile au deja thumbnails generate.");
-    }
-
-    showConfirm(
-      "Confirmare Generare", 
-      `S-au găsit ${carsToUpdate.length} mașini fără thumbnail. Generarea poate dura câteva minute (se descarcă și procesează local fiecare imagine), doriți să continuați?`,
-      async () => {
-        setUploadingCount(prev => prev + 1); // just to show loading state in UI
-        setThumbnailProgress({ current: 0, total: carsToUpdate.length });
-        let generatedCount = 0;
-        
-        try {
-          for (let i = 0; i < carsToUpdate.length; i++) {
-            const car = carsToUpdate[i];
-            try {
-                const firstImg = car.images[0];
-                // Only try if it's not base64 directly
-                if (!firstImg.startsWith('data:image')) {
-                    // Fetch the image
-                    const response = await fetch(firstImg, { mode: 'cors' });
-                    const blob = await response.blob();
-                    const file = new File([blob], "thumbnail.webp", { type: "image/webp" });
-                    
-                    // Compress it heavily for thumbnail usage
-                    const thumbnailBase64 = await compressImage(file, 600, 0.70);
-                    
-                    // Extract base64 and create a blob to upload
-                    const thumbData = thumbnailBase64.split(',')[1];
-                    const thumbChars = atob(thumbData);
-                    const thumbNumbers = new Array(thumbChars.length);
-                    for (let j = 0; j < thumbChars.length; j++) {
-                       thumbNumbers[j] = thumbChars.charCodeAt(j);
-                    }
-                    const thumbArray = new Uint8Array(thumbNumbers);
-                    const thumbBlobUrl = new Blob([thumbArray], {type: 'image/webp'});
-                    const thumbFilePath = `thumb_${car.id}.webp`;
-                    
-                    const { error: thumbErr } = await supabase.storage.from('car-images').upload(thumbFilePath, thumbBlobUrl, {
-                       contentType: 'image/webp',
-                       cacheControl: '31536000',
-                       upsert: true
-                    });
-                    
-                    if (thumbErr) throw thumbErr;
-                    
-                    const { data: { publicUrl: tUrl } } = supabase.storage.from('car-images').getPublicUrl(thumbFilePath);
-                    
-                    // Update car with new thumbnail url
-                    await updateCar({ ...car, thumbnailUrl: tUrl });
-                    generatedCount++;
-                }
-            } catch (err) {
-                console.error(`Nu s-a putut genera thumbnail pentru mașina ID ${car.id}`, err);
-            }
-            setThumbnailProgress({ current: i + 1, total: carsToUpdate.length });
-          }
-          showAlert("Succes", `S-au generat cu succes ${generatedCount} thumbnails.`);
-        } catch (err: any) {
-          showAlert("Eroare", err.message);
-        } finally {
-          setUploadingCount(prev => prev - 1);
-          setThumbnailProgress(null);
-        }
-      }
-    );
   };
 
   const handleEdit = (car: Car) => {
@@ -626,23 +551,13 @@ Oferim servicii complete prin biroul nostru de intermedieri:
     setCurrentCar(prev => ({ ...prev, images: [...(prev.images || []), ...newImages.map(i => i.blob)] }));
     setUploadingCount(prev => prev + fileArray.length);
 
-    let isFirstImageInThisBatch = true;
-
     for (const item of newImages) {
         let finalUrl = "";
-        let finalThumbnailUrl = "";
         try {
             const compressedBase64 = await compressImage(item.file);
-            let thumbnailBase64 = "";
-            
-            if (!currentCar.thumbnailUrl && isFirstImageInThisBatch) {
-               thumbnailBase64 = await compressImage(item.file, 600, 0.70);
-            }
-            
             try {
                 if (!isConnected) {
                     finalUrl = compressedBase64;
-                    if (thumbnailBase64) finalThumbnailUrl = thumbnailBase64;
                 } else {
                     const base64Data = compressedBase64.split(',')[1];
                     const byteCharacters = atob(base64Data);
@@ -663,34 +578,10 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                     if (error) throw error;
                     const { data: { publicUrl } } = supabase.storage.from('car-images').getPublicUrl(filePath);
                     finalUrl = publicUrl;
-                    
-                    if (thumbnailBase64) {
-                        const thumbData = thumbnailBase64.split(',')[1];
-                        const thumbChars = atob(thumbData);
-                        const thumbNumbers = new Array(thumbChars.length);
-                        for (let i = 0; i < thumbChars.length; i++) {
-                           thumbNumbers[i] = thumbChars.charCodeAt(i);
-                        }
-                        const thumbArray = new Uint8Array(thumbNumbers);
-                        const thumbBlobUrl = new Blob([thumbArray], {type: 'image/webp'});
-                        const thumbFilePath = `thumb_${currentCar.id}.webp`;
-                        
-                        const { error: thumbErr } = await supabase.storage.from('car-images').upload(thumbFilePath, thumbBlobUrl, {
-                           contentType: 'image/webp',
-                           cacheControl: '31536000',
-                           upsert: true
-                        });
-                        
-                        if (!thumbErr) {
-                           const { data: { publicUrl: tUrl } } = supabase.storage.from('car-images').getPublicUrl(thumbFilePath);
-                           finalThumbnailUrl = tUrl;
-                        }
-                    }
                 }
             } catch (err: any) { 
                 console.warn("Storage upload failed, falling back to base64", err);
                 finalUrl = compressedBase64;
-                if (thumbnailBase64) finalThumbnailUrl = thumbnailBase64;
             }
         } catch (error: any) {
             showAlert("Eroare", error.message);
@@ -701,16 +592,11 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                     const currentImages = [...(prev.images || [])];
                     const index = currentImages.indexOf(item.blob);
                     if (index !== -1) currentImages[index] = finalUrl;
-                    return { 
-                       ...prev, 
-                       images: currentImages,
-                       ...(finalThumbnailUrl ? { thumbnailUrl: finalThumbnailUrl } : {})
-                    };
+                    return { ...prev, images: currentImages };
                 });
             }
             URL.revokeObjectURL(item.blob);
             setUploadingCount(prev => Math.max(0, prev - 1));
-            isFirstImageInThisBatch = false;
         }
     }
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -1022,18 +908,9 @@ Oferim servicii complete prin biroul nostru de intermedieri:
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input type="text" placeholder="Căutare după marcă..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-gray-100 dark:bg-white/5 border border-transparent focus:border-gold-500 rounded-lg py-2.5 pl-10 text-gray-900 dark:text-white outline-none" />
               </div>
-              <div className="flex gap-2 w-full md:w-auto">
-                <button onClick={handleGenerateThumbnails} disabled={thumbnailProgress !== null} className="w-full md:w-auto bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-900 dark:text-white font-bold px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                  {thumbnailProgress !== null ? (
-                    <><Loader2 size={20} className="animate-spin" /> Procesare ({thumbnailProgress.current}/{thumbnailProgress.total})</>
-                  ) : (
-                    <><RefreshCw size={20} /> Generează Thumbnails</>
-                  )}
-                </button>
-                <button onClick={handleAddNew} className="w-full md:w-auto bg-gold-500 hover:bg-gold-600 text-black font-bold px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-lg hover:scale-[1.05] transition-all">
-                  <Plus size={20} /> Adaugă în Stoc
-                </button>
-              </div>
+              <button onClick={handleAddNew} className="w-full md:w-auto bg-gold-500 hover:bg-gold-600 text-black font-bold px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-lg hover:scale-[1.05] transition-all">
+                <Plus size={20} /> Adaugă în Stoc
+              </button>
             </div>
 
             <div className="grid grid-cols-1 gap-4">

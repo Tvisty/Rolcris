@@ -168,8 +168,8 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   }, []);
 
   const addCar = async (car: Car) => {
+    const tempId = Math.random().toString(36).substr(2, 9);
     const { id, ...carData } = car;
-    const tempId = id || Math.random().toString(36).substr(2, 9);
     const payload = {
         ...carData,
         id: tempId,

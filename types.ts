@@ -13,7 +13,6 @@ export interface Car {
   engineSize: string; // e.g. 3.0L
   vin?: string;
   images: string[];
-  thumbnailUrl?: string; // New field for faster list loading
   isHotDeal?: boolean;
   isSold?: boolean; // New field for Sold status
   description: string;
