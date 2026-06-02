@@ -28,7 +28,7 @@ const WEBSITE_KNOWLEDGE_BASE = `
 - Program: Luni - Vineri (09:00 - 18:00), Sâmbătă (09:00 - 14:00), Duminică (Închis).
 
 --- SERVICII OFERITE ---
-1. Service Propriu: Autorizat RAR, reparații mecanice/electrice, diagnoză computerizată.
+1. Service Propriu: reparații mecanice/electrice, diagnoză computerizată.
 2. Cosmetică & Detailing: Polish profesional, protecție ceramică, curățare tapițerie, tratament ozon.
 3. Vulcanizare & Roți: Schimb anvelope, echilibrare, geometrie 3D, Hotel de anvelope.
 4. Acte Auto: Înmatriculări, numere roșii (provizorii) pe loc, contracte vânzare-cumpărare, asigurări RCA/CASCO.

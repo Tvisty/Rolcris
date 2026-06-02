@@ -12,7 +12,7 @@ const Services: React.FC = () => {
       id: 'service',
       title: 'Service Propriu',
       icon: Wrench,
-      description: 'Dispunem de un service auto ultra-modern, autorizat RAR, dotat cu echipamente de ultimă generație pentru diagnosticare și reparații. Echipa noastră de mecanici specializați asigură întreținerea corectă a autoturismului dumneavoastră, de la revizii periodice până la reparații complexe de motor și transmisie.',
+      description: 'Dispunem de un service auto ultra-modern, dotat cu echipamente de ultimă generație pentru diagnosticare și reparații. Echipa noastră de mecanici specializați asigură întreținerea corectă a autoturismului dumneavoastră, de la revizii periodice până la reparații complexe de motor și transmisie.',
       features: ['Diagnosticare computerizată', 'Reparații mecanice și electrice', 'Revizii periodice', 'Garanție pentru manoperă și piese'],
       image: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=2070&auto=format&fit=crop'
     },
