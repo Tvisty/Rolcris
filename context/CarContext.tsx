@@ -92,18 +92,20 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
 
   useEffect(() => {
       const fetchData = async () => {
-       // Attempt to load from localforage quickly before network call resolves
-       if (cars.length === 0) {
+       let hasLocalCars = cars.length > 0;
+       
+       if (!hasLocalCars) {
           try {
              const cachedCars = await localforage.getItem<Car[]>('cars_all');
              if (cachedCars && cachedCars.length > 0) {
                  setCars(cachedCars);
                  setIsLoading(false);
+                 hasLocalCars = true;
              }
           } catch(e) {}
        }
 
-       if (cars.length === 0) {
+       if (!hasLocalCars) {
            setIsLoading(true);
        }
        
