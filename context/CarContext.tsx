@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Car, Booking, ContactMessage, Auction, Bid } from '../types';
 import { supabase } from '../supabase';
+import localforage from 'localforage';
 
 interface CarContextType {
   cars: Car[];
@@ -38,11 +39,16 @@ const getFromLocalStorage = (key: string, defaultValue: any) => {
   }
 };
 
-const syncToLocalStorage = (key: string, data: any) => {
+const syncToStorage = async (key: string, data: any) => {
   try {
     localStorage.setItem(key, JSON.stringify(data));
   } catch(e) {
-    console.warn("Local storage save failed", e);
+    // If quota exceeded, just rely on localforage
+  }
+  try {
+    await localforage.setItem(key, data);
+  } catch(e) {
+    console.warn("Localforage save failed", e);
   }
 };
 
@@ -86,40 +92,51 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
 
   useEffect(() => {
       const fetchData = async () => {
+       // Attempt to load from localforage quickly before network call resolves
+       if (cars.length === 0) {
+          try {
+             const cachedCars = await localforage.getItem<Car[]>('cars_all');
+             if (cachedCars && cachedCars.length > 0) {
+                 setCars(cachedCars);
+                 setIsLoading(false);
+             }
+          } catch(e) {}
+       }
+
        if (cars.length === 0) {
            setIsLoading(true);
        }
+       
        try {
-           // Fetch all data
-           const [carsRes, bookingsRes, messagesRes, auctionsRes] = await Promise.all([
-               supabase.from('cars').select('*').order('createdAt', { ascending: false }),
+           // Decouple cars fetch for faster rendering if network is fast
+           supabase.from('cars').select('*').order('createdAt', { ascending: false }).then(carsRes => {
+               if(carsRes.data) {
+                 setCars(carsRes.data as Car[]);
+                 syncToStorage('cars_all', carsRes.data);
+                 setIsLoading(false);
+               }
+           }).catch(() => {});
+
+           // Fetch other data
+           const [bookingsRes, messagesRes, auctionsRes] = await Promise.all([
                supabase.from('bookings').select('*').order('date', { ascending: true }),
                supabase.from('messages').select('*').order('date', { ascending: false }),
                supabase.from('auctions').select('*')
            ]);
            
-           if (carsRes.error) throw carsRes.error;
-           if (bookingsRes.error) throw bookingsRes.error;
-           if (messagesRes.error) throw messagesRes.error;
-           if (auctionsRes.error) throw auctionsRes.error;
-           
-           if(carsRes.data) {
-             setCars(carsRes.data as Car[]);
-             syncToLocalStorage('cars_all', carsRes.data);
-           }
            if(bookingsRes.data) {
                setBookings(bookingsRes.data as Booking[]);
-               syncToLocalStorage('bookings', bookingsRes.data);
+               syncToStorage('bookings_all', bookingsRes.data);
                prevBookingsCount.current = bookingsRes.data.length;
            }
            if(messagesRes.data) {
                setMessages(messagesRes.data as ContactMessage[]);
-               syncToLocalStorage('messages', messagesRes.data);
+               syncToStorage('messages_all', messagesRes.data);
                prevMessagesCount.current = messagesRes.data.length;
            }
            if(auctionsRes.data) {
              setAuctions(auctionsRes.data as Auction[]);
-             syncToLocalStorage('auctions', auctionsRes.data);
+             syncToStorage('auctions_all', auctionsRes.data);
            }
            
            setIsConnected(true);
@@ -129,12 +146,8 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
            console.warn("Database offline. Falling back to LocalStorage.");
            setIsConnected(false);
            setConnectionError("Offline Mode");
-           setCars(getFromLocalStorage('cars_all', []));
-           setBookings(getFromLocalStorage('bookings_all', []));
-           setMessages(getFromLocalStorage('messages_all', []));
-           setAuctions(getFromLocalStorage('auctions_all', []));
+           localforage.getItem<Car[]>('cars_all').then(c => { if(c) setCars(c); setIsLoading(false); });
        } finally {
-           setIsLoading(false);
            setIsSyncing(false);
        }
     };
@@ -181,7 +194,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     
     setCars(prev => {
       const newCars = [payload, ...prev];
-      syncToLocalStorage('cars_all', newCars);
+      syncToStorage('cars_all', newCars);
       return newCars;
     });
     
@@ -198,7 +211,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
 
     setCars(prev => {
       const newCars = prev.map(c => c.id === updatedCar.id ? payload : c);
-      syncToLocalStorage('cars_all', newCars);
+      syncToStorage('cars_all', newCars);
       return newCars;
     });
     
@@ -211,7 +224,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   const deleteCar = async (id: string) => {
     setCars(prev => {
       const newCars = prev.filter(c => c.id !== id);
-      syncToLocalStorage('cars_all', newCars);
+      syncToStorage('cars_all', newCars);
       return newCars;
     });
     
@@ -223,7 +236,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   const addBooking = async (booking: Booking) => {
     setBookings(prev => {
       const newBookings = [...prev, booking];
-      syncToLocalStorage('bookings', newBookings);
+      syncToStorage('bookings', newBookings);
       return newBookings;
     });
     if (isConnected) {
@@ -235,7 +248,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   const updateBookingStatus = async (id: string, status: Booking['status']) => {
     setBookings(prev => {
       const newBookings = prev.map(b => b.id === id ? { ...b, status } : b);
-      syncToLocalStorage('bookings', newBookings);
+      syncToStorage('bookings', newBookings);
       return newBookings;
     });
     if (isConnected) {
@@ -246,7 +259,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   const deleteBooking = async (id: string) => {
     setBookings(prev => {
       const newBookings = prev.filter(b => b.id !== id);
-      syncToLocalStorage('bookings', newBookings);
+      syncToStorage('bookings', newBookings);
       return newBookings;
     });
     if (isConnected) {
@@ -257,7 +270,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   const addMessage = async (message: ContactMessage) => {
     setMessages(prev => {
       const newMessages = [...prev, message];
-      syncToLocalStorage('messages', newMessages);
+      syncToStorage('messages', newMessages);
       return newMessages;
     });
     if (isConnected) {
@@ -269,7 +282,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   const deleteMessage = async (id: string) => {
     setMessages(prev => {
       const newMessages = prev.filter(m => m.id !== id);
-      syncToLocalStorage('messages', newMessages);
+      syncToStorage('messages', newMessages);
       return newMessages;
     });
     if (isConnected) {
@@ -281,7 +294,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     const newAuction = { ...auction, id: Math.random().toString(36).substr(2, 9) } as Auction;
     setAuctions(prev => {
       const newAuctions = [...prev, newAuction];
-      syncToLocalStorage('auctions', newAuctions);
+      syncToStorage('auctions', newAuctions);
       return newAuctions;
     });
     if (isConnected) {
@@ -292,7 +305,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   const cancelAuction = async (id: string) => {
     setAuctions(prev => {
       const newAuctions = prev.map(a => a.id === id ? { ...a, status: 'cancelled' as const } : a);
-      syncToLocalStorage('auctions', newAuctions);
+      syncToStorage('auctions', newAuctions);
       return newAuctions;
     });
     if (isConnected) {
@@ -326,7 +339,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
 
     setAuctions(prev => {
       const newAuctions = prev.map(a => a.id === auctionId ? { ...a, ...updatedData } : a);
-      syncToLocalStorage('auctions', newAuctions);
+      syncToStorage('auctions', newAuctions);
       return newAuctions;
     });
     
