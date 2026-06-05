@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Filter, X, ChevronDown, ChevronUp, Search, Loader2, Check, Palette, Leaf, Compass } from 'lucide-react';
-import CarCard from '../components/CarCard';
+import CarCard, { CarCardSkeleton } from '../components/CarCard';
 import { BRANDS, BODY_TYPES, FUELS, CAR_FEATURES, LOCATIONS, POLLUTION_STANDARDS, TRACTIONS, VEHICLE_TYPES, MOTO_BRANDS, MOTO_CATEGORIES } from '../constants';
 import { SortOption } from '../types';
 import { useCars } from '../context/CarContext';
@@ -248,7 +248,7 @@ const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
              {pageType === 'moto' ? 'Stoc Motociclete' : pageType === 'auto' ? 'Stoc Auto' : 'Stoc Disponibil'}
            </h1>
            <p className="text-gray-500 dark:text-gray-400 text-sm">
-             {isLoading ? 'Se încarcă...' : `${totalCarsOfType} ${pageType === 'moto' ? 'motociclete găsite' : 'autoturisme găsite'}`}
+             {isLoading && cars.length === 0 ? 'Se încarcă...' : `${totalCarsOfType} ${pageType === 'moto' ? 'motociclete găsite' : 'autoturisme găsite'}`}
            </p>
         </div>
         
@@ -573,10 +573,9 @@ const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
         </aside>
 
         <div className="flex-1">
-           {isLoading ? (
-             <div className="flex flex-col items-center justify-center py-20 min-h-[400px]">
-               <Loader2 className="w-10 h-10 text-gold-500 animate-spin mb-4" />
-               <p className="text-gray-500 dark:text-gray-400">Se încarcă oferta...</p>
+           {isLoading && cars.length === 0 ? (
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+               {[1, 2, 3, 4, 5, 6].map(i => <CarCardSkeleton key={i} />)}
              </div>
            ) : filteredCars.length > 0 ? (
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

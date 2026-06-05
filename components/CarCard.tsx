@@ -13,8 +13,8 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
   const navigate = useNavigate();
 
   const mainImage = getCarMainImage(car);
-  // Optional width=800 ensures good quality on high-density displays yet small overall payload
-  const optimizedImage = getOptimizedImageUrl(mainImage, 800);
+  // Using 600px width which limits the payload size for cards
+  const optimizedImage = getOptimizedImageUrl(mainImage, 600);
 
   const handleCardClick = () => {
     const routePrefix = car.vehicleType === 'Motocicletă' ? '/moto-inventory' : '/inventory';
@@ -111,5 +111,25 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
     </div>
   );
 };
+
+export const CarCardSkeleton: React.FC = () => (
+  <div className="bg-white dark:bg-[#121212] rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 animate-pulse">
+    <div className="h-64 bg-gray-200 dark:bg-white/5"></div>
+    <div className="p-4 pt-2">
+      <div className="flex justify-between items-center mb-4 border-b border-gray-100 dark:border-white/5 pb-3 pt-3">
+        <div className="h-4 w-12 bg-gray-200 dark:bg-white/10 rounded"></div>
+        <div className="h-4 w-12 bg-gray-200 dark:bg-white/10 rounded"></div>
+        <div className="h-4 w-12 bg-gray-200 dark:bg-white/10 rounded"></div>
+      </div>
+      <div className="flex justify-between items-end">
+        <div>
+          <div className="h-3 w-8 bg-gray-200 dark:bg-white/10 rounded mb-2"></div>
+          <div className="h-6 w-20 bg-gray-200 dark:bg-white/10 rounded"></div>
+        </div>
+        <div className="h-8 w-24 bg-gray-200 dark:bg-white/10 rounded-full"></div>
+      </div>
+    </div>
+  </div>
+);
 
 export default CarCard;
