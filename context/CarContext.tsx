@@ -21,6 +21,7 @@ interface CarContextType {
   cancelAuction: (id: string) => Promise<void>;
   requestNotificationPermission: () => Promise<string | null>;
   isLoading: boolean;
+  isSyncing: boolean;
   isConnected: boolean;
   connectionError: string | null;
   fcmToken: string | null;
@@ -52,6 +53,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
   const [messages, setMessages] = useState<ContactMessage[]>(() => getFromLocalStorage('messages_all', []));
   const [auctions, setAuctions] = useState<Auction[]>(() => getFromLocalStorage('auctions_all', []));
   const [isLoading, setIsLoading] = useState(initialCars.length === 0);
+  const [isSyncing, setIsSyncing] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [fcmToken, setFcmToken] = useState<string | null>(null);
@@ -133,6 +135,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
            setAuctions(getFromLocalStorage('auctions_all', []));
        } finally {
            setIsLoading(false);
+           setIsSyncing(false);
        }
     };
     
@@ -344,7 +347,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
       addMessage, deleteMessage,
       createAuction, placeBid, cancelAuction,
       requestNotificationPermission,
-      isLoading, isConnected, connectionError, fcmToken
+      isLoading, isSyncing, isConnected, connectionError, fcmToken
     }}>
       {children}
     </CarContext.Provider>

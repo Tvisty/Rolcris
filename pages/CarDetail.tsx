@@ -9,7 +9,7 @@ import { getOptimizedImageUrl } from '../utils/imageHelpers';
 const CarDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { cars, addBooking, isLoading } = useCars();
+  const { cars, addBooking, isLoading, isSyncing } = useCars();
   const car = cars.find(c => c.id === id);
   const [activeImage, setActiveImage] = useState(0);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -58,7 +58,7 @@ const CarDetail: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isGalleryOpen, activeImage]);
 
-  if (isLoading && !car) {
+  if ((isLoading || isSyncing) && !car) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center dark:bg-[#121212]">
         <div className="flex flex-col items-center gap-4 animate-fade-in">
