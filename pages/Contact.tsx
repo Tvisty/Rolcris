@@ -48,9 +48,9 @@ const Contact: React.FC = () => {
   const locations = [
     { 
       city: 'Satu Mare', 
-      addr: 'B-dul Lucian Blaga 347', 
+      addr: 'Bulevardul Lucian Blaga 347A, 440108 Satu Mare', 
       tel: '0740 513 713', 
-      mapQuery: 'Bulevardul+Lucian+Blaga+347,+Satu+Mare' 
+      mapQuery: 'Rol+Cris,+Bulevardul+Lucian+Blaga+347A,+Satu+Mare' 
     },
     { 
       city: 'Seini', 
@@ -69,7 +69,7 @@ const Contact: React.FC = () => {
       addr: 'Str. 1 Decembrie Nr. 25, Jud. Bihor', 
       tel: '0740 513 713', 
       mapQuery: 'Strada+1+Decembrie+Nr.+25,+Marghita,+Bihor' 
-    },
+    }
   ];
 
   return (

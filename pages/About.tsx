@@ -190,7 +190,7 @@ const About: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { city: 'Satu Mare', addr: 'B-dul Lucian Blaga 347', tel: '0740 513 713', color: 'gold' },
+              { city: 'Satu Mare', addr: 'Bulevardul Lucian Blaga 347A, 440108 Satu Mare', tel: '0740 513 713', color: 'gold' },
               { city: 'Seini', addr: 'Piața Unirii 2', tel: '0745 123 456', color: 'gray' },
               { city: 'Tășnad', addr: 'Str. N. Bălcescu 19', tel: '0742 987 654', color: 'gray' },
               { city: 'Marghita', addr: 'Str. 1 Decembrie Nr. 25', tel: '0740 513 713', color: 'gray' },

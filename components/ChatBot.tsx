@@ -19,7 +19,7 @@ const WEBSITE_KNOWLEDGE_BASE = `
 - Filozofie: Transparență totală, calitate garantată, nu vindem doar mașini, ci siguranță.
 
 --- LOCAȚII ȘI CONTACT ---
-1. Satu Mare: B-dul Lucian Blaga 347, Jud. Satu Mare.
+1. Satu Mare: Bulevardul Lucian Blaga 347A, 440108 Satu Mare.
 2. Seini: Piața Unirii 2, Jud. Maramureș.
 3. Tășnad: Str. N. Bălcescu 19, Jud. Satu Mare.
 4. Marghita: Str. 1 Decembrie Nr. 25, Jud. Bihor.

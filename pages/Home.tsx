@@ -91,10 +91,7 @@ const Home: React.FC = () => {
   const [heroIndex, setHeroIndex] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setHeroIndex(prev => (prev === 0 ? 1 : 0));
-    }, 6000);
-    return () => clearInterval(timer);
+    // Only keeping one slide, so no interval needed.
   }, []);
 
   const heroSlides = [
@@ -105,14 +102,6 @@ const Home: React.FC = () => {
       buttonLink: "/inventory",
       bgLight: heroImage,
       bgDark: "/background-dark.webp"
-    },
-    {
-      subtitle: "Nou! Secțiunea Moto",
-      title: "Descoperă pasiunea pe două roți. <br className=\"hidden sm:block\" /> Stoc nou de motociclete!",
-      buttonText: "Vezi Motocicletele",
-      buttonLink: "/moto-inventory",
-      bgLight: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop",
-      bgDark: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop"
     }
   ];
 
@@ -195,7 +184,7 @@ const Home: React.FC = () => {
           <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 md:gap-4 max-w-5xl mx-auto animate-fade-in-up delay-300">
             {/* Satu Mare */}
             <div className="flex items-center justify-between sm:justify-start bg-black/60 sm:bg-black/50 backdrop-blur-md border border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-xl w-full sm:w-auto">
-              <a href="https://www.google.com/maps?q=Bulevardul+Lucian+Blaga+347,+Satu+Mare" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
+              <a href="https://www.google.com/maps?q=Rol+Cris,+Bulevardul+Lucian+Blaga+347A,+Satu+Mare" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
                 <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
                 <span className="font-semibold text-sm md:text-base">Satu Mare</span>
               </a>
@@ -261,7 +250,7 @@ const Home: React.FC = () => {
         </div>
 
         {/* Partner Badge - Top Left Placement (Updated) */}
-        <div className="absolute top-24 left-4 md:top-32 md:left-12 z-20 animate-fade-in-left delay-400">
+        <div className="hidden md:block absolute top-24 left-4 md:top-32 md:left-12 z-20 animate-fade-in-left delay-400">
            <picture>
              <source media="(max-width: 768px)" srcSet="/badge-mobile.webp" />
              <img 

@@ -101,8 +101,8 @@ const Footer: React.FC = () => {
               <li className="flex items-start gap-3 text-gray-600 dark:text-gray-400">
                 <MapPin className={seasonalTheme === 'valentine' ? "text-pink-500 mt-1 shrink-0" : "text-gold-500 mt-1 shrink-0"} size={18} />
                 <div className="text-sm">
-                  <span className="text-gray-900 dark:text-white font-semibold block">Autoparc 1:</span>
-                  Satu Mare, B-dul Lucian Blaga 347, Jud. Satu Mare
+                  <span className="text-gray-900 dark:text-white font-semibold block">Autoparc 1 (Satu Mare):</span>
+                  Bulevardul Lucian Blaga 347A, 440108
                 </div>
               </li>
               <li className="flex items-start gap-3 text-gray-600 dark:text-gray-400">
