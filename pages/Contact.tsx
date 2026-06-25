@@ -66,9 +66,10 @@ const Contact: React.FC = () => {
     },
     { 
       city: 'Marghita', 
-      addr: 'Str. 1 Decembrie Nr. 25, Jud. Bihor', 
+      addr: 'Str. 1 Decembrie 1918 Nr. 25, Jud. Bihor', 
       tel: '0740 513 713', 
-      mapQuery: 'Strada+1+Decembrie+Nr.+25,+Marghita,+Bihor' 
+      mapQuery: '47.348987,22.344744',
+      mapLink: 'https://maps.app.goo.gl/KWhXBrdLSV9TEW1QA'
     }
   ];
 
@@ -281,7 +282,7 @@ const Contact: React.FC = () => {
                 </h3>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{loc.addr}</p>
                 <a 
-                  href={`https://www.google.com/maps?q=${loc.mapQuery}`} 
+                  href={loc.mapLink || `https://www.google.com/maps?q=${loc.mapQuery}`} 
                   target="_blank" 
                   rel="noreferrer" 
                   className="w-full inline-flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gold-500 hover:text-black text-gray-900 dark:text-white py-3 rounded-lg font-bold transition-all"

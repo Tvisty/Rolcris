@@ -223,7 +223,7 @@ const Home: React.FC = () => {
 
             {/* Marghita */}
             <div className="flex items-center justify-between sm:justify-start bg-black/60 sm:bg-black/50 backdrop-blur-md border border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-xl w-full sm:w-auto">
-              <a href="https://www.google.com/maps?q=Strada+1+Decembrie+Nr.+25,+Marghita,+Bihor" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
+              <a href="https://maps.app.goo.gl/KWhXBrdLSV9TEW1QA" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
                 <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
                 <span className="font-semibold text-sm md:text-base">Marghita</span>
               </a>

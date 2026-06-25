@@ -123,7 +123,7 @@ const Footer: React.FC = () => {
                 <MapPin className={seasonalTheme === 'valentine' ? "text-pink-500 mt-1 shrink-0" : "text-gold-500 mt-1 shrink-0"} size={18} />
                 <div className="text-sm">
                   <span className="text-gray-900 dark:text-white font-semibold block">Autoparc 4:</span>
-                  Marghita, Str. 1 Decembrie Nr. 25, Jud. Bihor
+                  Marghita, Str. 1 Decembrie 1918 Nr. 25, Jud. Bihor
                 </div>
               </li>
               <li className="flex items-center gap-3 text-gray-600 dark:text-gray-400 mt-4 pt-4 border-t border-gray-100 dark:border-white/5">

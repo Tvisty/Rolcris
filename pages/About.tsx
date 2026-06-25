@@ -193,7 +193,7 @@ const About: React.FC = () => {
               { city: 'Satu Mare', addr: 'Bulevardul Lucian Blaga 347A, 440108 Satu Mare', tel: '0740 513 713', color: 'gold' },
               { city: 'Seini', addr: 'Piața Unirii 2', tel: '0745 123 456', color: 'gray' },
               { city: 'Tășnad', addr: 'Str. N. Bălcescu 19', tel: '0742 987 654', color: 'gray' },
-              { city: 'Marghita', addr: 'Str. 1 Decembrie Nr. 25', tel: '0740 513 713', color: 'gray' },
+              { city: 'Marghita', addr: 'Str. 1 Decembrie 1918 Nr. 25', tel: '0740 513 713', color: 'gray' },
             ].map((loc, i) => (
               <div key={i} className="bg-white dark:bg-[#121212] p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 hover:border-gold-500/30 transition-all">
                 <MapPin className="text-gold-500 mb-4" size={32} />
