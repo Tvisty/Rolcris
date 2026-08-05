@@ -90,7 +90,8 @@ export const MOTO_BRANDS = [
   'Husqvarna',
   'CFMOTO',
   'Benelli',
-  'SYM'
+  'SYM',
+  'Vespa'
 ];
 
 export const MOTO_CATEGORIES = [
