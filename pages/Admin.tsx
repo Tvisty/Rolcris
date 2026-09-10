@@ -199,8 +199,12 @@ const MessageCard: React.FC<{ message: ContactMessage, onDelete: (id: string) =>
 };
 
 const Admin: React.FC = () => {
-  const { cars, bookings, messages, auctions, addCar, updateCar, deleteCar, updateBookingStatus, deleteBooking, deleteMessage, createAuction, cancelAuction, isConnected, requestNotificationPermission, fcmToken } = useCars();
+  const { cars, bookings, messages, auctions, addCar, updateCar, deleteCar, updateBookingStatus, deleteBooking, deleteMessage, createAuction, cancelAuction, isConnected, requestNotificationPermission, fcmToken, loadAllCars } = useCars();
   const { seasonalTheme, setSeasonalTheme, holidayPrize, saveHolidayPrize } = useTheme();
+  
+  useEffect(() => {
+    loadAllCars();
+  }, [loadAllCars]);
 
   const [activeTab, setActiveTab] = useState<'inventory' | 'calendar' | 'messages' | 'auctions' | 'settings'>('inventory');
   const [user, setUser] = useState<any | null>(null);

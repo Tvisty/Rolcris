@@ -9,7 +9,12 @@ import { getOptimizedImageUrl } from '../utils/imageHelpers';
 const CarDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { cars, addBooking, isLoading, isSyncing } = useCars();
+  const { cars, addBooking, isLoading, isSyncing, loadAllCars } = useCars();
+  
+  useEffect(() => {
+    loadAllCars();
+  }, [loadAllCars]);
+
   const car = cars.find(c => c.id === id);
   const [activeImage, setActiveImage] = useState(0);
   const [isBookingOpen, setIsBookingOpen] = useState(false);

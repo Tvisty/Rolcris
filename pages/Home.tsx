@@ -277,7 +277,7 @@ const Home: React.FC = () => {
               <h2 className="text-4xl md:text-5xl font-display font-bold text-gray-900 dark:text-white mb-2">Oferte Speciale</h2>
               <div className="h-1 w-24 bg-gold-500 rounded-full" />
             </div>
-            <Link to="/inventory" className="hidden md:flex items-center gap-2 text-gold-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <Link to="/inventory" className="hidden md:flex items-center gap-2 text-gold-600 dark:text-gold-500 hover:text-gray-900 dark:hover:text-white transition-colors">
               Vezi toate ofertele <ArrowRight size={20} />
             </Link>
           </div>
@@ -289,7 +289,7 @@ const Home: React.FC = () => {
           </div>
           
           <div className="mt-8 text-center md:hidden">
-            <Link to="/inventory" className="inline-flex items-center gap-2 text-gold-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <Link to="/inventory" className="inline-flex items-center gap-2 text-gold-600 dark:text-gold-500 hover:text-gray-900 dark:hover:text-white transition-colors">
               Vezi toate ofertele <ArrowRight size={20} />
             </Link>
           </div>

@@ -28,7 +28,12 @@ interface InventoryProps {
 }
 
 const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
-  const { cars, isLoading } = useCars();
+  const { cars, isLoading, loadAllCars } = useCars();
+  
+  useEffect(() => {
+    loadAllCars();
+  }, [loadAllCars]);
+
   const [searchParams] = useSearchParams();
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   

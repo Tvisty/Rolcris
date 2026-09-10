@@ -26,6 +26,7 @@ interface CarContextType {
   isConnected: boolean;
   connectionError: string | null;
   fcmToken: string | null;
+  loadAllCars: () => Promise<void>;
 }
 
 const CarContext = createContext<CarContextType | undefined>(undefined);
@@ -90,6 +91,23 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     }
   };
 
+  const [isAllCarsLoaded, setIsAllCarsLoaded] = useState(false);
+
+  const loadAllCars = async () => {
+    if (isAllCarsLoaded) return;
+    setIsLoading(true);
+    try {
+      const carsRes = await supabase.from('cars').select('*').order('createdAt', { ascending: false });
+      if (carsRes.data) {
+        setCars(carsRes.data as Car[]);
+        syncToStorage('cars_all', carsRes.data);
+        setIsAllCarsLoaded(true);
+      }
+    } catch (e) {} finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
       const fetchData = async () => {
        let hasLocalCars = cars.length > 0;
@@ -101,6 +119,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
                  setCars(cachedCars);
                  setIsLoading(false);
                  hasLocalCars = true;
+                 setIsAllCarsLoaded(true); // If we have all from cache
              }
           } catch(e) {}
        }
@@ -110,11 +129,11 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
        }
        
        try {
-           // Decouple cars fetch for faster rendering if network is fast
-           supabase.from('cars').select('*').order('createdAt', { ascending: false }).then(carsRes => {
+           // Fetch only a limited number of cars initially for better performance
+           supabase.from('cars').select('*').order('createdAt', { ascending: false }).limit(12).then(carsRes => {
                if(carsRes.data) {
-                 setCars(carsRes.data as Car[]);
-                 syncToStorage('cars_all', carsRes.data);
+                 // Only overwrite if we don't already have full cars
+                 setCars(prev => isAllCarsLoaded ? prev : carsRes.data as Car[]);
                  setIsLoading(false);
                }
            }).catch(() => {});
@@ -362,7 +381,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
       addMessage, deleteMessage,
       createAuction, placeBid, cancelAuction,
       requestNotificationPermission,
-      isLoading, isSyncing, isConnected, connectionError, fcmToken
+      isLoading, isSyncing, isConnected, connectionError, fcmToken, loadAllCars
     }}>
       {children}
     </CarContext.Provider>

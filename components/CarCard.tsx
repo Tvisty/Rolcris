@@ -13,8 +13,8 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
   const navigate = useNavigate();
 
   const mainImage = getCarMainImage(car);
-  // Using 600px width which limits the payload size for cards
-  const optimizedImage = getOptimizedImageUrl(mainImage, 600);
+  // Using 400px width which limits the payload size for cards further
+  const optimizedImage = getOptimizedImageUrl(mainImage, 400);
 
   const handleCardClick = () => {
     const routePrefix = car.vehicleType === 'Motocicletă' ? '/moto-inventory' : '/inventory';
@@ -95,7 +95,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
         <div className="flex justify-between items-end">
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Preț</p>
-            <p className={`text-2xl font-bold font-display ${car.isSold ? 'text-gray-400 line-through' : 'text-gold-500'}`}>
+            <p className={`text-2xl font-bold font-display ${car.isSold ? 'text-gray-400 line-through' : 'text-gold-600 dark:text-gold-500'}`}>
               {car.price?.toLocaleString()} €
             </p>
           </div>

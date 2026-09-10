@@ -9,8 +9,8 @@ const Footer: React.FC = () => {
   const { seasonalTheme } = useTheme();
 
   const socialLinks = [
-    { icon: Facebook, href: 'https://www.facebook.com/smautoparc/?locale=ro_RO' },
-    { icon: Instagram, href: 'https://www.instagram.com/autoparc.rolcris/?fbclid=IwY2xjawPYdBlleHRuA2FlbQIxMABzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeRebHfifSibEdwgpxHKpT29l_Zb458aJrneJ0enkV74NOF54KFlT3WlfFe0Y_aem_Cpdc61MWFBQDd_qXdFKbfg#' }
+    { icon: Facebook, href: 'https://www.facebook.com/smautoparc/?locale=ro_RO', label: 'Pagina noastră de Facebook' },
+    { icon: Instagram, href: 'https://www.instagram.com/autoparc.rolcris/?fbclid=IwY2xjawPYdBlleHRuA2FlbQIxMABzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeRebHfifSibEdwgpxHKpT29l_Zb458aJrneJ0enkV74NOF54KFlT3WlfFe0Y_aem_Cpdc61MWFBQDd_qXdFKbfg#', label: 'Pagina noastră de Instagram' }
   ];
 
   return (
@@ -31,6 +31,8 @@ const Footer: React.FC = () => {
                       <img 
                         src="/logo.webp" 
                         alt="RolCris Autoparc" 
+                        width="400"
+                        height="300"
                         referrerPolicy="no-referrer"
                         className="h-20 md:h-24 w-auto object-contain mb-4"
                         onError={() => setLogoError(true)}
@@ -50,6 +52,8 @@ const Footer: React.FC = () => {
                   <img 
                     src="/badge-20-years.webp" 
                     alt="Partner Badge" 
+                    width="256"
+                    height="256"
                     className="h-16 w-auto object-contain mb-4"
                   />
                 </picture>
@@ -59,12 +63,13 @@ const Footer: React.FC = () => {
               Lider în vânzări auto premium și de lux. Oferim transparență, garanție și servicii de finanțare personalizate pentru mașina visurilor tale.
             </p>
             <div className="flex gap-4">
-              {socialLinks.map(({ icon: Icon, href }, i) => (
+              {socialLinks.map(({ icon: Icon, href, label }, i) => (
                 <a 
                   key={i} 
                   href={href} 
                   target={href !== '#' ? "_blank" : undefined}
                   rel={href !== '#' ? "noopener noreferrer" : undefined}
+                  aria-label={label}
                   className={`w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-600 dark:text-white transition-all ${seasonalTheme === 'valentine' ? 'hover:bg-pink-500' : 'hover:bg-gold-500'} hover:text-black`}
                 >
                   <Icon size={18} />
