@@ -138,27 +138,27 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
                }
            }).catch(() => {});
 
-           // Fetch other data
-           const [bookingsRes, messagesRes, auctionsRes] = await Promise.all([
+           // Fetch other data in parallel but don't block the cars UI update
+           Promise.all([
                supabase.from('bookings').select('*').order('date', { ascending: true }),
                supabase.from('messages').select('*').order('date', { ascending: false }),
                supabase.from('auctions').select('*')
-           ]);
-           
-           if(bookingsRes.data) {
-               setBookings(bookingsRes.data as Booking[]);
-               syncToStorage('bookings_all', bookingsRes.data);
-               prevBookingsCount.current = bookingsRes.data.length;
-           }
-           if(messagesRes.data) {
-               setMessages(messagesRes.data as ContactMessage[]);
-               syncToStorage('messages_all', messagesRes.data);
-               prevMessagesCount.current = messagesRes.data.length;
-           }
-           if(auctionsRes.data) {
-             setAuctions(auctionsRes.data as Auction[]);
-             syncToStorage('auctions_all', auctionsRes.data);
-           }
+           ]).then(([bookingsRes, messagesRes, auctionsRes]) => {
+             if(bookingsRes.data) {
+                 setBookings(bookingsRes.data as Booking[]);
+                 syncToStorage('bookings_all', bookingsRes.data);
+                 prevBookingsCount.current = bookingsRes.data.length;
+             }
+             if(messagesRes.data) {
+                 setMessages(messagesRes.data as ContactMessage[]);
+                 syncToStorage('messages_all', messagesRes.data);
+                 prevMessagesCount.current = messagesRes.data.length;
+             }
+             if(auctionsRes.data) {
+               setAuctions(auctionsRes.data as Auction[]);
+               syncToStorage('auctions_all', auctionsRes.data);
+             }
+           }).catch(() => {});
            
            setIsConnected(true);
            setConnectionError(null);
