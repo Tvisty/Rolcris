@@ -28,12 +28,7 @@ interface InventoryProps {
 }
 
 const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
-  const { cars, isLoading, loadAllCars } = useCars();
-  
-  useEffect(() => {
-    loadAllCars();
-  }, [loadAllCars]);
-
+  const { cars, isLoading } = useCars();
   const [searchParams] = useSearchParams();
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   
@@ -170,7 +165,10 @@ const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
       if (filters.selectedBrand && car.make !== filters.selectedBrand) return false;
       if (filters.selectedModel && car.model !== filters.selectedModel) return false;
       if (filters.selectedBody && car.bodyType !== filters.selectedBody) return false;
-      if (filters.selectedFuel && car.fuel !== filters.selectedFuel) return false;
+      if (filters.selectedFuel) {
+        const normalize = (s: string) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+        if (car.fuel !== filters.selectedFuel && normalize(car.fuel) !== normalize(filters.selectedFuel)) return false;
+      }
       if (filters.selectedTransmission && car.transmission !== filters.selectedTransmission) return false;
       if (filters.selectedLocation && car.location !== filters.selectedLocation) return false;
       if (carYear < filters.yearRange[0] || carYear > filters.yearRange[1]) return false;

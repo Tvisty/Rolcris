@@ -107,7 +107,7 @@ export const MOTO_CATEGORIES = [
 ];
 
 export const BODY_TYPES = ['SUV', 'Sedan', 'Coupe', 'Cabrio', 'Break', 'Hatchback', 'Dube', 'Monovolum'];
-export const FUELS = ['Diesel', 'Benzină', 'Benzină/Gaz', 'Hibrid', 'Electric', 'Diesel/Electric', 'Benzină/Electric'];
+export const FUELS = ['Diesel', 'Benzină', 'Benzină/Gaz', 'Benzină/Electric', 'Hibrid', 'Electric', 'Diesel/Electric'];
 export const LOCATIONS = ['Satu Mare', 'Seini', 'Tășnad', 'Marghita'];
 export const POLLUTION_STANDARDS = ['Euro 6', 'Euro 5', '0'];
 export const TRACTIONS = ['Fata', 'Spate', '4x4', '4x4 Automat'];

@@ -26,7 +26,6 @@ interface CarContextType {
   isConnected: boolean;
   connectionError: string | null;
   fcmToken: string | null;
-  loadAllCars: () => Promise<void>;
 }
 
 const CarContext = createContext<CarContextType | undefined>(undefined);
@@ -91,23 +90,6 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
     }
   };
 
-  const [isAllCarsLoaded, setIsAllCarsLoaded] = useState(false);
-
-  const loadAllCars = async () => {
-    if (isAllCarsLoaded) return;
-    setIsLoading(true);
-    try {
-      const carsRes = await supabase.from('cars').select('*').order('createdAt', { ascending: false });
-      if (carsRes.data) {
-        setCars(carsRes.data as Car[]);
-        syncToStorage('cars_all', carsRes.data);
-        setIsAllCarsLoaded(true);
-      }
-    } catch (e) {} finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
       const fetchData = async () => {
        let hasLocalCars = cars.length > 0;
@@ -119,7 +101,6 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
                  setCars(cachedCars);
                  setIsLoading(false);
                  hasLocalCars = true;
-                 setIsAllCarsLoaded(true); // If we have all from cache
              }
           } catch(e) {}
        }
@@ -129,36 +110,36 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
        }
        
        try {
-           // Fetch only a limited number of cars initially for better performance
-           supabase.from('cars').select('*').order('createdAt', { ascending: false }).limit(12).then(carsRes => {
+           // Decouple cars fetch for faster rendering if network is fast
+           supabase.from('cars').select('*').order('createdAt', { ascending: false }).then(carsRes => {
                if(carsRes.data) {
-                 // Only overwrite if we don't already have full cars
-                 setCars(prev => isAllCarsLoaded ? prev : carsRes.data as Car[]);
+                 setCars(carsRes.data as Car[]);
+                 syncToStorage('cars_all', carsRes.data);
                  setIsLoading(false);
                }
            }).catch(() => {});
 
-           // Fetch other data in parallel but don't block the cars UI update
-           Promise.all([
+           // Fetch other data
+           const [bookingsRes, messagesRes, auctionsRes] = await Promise.all([
                supabase.from('bookings').select('*').order('date', { ascending: true }),
                supabase.from('messages').select('*').order('date', { ascending: false }),
                supabase.from('auctions').select('*')
-           ]).then(([bookingsRes, messagesRes, auctionsRes]) => {
-             if(bookingsRes.data) {
-                 setBookings(bookingsRes.data as Booking[]);
-                 syncToStorage('bookings_all', bookingsRes.data);
-                 prevBookingsCount.current = bookingsRes.data.length;
-             }
-             if(messagesRes.data) {
-                 setMessages(messagesRes.data as ContactMessage[]);
-                 syncToStorage('messages_all', messagesRes.data);
-                 prevMessagesCount.current = messagesRes.data.length;
-             }
-             if(auctionsRes.data) {
-               setAuctions(auctionsRes.data as Auction[]);
-               syncToStorage('auctions_all', auctionsRes.data);
-             }
-           }).catch(() => {});
+           ]);
+           
+           if(bookingsRes.data) {
+               setBookings(bookingsRes.data as Booking[]);
+               syncToStorage('bookings_all', bookingsRes.data);
+               prevBookingsCount.current = bookingsRes.data.length;
+           }
+           if(messagesRes.data) {
+               setMessages(messagesRes.data as ContactMessage[]);
+               syncToStorage('messages_all', messagesRes.data);
+               prevMessagesCount.current = messagesRes.data.length;
+           }
+           if(auctionsRes.data) {
+             setAuctions(auctionsRes.data as Auction[]);
+             syncToStorage('auctions_all', auctionsRes.data);
+           }
            
            setIsConnected(true);
            setConnectionError(null);
@@ -381,7 +362,7 @@ export const CarProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
       addMessage, deleteMessage,
       createAuction, placeBid, cancelAuction,
       requestNotificationPermission,
-      isLoading, isSyncing, isConnected, connectionError, fcmToken, loadAllCars
+      isLoading, isSyncing, isConnected, connectionError, fcmToken
     }}>
       {children}
     </CarContext.Provider>

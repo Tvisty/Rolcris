@@ -85,7 +85,7 @@ export const ThemeProvider: React.FC<React.PropsWithChildren> = ({ children }) =
       }
     };
     
-    const fetchTimeout = setTimeout(() => { fetchSettings(); }, 1500);
+    fetchSettings();
     
     const channel = supabase.channel('settings-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, payload => {
@@ -95,7 +95,6 @@ export const ThemeProvider: React.FC<React.PropsWithChildren> = ({ children }) =
 
     return () => {
        supabase.removeChannel(channel);
-       clearTimeout(fetchTimeout);
     }
   }, []);
 
