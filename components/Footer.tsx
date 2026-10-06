@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
                   )}
                   {!logoError ? (
                     <picture>
-                      <source media="(max-width: 768px)" srcSet="/logo-mobile.webp" />
+                      <source media="(max-width: 768px)" srcSet="/logo-footer-mobile.webp" />
                       <img 
                         src="/logo.webp" 
                         alt="RolCris Autoparc" 
