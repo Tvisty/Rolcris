@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle, AlertTriangle, Maximize2, Palette, Leaf, Compass } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Phone, MessageCircle, Check, Calendar, Gauge, Fuel, Zap, Settings, MapPin, Layout, CarFront, Fingerprint, Clock, X, CheckCircle, AlertTriangle, Maximize2, Palette, Leaf, Compass, Users } from 'lucide-react';
 import { useCars } from '../context/CarContext';
 import { getOptimizedImageUrl } from '../utils/imageHelpers';
 
@@ -436,6 +436,7 @@ const CarDetail: React.FC = () => {
               )}
 
               <SpecItem icon={Layout} label="Portiere" value={car.doors || '4/5'} />
+              <SpecItem icon={Users} label="Număr Locuri" value={car.seats === 1 ? '1 Loc' : car.seats === 9 ? '8+1 Locuri' : `${car.seats || 5} Locuri`} />
               {car.traction && <SpecItem icon={Compass} label="Tracțiune" value={car.traction} />}
               <SpecItem icon={Fingerprint} label="VIN" value={car.vin || 'Nespecificat'} />
             </div>
