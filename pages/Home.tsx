@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle, MapPin, Phone } from 'lucide-react';
+import { ArrowRight, CheckCircle, MapPin, Phone, ChevronLeft, ChevronRight } from 'lucide-react';
 import SearchWidget from '../components/SearchWidget';
 import CarCard from '../components/CarCard';
 import { BRANDS } from '../constants';
@@ -86,24 +86,47 @@ const BrandLogo = ({ brand }: { brand: string }) => {
 const Home: React.FC = () => {
   const { cars } = useCars();
   const hotDeals = cars.filter(c => c.isHotDeal).slice(0, 4);
-  const [heroImage, setHeroImage] = useState("/background-light.webp");
-  const [isLoaded, setIsLoaded] = useState(false);
   const [heroIndex, setHeroIndex] = useState(0);
-
-  useEffect(() => {
-    // Only keeping one slide, so no interval needed.
-  }, []);
 
   const heroSlides = [
     {
-      subtitle: "Autoparc RolCris",
-      title: "Vii cu mașina veche <br className=\"hidden sm:block\" /> și pleci cu una nouă!",
-      buttonText: "Vezi Stoc auto",
-      buttonLink: "/inventory",
-      bgLight: heroImage,
-      bgDark: "/background-dark.webp"
+      id: 'buyback',
+      image: '/buyback.webp',
+      imageMobile: '/buyback-mobile.webp',
+      alt: 'Buy-Back RolCris - Vii cu mașina veche, pleci cu una nouă',
+      buttonText: 'Vezi Stoc Auto',
+      buttonLink: '/inventory',
+      badge: 'Buy-Back'
+    },
+    {
+      id: 'finantare',
+      image: '/finantare.webp',
+      imageMobile: '/finantare-mobile.webp',
+      alt: 'Finanțare Rapidă RolCris - Cumpără în rate cu Avans 0%',
+      buttonText: 'Calculează Finanțarea',
+      buttonLink: '/finance',
+      badge: 'Finanțare Rapidă'
+    },
+    {
+      id: 'garantie',
+      image: '/garantie.webp',
+      imageMobile: '/garantie-mobile.webp',
+      alt: '12 Luni Garanție RolCris - Condu fără griji',
+      buttonText: 'Contactează-ne',
+      buttonLink: '/contact',
+      badge: '12 Luni Garanție'
     }
   ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroIndex(prev => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [heroSlides.length]);
+
+  const nextSlide = () => setHeroIndex(prev => (prev + 1) % heroSlides.length);
+  const prevSlide = () => setHeroIndex(prev => (prev - 1 + heroSlides.length) % heroSlides.length);
 
   // Filter out specific brands from the homepage logo display
   const brandsToExclude = ['BYD', 'Cupra', 'Lexus', 'Dodge', 'SsangYong'];
@@ -111,173 +134,109 @@ const Home: React.FC = () => {
 
   return (
     <div className="w-full">
-      {/* Hero Section */}
-      <section className="relative min-h-screen md:h-screen flex items-center justify-center overflow-hidden bg-black pb-20 md:pb-0">
-        {/* Background */}
-        <div className={`absolute inset-0 z-0 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-          
+      {/* Hero Section - Responsive Mobile & Desktop Banner */}
+      <section className="relative w-full aspect-[9/16] min-h-[580px] max-h-[88dvh] sm:aspect-[16/10] md:aspect-[3168/1344] md:min-h-0 md:max-h-[92vh] flex flex-col justify-between overflow-hidden bg-[#0c1015] group">
+        {/* Fullscreen Background Images */}
+        <div className="absolute inset-0 w-full h-full z-0">
           {heroSlides.map((slide, idx) => (
-            <div key={idx} className={`absolute inset-0 transition-opacity duration-1000 ${heroIndex === idx ? 'opacity-100 z-0' : 'opacity-0 -z-10'}`}>
-              <picture className="w-full h-full absolute inset-0 block dark:hidden">
-                <source media="(max-width: 768px)" srcSet={idx === 0 ? "/background-mobile.webp" : slide.bgLight} />
+            <div 
+              key={slide.id} 
+              className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${heroIndex === idx ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}
+            >
+              <picture className="w-full h-full block">
+                <source media="(max-width: 767px)" srcSet={slide.imageMobile} />
                 <img 
-                  src={slide.bgLight} 
-                  alt="Hero Background Light" 
-                  referrerPolicy="no-referrer"
-                  onLoad={() => { if (idx === 0) setIsLoaded(true); }}
-                  width="1920"
-                  height="1080"
+                  src={slide.image} 
+                  alt={slide.alt} 
                   fetchpriority={idx === 0 ? "high" : "auto"}
-                  className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 transform transition-transform duration-[20s] hover:scale-110"
-                  style={{ animation: 'none' }} 
-                  onError={() => {
-                    if (idx === 0) setHeroImage("https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=2070&auto=format&fit=crop");
-                  }}
-                />
-              </picture>
-              <picture className="w-full h-full absolute inset-0 hidden dark:block">
-                <source media="(max-width: 768px)" srcSet={idx === 0 ? "/background-mobile-dark.webp" : slide.bgDark} />
-                <img 
-                  src={slide.bgDark} 
-                  alt="Hero Background Dark" 
-                  referrerPolicy="no-referrer"
-                  onLoad={() => { if (idx === 0) setIsLoaded(true); }}
-                  width="1920"
-                  height="1080"
-                  fetchpriority={idx === 0 ? "high" : "auto"}
-                  className="w-full h-full object-cover object-[80%_center] md:object-center scale-105 transform transition-transform duration-[20s] hover:scale-110"
-                  style={{ animation: 'none' }} 
+                  loading={idx === 0 ? "eager" : "lazy"}
+                  className="w-full h-full object-cover object-center select-none"
                 />
               </picture>
             </div>
           ))}
 
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent z-10 pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/90 via-transparent to-transparent z-10 pointer-events-none" />
+          {/* Top gradient for navbar readability */}
+          <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/80 via-black/30 to-transparent z-10 pointer-events-none" />
+
+          {/* Bottom subtle edge fade into Oferte Speciale */}
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0c1015] via-[#0c1015]/40 to-transparent z-10 pointer-events-none" />
         </div>
 
-        <div className="relative z-20 text-center w-full px-4 pt-32 pb-20 md:pt-0 md:mt-[-40px]">
-          <div className="min-h-[200px] flex flex-col justify-center items-center">
-            <h2 
-              className="text-gold-500 font-black tracking-[0.15em] md:tracking-[0.2em] uppercase text-2xl sm:text-3xl md:text-5xl mb-4 md:mb-6 transition-all duration-500 transform animate-fade-in-up"
-              style={{ textShadow: '0 4px 8px rgba(0,0,0,0.9), 0 0 30px rgba(197,160,89,0.4)', opacity: 1 }}
-              key={`subtitle-${heroIndex}`}
-            >
-              {heroSlides[heroIndex].subtitle}
-            </h2>
-            <h1 
-              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-display font-bold text-white mb-6 md:mb-8 leading-tight drop-shadow-2xl px-2 transition-all duration-500 delay-100"
-              key={`title-${heroIndex}`}
-              dangerouslySetInnerHTML={{ __html: heroSlides[heroIndex].title }}
-            />
-            <div 
-              className="flex flex-col sm:flex-row gap-4 justify-center mb-10 md:mb-12 transition-all duration-500 delay-200"
-              key={`btn-${heroIndex}`}
-            >
-              <Link to={heroSlides[heroIndex].buttonLink} className="bg-gold-500 hover:bg-gold-600 text-black px-6 md:px-8 py-3 md:py-4 rounded-lg font-bold text-base md:text-lg transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(197,160,89,0.4)]">
-                {heroSlides[heroIndex].buttonText}
-              </Link>
-            </div>
-          </div>
+        {/* Side Navigation Arrows */}
+        <button
+          onClick={prevSlide}
+          aria-label="Slide-ul anterior"
+          className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md text-white/80 hover:text-gold-500 border border-white/10 hover:border-gold-500/50 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+        >
+          <ChevronLeft size={28} />
+        </button>
+        <button
+          onClick={nextSlide}
+          aria-label="Slide-ul următor"
+          className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md text-white/80 hover:text-gold-500 border border-white/10 hover:border-gold-500/50 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+        >
+          <ChevronRight size={28} />
+        </button>
+
+
+
+        {/* Spacer to push controls to the bottom */}
+        <div className="flex-1 pointer-events-none" />
+
+        {/* Action Controls (Floating at the bottom of the hero) */}
+        <div className="relative z-20 w-full max-w-7xl mx-auto px-4 pb-5 sm:pb-12 text-center">
           
-          {/* Location Buttons */}
-          <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 md:gap-4 max-w-5xl mx-auto animate-fade-in-up delay-300">
-            {/* Satu Mare */}
-            <div className="flex items-center justify-between sm:justify-start bg-black/60 sm:bg-black/50 backdrop-blur-md border border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-xl w-full sm:w-auto">
-              <a href="https://www.google.com/maps?q=Rol+Cris,+Bulevardul+Lucian+Blaga+347A,+Satu+Mare" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
-                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
-                <span className="font-semibold text-sm md:text-base">Satu Mare</span>
-              </a>
-              <div className="hidden sm:block w-px h-6 bg-white/20 mx-2"></div>
-              <a href="tel:0740513713" className="flex items-center gap-2 bg-white/10 sm:bg-white/5 hover:bg-gold-500/20 text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
-                <Phone size={14} className="text-gold-500" />
-                <span className="font-bold sm:font-medium text-sm">0740 513 713</span>
-              </a>
-            </div>
+          {/* Dynamic Call To Action Button */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+            <Link 
+              to={heroSlides[heroIndex].buttonLink} 
+              key={`cta-btn-${heroIndex}`}
+              className="inline-flex items-center gap-2.5 bg-gradient-to-r from-gold-500 via-gold-400 to-gold-500 hover:from-gold-400 hover:to-gold-500 text-black px-6 py-2.5 sm:px-10 sm:py-4 rounded-xl font-bold text-sm sm:text-lg transition-all transform hover:scale-105 shadow-[0_0_35px_rgba(197,160,89,0.4)] border border-gold-300/40 animate-fade-in-up"
+            >
+              <span>{heroSlides[heroIndex].buttonText}</span>
+              <ArrowRight size={18} className="stroke-[2.5]" />
+            </Link>
 
-            {/* Seini */}
-            <div className="flex items-center justify-between sm:justify-start bg-black/60 sm:bg-black/50 backdrop-blur-md border border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-xl w-full sm:w-auto">
-              <a href="https://www.google.com/maps?q=Piața+Unirii+2,+Seini" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
-                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
-                <span className="font-semibold text-sm md:text-base">Seini</span>
-              </a>
-              <div className="hidden sm:block w-px h-6 bg-white/20 mx-2"></div>
-              <a href="tel:0745042593" className="flex items-center gap-2 bg-white/10 sm:bg-white/5 hover:bg-gold-500/20 text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
-                <Phone size={14} className="text-gold-500" />
-                <span className="font-bold sm:font-medium text-sm">0745 042 593</span>
-              </a>
-            </div>
-
-            {/* Tășnad */}
-            <div className="flex items-center justify-between sm:justify-start bg-black/60 sm:bg-black/50 backdrop-blur-md border border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-xl w-full sm:w-auto">
-              <a href="https://www.google.com/maps?q=Strada+Nicolae+Bălcescu+19,+Tășnad" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
-                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
-                <span className="font-semibold text-sm md:text-base">Tășnad</span>
-              </a>
-              <div className="hidden sm:block w-px h-6 bg-white/20 mx-2"></div>
-              <a href="tel:0745568886" className="flex items-center gap-2 bg-white/10 sm:bg-white/5 hover:bg-gold-500/20 text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
-                <Phone size={14} className="text-gold-500" />
-                <span className="font-bold sm:font-medium text-sm">0745 568 886</span>
-              </a>
-            </div>
-
-            {/* Marghita */}
-            <div className="flex items-center justify-between sm:justify-start bg-black/60 sm:bg-black/50 backdrop-blur-md border border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-xl w-full sm:w-auto">
-              <a href="https://maps.app.goo.gl/KWhXBrdLSV9TEW1QA" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-white hover:text-gold-500 transition-colors group">
-                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
-                <span className="font-semibold text-sm md:text-base">Marghita</span>
-              </a>
-              <div className="hidden sm:block w-px h-6 bg-white/20 mx-2"></div>
-              <a href="tel:0774955698" className="flex items-center gap-2 bg-white/10 sm:bg-white/5 hover:bg-gold-500/20 text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
-                <Phone size={14} className="text-gold-500" />
-                <span className="font-bold sm:font-medium text-sm">0774 955 698</span>
-              </a>
-            </div>
+            {heroSlides[heroIndex].id !== 'buyback' && (
+              <Link
+                to="/inventory"
+                className="inline-flex items-center gap-2 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/20 hover:border-gold-500/50 px-5 py-2 sm:px-6 sm:py-4 rounded-xl font-semibold text-xs sm:text-base transition-all shadow-lg"
+              >
+                <span>Vezi Stoc Auto</span>
+              </Link>
+            )}
           </div>
 
           {/* Slide Indicators */}
-          <div className="mt-8 md:mt-10 flex justify-center gap-3 z-30">
-            {heroSlides.map((_, idx) => (
+          <div className="flex justify-center items-center gap-2 sm:gap-2.5 mt-3 sm:mt-6">
+            {heroSlides.map((slide, idx) => (
               <button
-                key={idx}
+                key={slide.id}
                 onClick={() => setHeroIndex(idx)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${heroIndex === idx ? 'bg-gold-500 w-8' : 'bg-white/50 hover:bg-white/80'}`}
-                aria-label={`Slide ${idx + 1}`}
+                className={`h-2 rounded-full transition-all duration-500 ${
+                  heroIndex === idx 
+                    ? 'w-8 sm:w-10 bg-gold-500 shadow-[0_0_12px_rgba(197,160,89,0.6)]' 
+                    : 'w-2 sm:w-2.5 bg-white/40 hover:bg-white/70'
+                }`}
+                aria-label={`Slide ${idx + 1}: ${slide.badge}`}
               />
             ))}
           </div>
 
         </div>
 
-        {/* Partner Badge - Top Left Placement (Updated) */}
-        <div className="hidden md:block absolute top-24 left-4 md:top-32 md:left-12 z-20 animate-fade-in-left delay-400">
-           <picture>
-             <source media="(max-width: 768px)" srcSet="/badge-mobile.webp" />
-             <img 
-               src="/badge-20-years.webp" 
-               alt="Official Partner" 
-               width="256"
-               height="256"
-               fetchpriority="auto"
-               className="w-24 sm:w-32 md:w-48 lg:w-48 h-auto object-contain transform -rotate-12 hover:rotate-0 transition-all duration-500 drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] opacity-90 hover:opacity-100 hover:scale-110"
-             />
-           </picture>
-        </div>
-
       </section>
 
-      {/* Search Widget Overlay */}
-      <SearchWidget />
-
-      {/* Special Offers Section */}
-      <section className="py-24 px-4 bg-gray-50 dark:bg-[#0a0a0a] transition-colors duration-300">
+      {/* Special Offers Section - Moved right after Hero */}
+      <section className="py-16 sm:py-20 px-4 bg-gray-50 dark:bg-[#0a0a0a] transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-end mb-12">
+          <div className="flex justify-between items-end mb-10 md:mb-12">
             <div>
-              <h2 className="text-4xl md:text-5xl font-display font-bold text-gray-900 dark:text-white mb-2">Oferte Speciale</h2>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-gray-900 dark:text-white mb-2">Oferte Speciale</h2>
               <div className="h-1 w-24 bg-gold-500 rounded-full" />
             </div>
-            <Link to="/inventory" className="hidden md:flex items-center gap-2 text-gold-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <Link to="/inventory" className="hidden md:flex items-center gap-2 text-gold-500 hover:text-gray-900 dark:hover:text-white transition-colors font-semibold">
               Vezi toate ofertele <ArrowRight size={20} />
             </Link>
           </div>
@@ -289,12 +248,78 @@ const Home: React.FC = () => {
           </div>
           
           <div className="mt-8 text-center md:hidden">
-            <Link to="/inventory" className="inline-flex items-center gap-2 text-gold-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <Link to="/inventory" className="inline-flex items-center gap-2 text-gold-500 hover:text-gray-900 dark:hover:text-white transition-colors font-semibold">
               Vezi toate ofertele <ArrowRight size={20} />
             </Link>
           </div>
         </div>
       </section>
+
+      {/* Dealership Locations & Phone Numbers */}
+      <section className="py-10 px-4 bg-white dark:bg-[#080b0e] border-y border-gray-200 dark:border-white/5 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-6">
+            <span className="text-xs uppercase tracking-widest text-gold-500 font-bold block mb-1">Rețeaua Noastră</span>
+            <h3 className="text-xl sm:text-2xl font-display font-bold text-gray-900 dark:text-white">Locațiile Autoparc RolCris</h3>
+          </div>
+          <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 md:gap-4 max-w-5xl mx-auto">
+            {/* Satu Mare */}
+            <div className="flex items-center justify-between sm:justify-start bg-gray-50 dark:bg-black/50 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-md w-full sm:w-auto">
+              <a href="https://www.google.com/maps?q=Rol+Cris,+Bulevardul+Lucian+Blaga+347A,+Satu+Mare" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-gray-900 dark:text-white hover:text-gold-500 transition-colors group">
+                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
+                <span className="font-semibold text-sm md:text-base">Satu Mare</span>
+              </a>
+              <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-white/20 mx-2"></div>
+              <a href="tel:0740513713" className="flex items-center gap-2 bg-white dark:bg-white/5 hover:bg-gold-500/20 text-gray-900 dark:text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
+                <Phone size={14} className="text-gold-500" />
+                <span className="font-bold sm:font-medium text-sm">0740 513 713</span>
+              </a>
+            </div>
+
+            {/* Seini */}
+            <div className="flex items-center justify-between sm:justify-start bg-gray-50 dark:bg-black/50 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-md w-full sm:w-auto">
+              <a href="https://www.google.com/maps?q=Piața+Unirii+2,+Seini" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-gray-900 dark:text-white hover:text-gold-500 transition-colors group">
+                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
+                <span className="font-semibold text-sm md:text-base">Seini</span>
+              </a>
+              <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-white/20 mx-2"></div>
+              <a href="tel:0745042593" className="flex items-center gap-2 bg-white dark:bg-white/5 hover:bg-gold-500/20 text-gray-900 dark:text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
+                <Phone size={14} className="text-gold-500" />
+                <span className="font-bold sm:font-medium text-sm">0745 042 593</span>
+              </a>
+            </div>
+
+            {/* Tășnad */}
+            <div className="flex items-center justify-between sm:justify-start bg-gray-50 dark:bg-black/50 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-md w-full sm:w-auto">
+              <a href="https://www.google.com/maps?q=Strada+Nicolae+Bălcescu+19,+Tășnad" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-gray-900 dark:text-white hover:text-gold-500 transition-colors group">
+                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
+                <span className="font-semibold text-sm md:text-base">Tășnad</span>
+              </a>
+              <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-white/20 mx-2"></div>
+              <a href="tel:0745568886" className="flex items-center gap-2 bg-white dark:bg-white/5 hover:bg-gold-500/20 text-gray-900 dark:text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
+                <Phone size={14} className="text-gold-500" />
+                <span className="font-bold sm:font-medium text-sm">0745 568 886</span>
+              </a>
+            </div>
+
+            {/* Marghita */}
+            <div className="flex items-center justify-between sm:justify-start bg-gray-50 dark:bg-black/50 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-md w-full sm:w-auto">
+              <a href="https://maps.app.goo.gl/KWhXBrdLSV9TEW1QA" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-gray-900 dark:text-white hover:text-gold-500 transition-colors group">
+                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
+                <span className="font-semibold text-sm md:text-base">Marghita</span>
+              </a>
+              <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-white/20 mx-2"></div>
+              <a href="tel:0774955698" className="flex items-center gap-2 bg-white dark:bg-white/5 hover:bg-gold-500/20 text-gray-900 dark:text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
+                <Phone size={14} className="text-gold-500" />
+                <span className="font-bold sm:font-medium text-sm">0774 955 698</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Search Widget */}
+      <SearchWidget />
 
       {/* Features Banner */}
       <section className="py-16 bg-white dark:bg-[#121212] border-y border-gray-200 dark:border-white/5 transition-colors duration-300">
