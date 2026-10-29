@@ -262,58 +262,134 @@ const Home: React.FC = () => {
             <span className="text-xs uppercase tracking-widest text-gold-500 font-bold block mb-1">Rețeaua Noastră</span>
             <h3 className="text-xl sm:text-2xl font-display font-bold text-gray-900 dark:text-white">Locațiile Autoparc RolCris</h3>
           </div>
-          <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 md:gap-4 max-w-5xl mx-auto">
-            {/* Satu Mare */}
-            <div className="flex items-center justify-between sm:justify-start bg-gray-50 dark:bg-black/50 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-md w-full sm:w-auto">
-              <a href="https://www.google.com/maps?q=Rol+Cris,+Bulevardul+Lucian+Blaga+347A,+Satu+Mare" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-gray-900 dark:text-white hover:text-gold-500 transition-colors group">
-                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
-                <span className="font-semibold text-sm md:text-base">Satu Mare</span>
-              </a>
-              <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-white/20 mx-2"></div>
-              <a href="tel:0740513713" className="flex items-center gap-2 bg-white dark:bg-white/5 hover:bg-gold-500/20 text-gray-900 dark:text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
-                <Phone size={14} className="text-gold-500" />
-                <span className="font-bold sm:font-medium text-sm">0740 513 713</span>
-              </a>
-            </div>
+          <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 md:gap-4 max-w-6xl mx-auto">
+            {[
+              {
+                city: 'Satu Mare',
+                phoneDisplay: '0740 513 713',
+                phoneTel: '0740513713',
+                whatsapp: 'https://wa.me/40740513713',
+                gmaps: 'https://www.google.com/maps?q=Rol+Cris,+Bulevardul+Lucian+Blaga+347A,+Satu+Mare',
+                waze: 'https://waze.com/ul?q=Bulevardul%20Lucian%20Blaga%20347A%20Satu%20Mare&navigate=yes'
+              },
+              {
+                city: 'Seini',
+                phoneDisplay: '0745 042 593',
+                phoneTel: '0745042593',
+                whatsapp: 'https://wa.me/40745042593',
+                gmaps: 'https://www.google.com/maps?q=Piața+Unirii+2,+Seini',
+                waze: 'https://waze.com/ul?q=Piata%20Unirii%202%20Seini&navigate=yes'
+              },
+              {
+                city: 'Tășnad',
+                phoneDisplay: '0745 568 886',
+                phoneTel: '0745568886',
+                whatsapp: 'https://wa.me/40745568886',
+                gmaps: 'https://www.google.com/maps?q=Strada+Nicolae+Bălcescu+19,+Tășnad',
+                waze: 'https://waze.com/ul?q=Strada%20Nicolae%20Balcescu%2019%20Tasnad&navigate=yes'
+              },
+              {
+                city: 'Marghita',
+                phoneDisplay: '0774 955 698',
+                phoneTel: '0774955698',
+                whatsapp: 'https://wa.me/40774955698',
+                gmaps: 'https://maps.app.goo.gl/zAQYuhevpt1sBHYK9',
+                waze: 'https://waze.com/ul?ll=47.348987,22.3447439&navigate=yes'
+              }
+            ].map((loc) => (
+              <div
+                key={loc.city}
+                className="flex items-center justify-between sm:justify-start bg-gray-50 dark:bg-black/50 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-full px-4 py-2.5 sm:py-2 hover:border-gold-500/50 transition-all shadow-md w-full sm:w-auto gap-2"
+              >
+                <a
+                  href={loc.gmaps}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 text-gray-900 dark:text-white hover:text-gold-500 transition-colors group"
+                >
+                  <MapPin size={17} className="text-gold-500 group-hover:scale-110 transition-transform shrink-0" />
+                  <span className="font-semibold text-sm md:text-base">{loc.city}</span>
+                </a>
 
-            {/* Seini */}
-            <div className="flex items-center justify-between sm:justify-start bg-gray-50 dark:bg-black/50 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-md w-full sm:w-auto">
-              <a href="https://www.google.com/maps?q=Piața+Unirii+2,+Seini" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-gray-900 dark:text-white hover:text-gold-500 transition-colors group">
-                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
-                <span className="font-semibold text-sm md:text-base">Seini</span>
-              </a>
-              <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-white/20 mx-2"></div>
-              <a href="tel:0745042593" className="flex items-center gap-2 bg-white dark:bg-white/5 hover:bg-gold-500/20 text-gray-900 dark:text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
-                <Phone size={14} className="text-gold-500" />
-                <span className="font-bold sm:font-medium text-sm">0745 042 593</span>
-              </a>
-            </div>
+                <div className="hidden sm:block w-px h-5 bg-gray-300 dark:bg-white/15 mx-1"></div>
 
-            {/* Tășnad */}
-            <div className="flex items-center justify-between sm:justify-start bg-gray-50 dark:bg-black/50 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-md w-full sm:w-auto">
-              <a href="https://www.google.com/maps?q=Strada+Nicolae+Bălcescu+19,+Tășnad" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-gray-900 dark:text-white hover:text-gold-500 transition-colors group">
-                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
-                <span className="font-semibold text-sm md:text-base">Tășnad</span>
-              </a>
-              <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-white/20 mx-2"></div>
-              <a href="tel:0745568886" className="flex items-center gap-2 bg-white dark:bg-white/5 hover:bg-gold-500/20 text-gray-900 dark:text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
-                <Phone size={14} className="text-gold-500" />
-                <span className="font-bold sm:font-medium text-sm">0745 568 886</span>
-              </a>
-            </div>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <a
+                    href={`tel:${loc.phoneTel}`}
+                    className="flex items-center gap-1.5 bg-white dark:bg-white/5 hover:bg-gold-500/20 text-gray-900 dark:text-white px-2.5 py-1.5 rounded-lg sm:rounded-full transition-colors border border-gray-200/60 dark:border-white/5"
+                  >
+                    <Phone size={13} className="text-gold-500 shrink-0" />
+                    <span className="font-bold sm:font-medium text-xs sm:text-sm whitespace-nowrap">{loc.phoneDisplay}</span>
+                  </a>
 
-            {/* Marghita */}
-            <div className="flex items-center justify-between sm:justify-start bg-gray-50 dark:bg-black/50 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-xl sm:rounded-full px-4 py-3 sm:py-2 hover:border-gold-500/50 transition-all shadow-md w-full sm:w-auto">
-              <a href="https://maps.app.goo.gl/zAQYuhevpt1sBHYK9" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-gray-900 dark:text-white hover:text-gold-500 transition-colors group">
-                <MapPin size={18} className="text-gold-500 group-hover:scale-110 transition-transform" />
-                <span className="font-semibold text-sm md:text-base">Marghita</span>
-              </a>
-              <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-white/20 mx-2"></div>
-              <a href="tel:0774955698" className="flex items-center gap-2 bg-white dark:bg-white/5 hover:bg-gold-500/20 text-gray-900 dark:text-white px-3 py-1.5 rounded-lg sm:rounded-full transition-colors ml-4 sm:ml-0">
-                <Phone size={14} className="text-gold-500" />
-                <span className="font-bold sm:font-medium text-sm">0774 955 698</span>
-              </a>
-            </div>
+                  {/* WhatsApp Icon */}
+                  <a
+                    href={loc.whatsapp}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={`WhatsApp ${loc.city}`}
+                    aria-label={`WhatsApp ${loc.city}`}
+                    className="w-8 h-8 rounded-full bg-[#25D366] hover:bg-[#20bd5a] flex items-center justify-center shadow-sm hover:scale-110 transition-all shrink-0"
+                  >
+                    <svg viewBox="0 0 32 32" className="w-[18px] h-[18px] fill-white" aria-hidden="true">
+                      <path d="M16.004 3.2c-7.072 0-12.8 5.728-12.8 12.8 0 2.258.59 4.462 1.71 6.404L3.2 28.8l6.56-1.72c1.878 1.024 3.992 1.564 6.244 1.564 7.07 0 12.8-5.728 12.8-12.8s-5.73-12.644-12.8-12.644zm7.484 18.148c-.316.89-1.842 1.704-2.548 1.814-.656.1-1.488.14-2.402-.15-5.388-1.71-8.856-7.224-9.124-7.58-.268-.356-2.176-2.898-2.176-5.528s1.378-3.922 1.868-4.456c.49-.534 1.068-.668 1.424-.668.356 0 .712.004 1.024.018.328.016.768-.124 1.202.918.444 1.068 1.512 3.696 1.646 3.964.134.268.222.58.044.936-.178.356-.268.58-.534.89-.268.312-.562.696-.802.936-.268.266-.546.554-.234 1.09.312.534 1.384 2.284 2.972 3.7 2.042 1.82 3.762 2.384 4.296 2.652.534.268.846.222 1.158-.134.312-.356 1.336-1.558 1.692-2.092.356-.534.712-.446 1.202-.268.49.178 3.116 1.47 3.65 1.736.534.268.89.402 1.024.624.134.224.134 1.292-.182 2.182z" />
+                    </svg>
+                  </a>
+
+                  {/* Google Maps Icon */}
+                  <a
+                    href={loc.gmaps}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={`Google Maps ${loc.city}`}
+                    aria-label={`Google Maps ${loc.city}`}
+                    className="w-8 h-8 rounded-full bg-white dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/20 border border-gray-200 dark:border-white/10 flex items-center justify-center shadow-sm hover:scale-110 transition-all shrink-0"
+                  >
+                    <svg viewBox="0 0 48 48" className="w-5 h-5" aria-hidden="true">
+                      <path fill="#48b564" d="M35.76,26.36h0.01c0,0-3.77,5.53-6.94,9.64c-2.74,3.55-3.54,6.59-3.77,8.06C24.97,44.6,24.53,45,24,45s-0.97-0.4-1.06-0.94c-0.23-1.47-1.03-4.51-3.77-8.06c-0.42-0.55-0.85-1.12-1.28-1.7L28.24,22l8.33-9.88C37.49,14.05,38,16.21,38,18.5C38,21.4,37.17,24.09,35.76,26.36z" />
+                      <path fill="#fcc60e" d="M28.24,22L17.89,34.3c-2.82-3.78-5.66-7.94-5.66-7.94h0.01c-0.3-0.48-0.57-0.97-0.8-1.48L19.76,15c-0.79,0.95-1.26,2.17-1.26,3.5c0,3.04,2.46,5.5,5.5,5.5C25.71,24,27.24,23.22,28.24,22z" />
+                      <path fill="#2c85eb" d="M28.4,4.74l-8.57,10.18L13.27,9.2C15.83,6.02,19.69,4,24,4C25.54,4,27.02,4.26,28.4,4.74z" />
+                      <path fill="#ed5748" d="M19.83,14.92L19.76,15l-8.32,9.88C10.52,22.95,10,20.79,10,18.5c0-3.54,1.23-6.79,3.27-9.3L19.83,14.92z" />
+                      <path fill="#5695f6" d="M28.24,22c0.79-0.95,1.26-2.17,1.26-3.5c0-3.04-2.46-5.5-5.5-5.5c-1.71,0-3.24,0.78-4.24,2L28.4,4.74c3.59,1.22,6.53,3.91,8.17,7.38L28.24,22z" />
+                    </svg>
+                  </a>
+
+                  {/* Waze Icon */}
+                  <a
+                    href={loc.waze}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={`Waze ${loc.city}`}
+                    aria-label={`Waze ${loc.city}`}
+                    className="w-8 h-8 rounded-full bg-[#33CCFF] hover:bg-[#22b8eb] flex items-center justify-center shadow-sm hover:scale-110 transition-all shrink-0"
+                  >
+                    <svg viewBox="0 0 36 36" className="w-5 h-5" aria-hidden="true">
+                      <path
+                        fill="#FFFFFF"
+                        stroke="#1E232A"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M28.8 18.2c.2-.8.3-1.6.3-2.5 0-5.8-4.9-10.5-11-10.5S7.1 9.9 7.1 15.7c0 1.9.5 3.6 1.5 5.2.3.5.1 1.1-.4 1.4-.5.3-1.1.2-1.5-.2-.5-.6-1.2-.4-1.2.4 0 2.3 2.2 4.1 4.9 4.4h14.4c2.8-.6 4.9-2.8 4.9-5.5 0-1.4-1-2.6-2.5-3.2z"
+                      />
+                      <circle cx="14.5" cy="14.8" r="1.5" fill="#1E232A" />
+                      <circle cx="21.5" cy="14.8" r="1.5" fill="#1E232A" />
+                      <path
+                        fill="none"
+                        stroke="#1E232A"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        d="M14.5 19.2c.8 1.2 2.1 1.9 3.5 1.9s2.7-.7 3.5-1.9"
+                      />
+                      <circle cx="13" cy="27.2" r="2.6" fill="#1E232A" />
+                      <circle cx="13" cy="27.2" r="1" fill="#FFFFFF" />
+                      <circle cx="23" cy="27.2" r="2.6" fill="#1E232A" />
+                      <circle cx="23" cy="27.2" r="1" fill="#FFFFFF" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
