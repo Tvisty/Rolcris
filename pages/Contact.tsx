@@ -68,8 +68,9 @@ const Contact: React.FC = () => {
       city: 'Marghita', 
       addr: 'Str. 1 Decembrie 1918 Nr. 25, Jud. Bihor', 
       tel: '0740 513 713', 
-      mapQuery: '47.348987,22.344744',
-      mapLink: 'https://maps.app.goo.gl/KWhXBrdLSV9TEW1QA'
+      mapQuery: 'Autoparc+Rolcris+Marghita',
+      embedUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d401.8382037392053!2d22.34480690284592!3d47.348820674690835!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4747c50031a8929b%3A0xefefa7e88aa56d05!2sAutoparc%20Rolcris%20Marghita!5e0!3m2!1sen!2sro!4v1793272473229!5m2!1sen!2sro',
+      mapLink: 'https://maps.app.goo.gl/zAQYuhevpt1sBHYK9'
     }
   ];
 
@@ -266,9 +267,10 @@ const Contact: React.FC = () => {
                   width="100%"
                   height="100%"
                   title={`Map ${loc.city}`}
-                  src={`https://maps.google.com/maps?q=${loc.mapQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                  src={loc.embedUrl || `https://maps.google.com/maps?q=${loc.mapQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
                   style={{ border: 0 }}
                   loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
                   className="absolute inset-0 filter grayscale-[50%] hover:grayscale-0 transition-all duration-500"
                   allowFullScreen
                 ></iframe>
