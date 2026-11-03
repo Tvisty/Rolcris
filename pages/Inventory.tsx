@@ -294,22 +294,30 @@ const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
             
             <FilterSection title="Locație">
                 <div className="space-y-2">
+                    <div
+                        onClick={() => setFilters({ ...filters, selectedLocation: '' })}
+                        className="flex items-center gap-2 cursor-pointer group"
+                    >
+                        <div className={`w-4 h-4 rounded-full border ${!filters.selectedLocation ? 'bg-gold-500 border-gold-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-gold-500'} transition-colors flex items-center justify-center`}>
+                            {!filters.selectedLocation && <div className="w-2 h-2 bg-black rounded-full" />}
+                        </div>
+                        <span className={`text-sm ${!filters.selectedLocation ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
+                            Toate
+                        </span>
+                    </div>
                     {LOCATIONS.map(loc => (
-                        <label key={loc} className="flex items-center gap-2 cursor-pointer group">
+                        <div
+                            key={loc}
+                            onClick={() => setFilters({ ...filters, selectedLocation: filters.selectedLocation === loc ? '' : loc })}
+                            className="flex items-center gap-2 cursor-pointer group"
+                        >
                             <div className={`w-4 h-4 rounded-full border ${filters.selectedLocation === loc ? 'bg-gold-500 border-gold-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-gold-500'} transition-colors flex items-center justify-center`}>
                                 {filters.selectedLocation === loc && <div className="w-2 h-2 bg-black rounded-full" />}
                             </div>
-                            <input 
-                                type="radio" 
-                                name="location" 
-                                className="hidden"
-                                checked={filters.selectedLocation === loc}
-                                onChange={() => setFilters({...filters, selectedLocation: filters.selectedLocation === loc ? '' : loc})}
-                            />
                             <span className={`text-sm ${filters.selectedLocation === loc ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
                                 {loc}
                             </span>
-                        </label>
+                        </div>
                     ))}
                 </div>
             </FilterSection>
