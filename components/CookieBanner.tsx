@@ -10,6 +10,70 @@ interface CookieConsentState {
 }
 
 const CONSENT_STORAGE_KEY = 'rolcris_cookie_consent';
+export const GA_MEASUREMENT_ID = 'G-3PN5C8DRSF';
+
+declare global {
+  interface Window {
+    dataLayer?: any[];
+    gtag?: (...args: any[]) => void;
+    [key: string]: any;
+  }
+}
+
+export const syncGoogleAnalyticsConsent = (consent: { analytics: boolean; marketing: boolean }) => {
+  if (typeof window === 'undefined') return;
+
+  // Toggle GA disable flag
+  window[`ga-disable-${GA_MEASUREMENT_ID}`] = !consent.analytics;
+
+  window.dataLayer = window.dataLayer || [];
+  if (!window.gtag) {
+    window.gtag = function gtag() {
+      window.dataLayer!.push(arguments);
+    };
+  }
+
+  if (consent.analytics) {
+    // Load gtag.js script dynamically only after user grants analytics consent
+    const existingScript = document.getElementById('ga-gtag-script');
+    if (!existingScript) {
+      window.gtag('consent', 'default', {
+        analytics_storage: 'granted',
+        ad_storage: consent.marketing ? 'granted' : 'denied',
+        ad_user_data: consent.marketing ? 'granted' : 'denied',
+        ad_personalization: consent.marketing ? 'granted' : 'denied'
+      });
+      window.gtag('js', new Date());
+      window.gtag('config', GA_MEASUREMENT_ID, {
+        anonymize_ip: true,
+        page_path: window.location.hash ? window.location.hash.replace(/^#/, '') : window.location.pathname
+      });
+
+      const script = document.createElement('script');
+      script.id = 'ga-gtag-script';
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+      document.head.appendChild(script);
+    } else {
+      window.gtag('consent', 'update', {
+        analytics_storage: 'granted',
+        ad_storage: consent.marketing ? 'granted' : 'denied',
+        ad_user_data: consent.marketing ? 'granted' : 'denied',
+        ad_personalization: consent.marketing ? 'granted' : 'denied'
+      });
+    }
+  } else {
+    // Revoke consent if gtag was previously initialized
+    if (document.getElementById('ga-gtag-script')) {
+      window.gtag('consent', 'update', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied'
+      });
+    }
+  }
+};
 
 const CookieBanner: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -24,8 +88,11 @@ const CookieBanner: React.FC = () => {
     } else {
       try {
         const parsed: CookieConsentState = JSON.parse(saved);
-        setAnalytics(Boolean(parsed.analytics));
-        setMarketing(Boolean(parsed.marketing));
+        const hasAnalytics = Boolean(parsed.analytics);
+        const hasMarketing = Boolean(parsed.marketing);
+        setAnalytics(hasAnalytics);
+        setMarketing(hasMarketing);
+        syncGoogleAnalyticsConsent({ analytics: hasAnalytics, marketing: hasMarketing });
       } catch {
         setIsVisible(true);
       }
@@ -60,6 +127,7 @@ const CookieBanner: React.FC = () => {
     localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(payload));
     setAnalytics(consent.analytics);
     setMarketing(consent.marketing);
+    syncGoogleAnalyticsConsent(consent);
     setIsVisible(false);
     setShowCustomize(false);
   };

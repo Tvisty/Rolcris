@@ -14,6 +14,18 @@ const RouteChangeListener = () => {
       sessionStorage.removeItem('inventoryFilters');
       sessionStorage.removeItem('motoInventoryFilters');
     }
+
+    // Track SPA route navigation in Google Analytics if user consented
+    if (
+      typeof window !== 'undefined' &&
+      typeof window.gtag === 'function' &&
+      !window['ga-disable-G-3PN5C8DRSF'] &&
+      document.getElementById('ga-gtag-script')
+    ) {
+      window.gtag('config', 'G-3PN5C8DRSF', {
+        page_path: location.pathname + location.search
+      });
+    }
   }, [location]);
   return null;
 };

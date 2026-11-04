@@ -22,7 +22,7 @@ const firebaseConfig = {
   storageBucket: "autoparc-rolcris-fba68.firebasestorage.app",
   messagingSenderId: "765134886891",
   appId: "1:765134886891:web:7f6385a78de0fac8756bae",
-  measurementId: "G-H0EDL33GJB"
+  measurementId: "G-3PN5C8DRSF"
 };
 
 // Initialize Firebase
