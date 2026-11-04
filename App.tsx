@@ -29,6 +29,8 @@ const Admin = React.lazy(() => import('./pages/Admin'));
 const Auctions = React.lazy(() => import('./pages/Auctions'));
 const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
 const TermsAndConditions = React.lazy(() => import('./pages/TermsAndConditions'));
+const CookiePolicy = React.lazy(() => import('./pages/CookiePolicy'));
+const CookieBanner = React.lazy(() => import('./components/CookieBanner'));
 const ChatBot = React.lazy(() => import('./components/ChatBot'));
 const SeasonalEffects = React.lazy(() => import('./components/SeasonalEffects'));
 
@@ -65,12 +67,14 @@ const App: React.FC = () => {
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+                  <Route path="/cookie-policy" element={<CookiePolicy />} />
                 </Routes>
               </Suspense>
             </main>
             <Footer />
             <Suspense fallback={null}>
               <ChatBot />
+              <CookieBanner />
             </Suspense>
           </div>
         </Router>

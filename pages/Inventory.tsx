@@ -251,7 +251,11 @@ const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
              {pageType === 'moto' ? 'Stoc Motociclete' : pageType === 'auto' ? 'Stoc Auto' : 'Stoc Disponibil'}
            </h1>
            <p className="text-gray-500 dark:text-gray-400 text-sm">
-             {isLoading && cars.length === 0 ? 'Se încarcă...' : `${totalCarsOfType} ${pageType === 'moto' ? 'motociclete găsite' : 'autoturisme găsite'}`}
+             {isLoading && cars.length === 0
+               ? 'Se încarcă...'
+               : filteredCars.length !== totalCarsOfType
+                 ? `${filteredCars.length} din ${totalCarsOfType} ${pageType === 'moto' ? 'motociclete afișate' : 'autoturisme afișate'}`
+                 : `${totalCarsOfType} ${pageType === 'moto' ? 'motociclete găsite' : 'autoturisme găsite'}`}
            </p>
         </div>
         
@@ -482,25 +486,33 @@ const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
 
             <FilterSection title={pageType === 'moto' ? 'Categorie' : 'Caroserie'}>
               <div className="space-y-2">
+                <div
+                  onClick={() => setFilters({ ...filters, selectedBody: '' })}
+                  className="flex items-center gap-2 cursor-pointer group"
+                >
+                  <div className={`w-4 h-4 rounded-sm border ${!filters.selectedBody ? 'bg-gold-500 border-gold-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-gold-500'} transition-colors flex items-center justify-center`}>
+                    {!filters.selectedBody && <div className="w-2 h-2 bg-black rounded-[1px]" />}
+                  </div>
+                  <span className={`text-sm ${!filters.selectedBody ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
+                    Toate
+                  </span>
+                </div>
                 {(pageType === 'moto' 
                     ? MOTO_CATEGORIES 
                     : pageType === 'auto' 
                         ? BODY_TYPES 
                         : Array.from(new Set([...BODY_TYPES, ...MOTO_CATEGORIES])).sort()
                 ).map(type => (
-                  <label key={type} className="flex items-center gap-2 cursor-pointer group">
+                  <div
+                    key={type}
+                    onClick={() => setFilters({ ...filters, selectedBody: filters.selectedBody === type ? '' : type })}
+                    className="flex items-center gap-2 cursor-pointer group"
+                  >
                     <div className={`w-4 h-4 rounded-sm border ${filters.selectedBody === type ? 'bg-gold-500 border-gold-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-gold-500'} transition-colors flex items-center justify-center`}>
                       {filters.selectedBody === type && <div className="w-2 h-2 bg-black rounded-[1px]" />}
                     </div>
-                    <input 
-                      type="radio" 
-                      name="bodyType" 
-                      className="hidden"
-                      checked={filters.selectedBody === type}
-                      onChange={() => setFilters({...filters, selectedBody: filters.selectedBody === type ? '' : type})}
-                    />
-                    <span className={`text-sm ${filters.selectedBody === type ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'}`}>{type}</span>
-                  </label>
+                    <span className={`text-sm ${filters.selectedBody === type ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'}`}>{type}</span>
+                  </div>
                 ))}
               </div>
             </FilterSection>
@@ -546,30 +558,36 @@ const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
             <FilterSection title="Dotări">
                 <div className="max-h-60 overflow-y-auto custom-scrollbar pr-2 space-y-2">
                     {CAR_FEATURES.map(feature => (
-                        <label key={feature} className="flex items-center gap-2 cursor-pointer group">
+                        <div
+                            key={feature}
+                            onClick={() => toggleFeatureFilter(feature)}
+                            className="flex items-center gap-2 cursor-pointer group select-none"
+                        >
                             <div className={`w-4 h-4 rounded-sm border ${filters.selectedFeatures.includes(feature) ? 'bg-gold-500 border-gold-500' : 'border-gray-300 dark:border-gray-600 group-hover:border-gold-500'} transition-colors flex items-center justify-center shrink-0`}>
                                 {filters.selectedFeatures.includes(feature) && <Check size={12} className="text-black" />}
                             </div>
                             <span className={`text-sm ${filters.selectedFeatures.includes(feature) ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'}`}>
                                 {feature}
                             </span>
-                            <input 
-                                type="checkbox" 
-                                className="hidden"
-                                checked={filters.selectedFeatures.includes(feature)}
-                                onChange={() => toggleFeatureFilter(feature)}
-                            />
-                        </label>
+                        </div>
                     ))}
                 </div>
             </FilterSection>
 
-            <button 
-              onClick={resetFilters}
-              className="w-full mt-6 py-3 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-dashed border-gray-400 dark:border-gray-600 hover:border-gray-900 dark:hover:border-white rounded-lg transition-colors"
-            >
-              Resetează Filtrele
-            </button>
+            <div className="mt-6 space-y-2.5">
+              <div className="w-full py-2.5 px-3 bg-gold-500/10 border border-gold-500/30 rounded-lg text-center">
+                <span className="text-xs font-bold text-gray-900 dark:text-white">
+                  Afișate: <span className="text-gold-500 text-sm">{filteredCars.length}</span> din {totalCarsOfType} {pageType === 'moto' ? 'motociclete' : 'mașini'}
+                </span>
+              </div>
+
+              <button 
+                onClick={resetFilters}
+                className="w-full py-3 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-dashed border-gray-400 dark:border-gray-600 hover:border-gray-900 dark:hover:border-white rounded-lg transition-colors"
+              >
+                Resetează Filtrele ({filteredCars.length})
+              </button>
+            </div>
 
             <div className="md:hidden fixed bottom-6 left-6 right-6 z-50">
                <button 

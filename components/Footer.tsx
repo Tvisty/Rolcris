@@ -158,9 +158,17 @@ const Footer: React.FC = () => {
           <p className="text-gray-500 text-xs">
             <Link to="/admin" className="hover:text-gray-400 transition-colors cursor-default">©</Link> {new Date().getFullYear()} Autoparc RolCris. Toate drepturile rezervate.
           </p>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6">
             <Link to="/terms-and-conditions" className="text-gray-500 hover:text-gray-900 dark:hover:text-white text-xs">Termeni și Condiții</Link>
             <Link to="/privacy-policy" className="text-gray-500 hover:text-gray-900 dark:hover:text-white text-xs">Politica de Confidențialitate</Link>
+            <Link to="/cookie-policy" className="text-gray-500 hover:text-gray-900 dark:hover:text-white text-xs">Politica de Cookie-uri</Link>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-cookie-settings'))}
+              className="text-gray-500 hover:text-gold-500 dark:hover:text-gold-500 text-xs cursor-pointer transition-colors"
+            >
+              Setări Cookie-uri
+            </button>
           </div>
         </div>
       </div>
