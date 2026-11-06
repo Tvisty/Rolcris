@@ -295,6 +295,14 @@ const Home: React.FC = () => {
                 whatsapp: 'https://wa.me/40774955698',
                 gmaps: 'https://maps.app.goo.gl/zAQYuhevpt1sBHYK9',
                 waze: 'https://waze.com/ul?ll=47.348987,22.3447439&navigate=yes'
+              },
+              {
+                city: 'Baia Mare',
+                phoneDisplay: '0757 769 878',
+                phoneTel: '0757769878',
+                whatsapp: 'https://wa.me/40757769878',
+                gmaps: 'https://www.google.com/maps?q=Bulevardul+Regele+Mihai+I+60,+Baia+Mare',
+                waze: 'https://waze.com/ul?ll=47.6512841,23.5414326&navigate=yes'
               }
             ].map((loc) => (
               <div

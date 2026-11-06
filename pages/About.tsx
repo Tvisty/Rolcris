@@ -28,7 +28,7 @@ const About: React.FC = () => {
             <span className="text-gold-500 font-bold text-xs uppercase tracking-[0.2em]">Din 2005 în Satu Mare</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 leading-tight drop-shadow-2xl animate-fade-in-up">
-            20 ANI DE <br/> <span className="text-gold-500">EXPERIENȚĂ</span>
+            21 ANI DE <br/> <span className="text-gold-500">EXPERIENȚĂ</span>
           </h1>
           <p className="text-gray-300 text-lg md:text-xl font-light max-w-2xl mx-auto drop-shadow-lg animate-fade-in-up delay-200">
             Liderul pieței auto premium din Satu Mare, oferind excelență și încredere de peste două decenii.
@@ -157,7 +157,7 @@ const About: React.FC = () => {
             </p>
             <ul className="space-y-4">
               {[
-                'Peste 20 de ani de reputație impecabilă',
+                'Peste 21 de ani de reputație impecabilă',
                 'Colaborare cu parteneri financiari de top',
                 'Sistem de rate flexibil și aprobare rapidă',
                 'Inspecție tehnică detaliată înainte de vânzare'
@@ -185,25 +185,28 @@ const About: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-display font-bold text-gray-900 dark:text-white mb-4">Unde ne găsiți</h2>
-            <p className="text-gray-500 max-w-2xl mx-auto">Suntem prezenți în 4 locații strategice pentru a fi mai aproape de tine.</p>
+            <p className="text-gray-500 max-w-2xl mx-auto">Suntem prezenți în 5 locații strategice pentru a fi mai aproape de tine.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {[
               { city: 'Satu Mare', addr: 'Bulevardul Lucian Blaga 347A, 440108 Satu Mare', tel: '0740 513 713', color: 'gold' },
-              { city: 'Seini', addr: 'Piața Unirii 2', tel: '0745 123 456', color: 'gray' },
-              { city: 'Tășnad', addr: 'Str. N. Bălcescu 19', tel: '0742 987 654', color: 'gray' },
-              { city: 'Marghita', addr: 'Str. 1 Decembrie 1918 Nr. 25', tel: '0740 513 713', color: 'gray' },
+              { city: 'Seini', addr: 'Piața Unirii 2', tel: '0745 042 593', color: 'gray' },
+              { city: 'Tășnad', addr: 'Str. N. Bălcescu 19', tel: '0745 568 886', color: 'gray' },
+              { city: 'Marghita', addr: 'Str. 1 Decembrie 1918 Nr. 25', tel: '0774 955 698', color: 'gray' },
+              { city: 'Baia Mare', addr: 'Bulevardul Regele Mihai I Nr. 60, Baia Mare', tel: '0757 769 878', color: 'gray' },
             ].map((loc, i) => (
-              <div key={i} className="bg-white dark:bg-[#121212] p-8 rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 hover:border-gold-500/30 transition-all">
-                <MapPin className="text-gold-500 mb-4" size={32} />
-                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{loc.city}</h4>
-                <p className="text-gray-500 dark:text-gray-400 mb-6">{loc.addr}</p>
+              <div key={i} className="bg-white dark:bg-[#121212] p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 hover:border-gold-500/30 transition-all flex flex-col justify-between">
+                <div>
+                  <MapPin className="text-gold-500 mb-4" size={32} />
+                  <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{loc.city}</h4>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{loc.addr}</p>
+                </div>
                 <div className="flex flex-col gap-3">
-                  <a href={`tel:${loc.tel}`} className="flex items-center gap-2 text-gray-900 dark:text-white font-bold hover:text-gold-500 transition-colors">
+                  <a href={`tel:${loc.tel.replace(/\s+/g, '')}`} className="flex items-center gap-2 text-gray-900 dark:text-white font-bold hover:text-gold-500 transition-colors text-sm">
                     <Phone size={16} className="text-gold-500" /> {loc.tel}
                   </a>
-                  <a href="https://wa.me/40740513713" className="flex items-center gap-2 text-gray-900 dark:text-white font-bold hover:text-[#25D366] transition-colors">
+                  <a href={`https://wa.me/4${loc.tel.replace(/\s+/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-gray-900 dark:text-white font-bold hover:text-[#25D366] transition-colors text-sm">
                     <MessageSquare size={16} className="text-[#25D366]" /> WhatsApp Online
                   </a>
                 </div>

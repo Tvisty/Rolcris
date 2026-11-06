@@ -45,14 +45,11 @@ const Footer: React.FC = () => {
                 </div>
                 
                 {/* Partner Badge */}
-                <picture>
-                  <source media="(max-width: 768px)" srcSet="/badge-mobile.webp" />
-                  <img 
-                    src="/badge-20-years.webp" 
-                    alt="Partner Badge" 
-                    className="h-16 w-auto object-contain mb-4"
-                  />
-                </picture>
+                <img 
+                  src="/21badge.webp" 
+                  alt="21 Ani Experiență" 
+                  className="h-16 w-auto object-contain mb-4"
+                />
             </div>
 
             <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6">
@@ -124,6 +121,13 @@ const Footer: React.FC = () => {
                 <div className="text-sm">
                   <span className="text-gray-900 dark:text-white font-semibold block">Autoparc 4:</span>
                   Marghita, Str. 1 Decembrie 1918 Nr. 25, Jud. Bihor
+                </div>
+              </li>
+              <li className="flex items-start gap-3 text-gray-600 dark:text-gray-400">
+                <MapPin className={seasonalTheme === 'valentine' ? "text-pink-500 mt-1 shrink-0" : "text-gold-500 mt-1 shrink-0"} size={18} />
+                <div className="text-sm">
+                  <span className="text-gray-900 dark:text-white font-semibold block">Autoparc 5:</span>
+                  Baia Mare, Bulevardul Regele Mihai I Nr. 60, Jud. Maramureș
                 </div>
               </li>
               <li className="flex items-center gap-3 text-gray-600 dark:text-gray-400 mt-4 pt-4 border-t border-gray-100 dark:border-white/5">

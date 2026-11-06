@@ -71,6 +71,13 @@ const Contact: React.FC = () => {
       mapQuery: 'Autoparc+Rolcris+Marghita',
       embedUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d401.8382037392053!2d22.34480690284592!3d47.348820674690835!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4747c50031a8929b%3A0xefefa7e88aa56d05!2sAutoparc%20Rolcris%20Marghita!5e0!3m2!1sen!2sro!4v1793272473229!5m2!1sen!2sro',
       mapLink: 'https://maps.app.goo.gl/zAQYuhevpt1sBHYK9'
+    },
+    { 
+      city: 'Baia Mare', 
+      addr: 'Bulevardul Regele Mihai I Nr. 60, Baia Mare', 
+      tel: '0757 769 878', 
+      mapQuery: 'Bulevardul+Regele+Mihai+I+60,+Baia+Mare',
+      embedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5375.411550269899!2d23.541432595243563!3d47.651284119165155!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4737dda822b17081%3A0x6a03a44943b7d31f!2sAngel%20Auto%20Premium%20SRL!5e0!3m2!1sen!2sro!4v1793949188262!5m2!1sen!2sro'
     }
   ];
 
@@ -258,7 +265,7 @@ const Contact: React.FC = () => {
       {/* Visual Locations Section (Functional Maps) */}
       <section className="max-w-7xl mx-auto mb-16">
         <h2 className="text-3xl font-display font-bold text-gray-900 dark:text-white mb-12 text-center">Harta Locațiilor</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           {locations.map((loc, i) => (
             <div key={i} className="flex flex-col bg-white dark:bg-[#121212] rounded-2xl overflow-hidden shadow-xl border border-gray-200 dark:border-white/10 group hover:border-gold-500/50 transition-all">
               {/* Map Container */}
