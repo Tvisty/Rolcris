@@ -133,9 +133,9 @@ const Home: React.FC = () => {
   const displayBrands = BRANDS.filter(brand => !brandsToExclude.includes(brand));
 
   return (
-    <div className="w-full">
+    <div className="w-full pt-20 md:pt-0 bg-[#0c1015] md:bg-transparent">
       {/* Hero Section - Responsive Mobile & Desktop Banner */}
-      <section className="relative w-full aspect-[9/16] min-h-[580px] max-h-[88dvh] sm:aspect-[16/10] md:aspect-[3168/1344] md:min-h-0 md:max-h-[92vh] flex flex-col justify-between overflow-hidden bg-[#0c1015] group">
+      <section className="relative w-full aspect-[9/16] min-h-[560px] max-h-[85dvh] sm:aspect-[16/10] md:aspect-[3168/1344] md:min-h-0 md:max-h-[92vh] flex flex-col justify-between overflow-hidden bg-[#0c1015] group">
         {/* Fullscreen Background Images */}
         <div className="absolute inset-0 w-full h-full z-0">
           {heroSlides.map((slide, idx) => (
