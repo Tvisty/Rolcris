@@ -133,9 +133,9 @@ const Home: React.FC = () => {
   const displayBrands = BRANDS.filter(brand => !brandsToExclude.includes(brand));
 
   return (
-    <div className="w-full pt-20 md:pt-0 bg-[#0c1015] md:bg-transparent">
+    <div className="w-full pt-24 md:pt-0 bg-[#0c1015] md:bg-transparent">
       {/* Hero Section - Responsive Mobile & Desktop Banner */}
-      <section className="relative w-full aspect-[9/16] min-h-[560px] max-h-[85dvh] sm:aspect-[16/10] md:aspect-[3168/1344] md:min-h-0 md:max-h-[92vh] flex flex-col justify-between overflow-hidden bg-[#0c1015] group">
+      <section className="relative w-full aspect-[9/16] sm:aspect-[16/10] md:aspect-[3168/1344] md:min-h-0 md:max-h-[92vh] flex flex-col justify-between overflow-hidden bg-[#0c1015] group">
         {/* Fullscreen Background Images */}
         <div className="absolute inset-0 w-full h-full z-0">
           {heroSlides.map((slide, idx) => (
@@ -150,14 +150,14 @@ const Home: React.FC = () => {
                   alt={slide.alt} 
                   fetchpriority={idx === 0 ? "high" : "auto"}
                   loading={idx === 0 ? "eager" : "lazy"}
-                  className="w-full h-full object-cover object-center select-none"
+                  className="w-full h-full object-contain md:object-cover object-top md:object-center select-none"
                 />
               </picture>
             </div>
           ))}
 
-          {/* Top gradient for navbar readability */}
-          <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/80 via-black/30 to-transparent z-10 pointer-events-none" />
+          {/* Top gradient for navbar readability (desktop only since mobile header sits above the image) */}
+          <div className="hidden md:block absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/80 via-black/30 to-transparent z-10 pointer-events-none" />
 
           {/* Bottom subtle edge fade into Oferte Speciale */}
           <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0c1015] via-[#0c1015]/40 to-transparent z-10 pointer-events-none" />
