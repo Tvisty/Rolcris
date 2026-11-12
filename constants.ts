@@ -64,7 +64,7 @@ export const BRANDS = [
   'Porsche',
   'Range Rover',
   'Renault',
-  'SEAT',
+  'Seat',
   'Skoda',
   'Smart',
   'SsangYong',

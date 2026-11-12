@@ -92,7 +92,7 @@ const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
     const make = filters.selectedBrand;
     // Filter cars by the selected make if one exists, otherwise use all cars
     let relevantCars = make 
-        ? cars.filter(c => c.make === make) 
+        ? cars.filter(c => (c.make || '').toLowerCase() === make.toLowerCase()) 
         : cars;
         
     relevantCars = relevantCars.filter(c => {
@@ -162,7 +162,7 @@ const Inventory: React.FC<InventoryProps> = ({ pageType = 'auto' }) => {
         if (carType !== filters.selectedVehicleType) return false;
       }
       
-      if (filters.selectedBrand && car.make !== filters.selectedBrand) return false;
+      if (filters.selectedBrand && (car.make || '').toLowerCase() !== filters.selectedBrand.toLowerCase()) return false;
       if (filters.selectedModel && car.model !== filters.selectedModel) return false;
       if (filters.selectedBody && car.bodyType !== filters.selectedBody) return false;
       if (filters.selectedFuel) {
